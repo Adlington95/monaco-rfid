@@ -1,10 +1,11 @@
 const express = require('express')
 const pool = require('./db')
+const cors = require('cors')
 const port = 3000
 
 const app = express()
 app.use(express.json())
-
+app.use(cors())
 //GET all entries
 app.get('/', async (req, res) => {
     try {
