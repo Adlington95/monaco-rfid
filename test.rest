@@ -1,0 +1,13 @@
+###
+GET http://localhost:13000/setup
+###
+GET http://localhost:13000
+###
+POST http://localhost:13000/
+Content-Type: application/json
+  
+  {
+    "name": "Marc Adlington",
+    "lap_time": "1:00.000",
+    "team_name": "Adlington Racing"
+  }
