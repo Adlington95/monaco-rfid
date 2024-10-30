@@ -10,6 +10,10 @@ Content-Type: application/json
 ###
 GET http://localhost:13000/setup
 ###
+GET http://localhost:3000/start
+###
+GET http://localhost:13000/stop
+###
 GET http://localhost:13000
 ###
 POST http://localhost:13000/
@@ -19,4 +23,14 @@ Content-Type: application/json
     "name": "Marc Adlington",
     "lap_time": "1:00.000",
     "team_name": "Adlington Racing"
+  }
+
+###
+POST http://localhost:13000/
+Content-Type: application/json
+  
+  {
+    "name": "Luke Walton",
+    "lap_time": "59:00.000",
+    "team_name": "Team win"
   }
