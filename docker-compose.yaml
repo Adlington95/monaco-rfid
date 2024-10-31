@@ -3,19 +3,14 @@ services:
   db:
     image: postgres
     environment:
-      POSTGRES_DB: marcdb
-      POSTGRES_USER: marc
-      POSTGRES_PASSWORD: marcpwd
-    # volumes:
-    #   - db-data:/var/lib/postgresql/data
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   app:
     image: my-node-app
     ports:
       - 13000:3000
-    # build: .
-    # ports:
-    #   - "5000:5000"
-    # depends_on:
-    #   - db
-    # environment:
-    #   DATABASE_URL: postgresql://marc:marcpwd@db:5432/marcdb
+    environment:
+      RFID_ADDRESS: ${RFID_ADDRESS}
+      WEB_PASSWORD: ${WEB_PASSWORD}
+      WEB_USERNAME: ${WEB_USERNAME}

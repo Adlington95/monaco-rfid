@@ -1,4 +1,13 @@
 ###
+POST http://192.168.0.53:13000/
+Content-Type: application/json
+  
+  {
+    "name": "Posted name from other machine",
+    "lap_time": "2:00.000",
+    "team_name": "Posted from Laptop"
+  }
+###
 GET http://localhost:13000/setup
 ###
 GET http://localhost:13000
