@@ -46,14 +46,10 @@ app.post('/', async (req, res) => {
 
         if (Array.isArray(response)) {
             response.forEach(element => {
-                const carId =
-                    element.data.idHex;
-                const timeStamp = element.timestamp;
-
+                const carId = element.data.idHex;
+                const timeStamp = new Date(element.timestamp);
                 responseData[carId] = timeStamp
-
             });
-            console.log(responseData)
         }
     } catch (e) {
         console.debug('Data does not match RFID respons')
@@ -101,7 +97,7 @@ app.get('/start', async (req, res) => {
 app.get('/stop', async (req, res) => {
     try {
         if (!token) {
-            rfidGetToken();
+            await rfidGetToken();
         }
 
         rfidStop();
@@ -120,7 +116,6 @@ app.listen(port, () => console.log(`Server has started on port: ${port}`))
 /**
  * Logs into RFID Reader with secure credentials and returns a token to be 
  * used for all future communications.
- * @returns void
  */
 async function rfidGetToken() {
     const loginResponse = await fetch(`https://${rfidAddress}/cloud/localRestLogin`, {
@@ -141,9 +136,8 @@ async function rfidGetToken() {
 
 /**
  * Starts the RFID Reader sending HTTP POST requests.
- * @returns {void}
  */
-async function rfidStart() {
+async function rfidStart(retryCount = 0) {
     const startResponse = await fetch(`https://${rfidAddress}/cloud/start`, {
         method: "PUT",
         headers: {
@@ -153,14 +147,18 @@ async function rfidStart() {
     if (startResponse.ok) {
         console.log('RFID Started')
         return;
+    } else if (retryCount < 2) {
+        await rfidGetToken();
+        await rfidStop()
+        await rfidStart(retryCount + 1)
+    } else {
+        console.error('RFID Start error')
+        throw startResponse.statusText;
     }
-    console.error('RFID Start error')
-    throw startResponse.statusText;
 }
 
 /**
  * Stops the RFID reader from sending HTTP POST requests
- * @returns {void}
  */
 async function rfidStop() {
     const stopResponse = await fetch(`https://${rfidAddress}/cloud/stop`, {
@@ -173,7 +171,8 @@ async function rfidStop() {
     if (stopResponse.ok) {
         console.log('RFID Stopped')
         return;
+    } else {
+        console.error('RFID Start error')
+        throw stopResponse.statusText;
     }
-    console.error('RFID Stop error')
-    throw stopResponse.statusText;
 }
