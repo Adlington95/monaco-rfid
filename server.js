@@ -128,42 +128,6 @@ app.post('/lap', async (req, res) => {
 
 });
 
-//POST new entry
-app.post('/', async (req, res) => {
-    // From RFID Reader, data is returned as 
-
-
-    // const response = req.body;
-    // try {
-
-    //     // the key is the id of the car
-    //     // the value is the time stamp it last crossed the line
-    //     const responseData = {};
-
-    //     if (Array.isArray(response)) {
-    //         response.forEach(element => {
-    //             const carId = element.data.idHex;
-    //             const timeStamp = new Date(element.timestamp);
-    //             responseData[carId] = timeStamp
-    //         });
-    //     }
-    // } catch (e) {
-    //     console.debug('Data does not match RFID respons')
-    // }
-
-
-    const { name, lap_time, team_name } = req.body
-    try {
-        await pool.query('INSERT INTO monaco (name, lap_time, team_name) VALUES ($1, $2, $3)', [name, lap_time, team_name])
-        res.status(200).send({ message: "Successfully inserted entry into moncaco" })
-    } catch (err) {
-        await pool.query('INSERT INTO monaco zebra, 0:00:000, zebra1')
-
-        console.log(err)
-        res.sendStatus(500)
-    }
-})
-
 app.get('/removeAllEntries', async (req, res) => {
     try {
         await pool.query('DELETE FROM monaco')
@@ -228,7 +192,7 @@ app.get('/stop', async (req, res) => {
 
 })
 
-app.post('/userscan', async (req,res) => {
+app.post('/scanUser', async (req,res) => {
     const response = req.body;
 
     const { name, id } = response;

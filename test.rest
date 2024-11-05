@@ -6,15 +6,7 @@ GET http://localhost:3000/start
 GET http://localhost:13000/stop
 ### Get all rows from the database
 GET http://localhost:13000
-### Add dummy row to database
-POST http://localhost:13000/
-Content-Type: application/json
-  
-  {
-    "name": "Marc Adlington",
-    "lap_time": "1:00.000",
-    "team_name": "Adlington Racing"
-  }
+
 ### POST fastest lap time
 POST http://localhost:13000/lap
 Content-Type: application/json
@@ -24,7 +16,7 @@ Content-Type: application/json
   }
 
 ### Scan into system after storing this, required by websocket
-POST http://localhost:13000/userscan
+POST http://localhost:13000/scanUser
 Content-Type: application/json
   
   {
