@@ -25,9 +25,6 @@ let scannedName = '';
 //id of the scanned in user
 let scannedId = '';
 
-//current count of laps
-let count = 0;
-
 //scanned car id
 let scannedCarId = '';
 
@@ -37,12 +34,6 @@ let scannedCarTimestamp = '';
 //lap times of the scanned car
 let lapTimes = [];
 
-
-//end count of qualifying
-const END_COUNT = 10;
-
-//start count of qualifying
-const START_COUNT = 3;
 // create variable named wss
 const wss = new WebSocket.Server({ port: 8080 });
 // Handle WebSocket connections
@@ -72,11 +63,9 @@ wss.on('connection', (ws) => {
 
         const lapTimeInMilis = new Date(dataObj.timestamp).getTime() - scannedCarTimestamp.getTime();
 
-        //we should update the timestamp and lap counter
         scannedCarTimestamp = new Date(dataObj.timestamp);
 
         lapTimes.push(lapTimeInMilis);
-        count++;
 
       // Give to the ws client all lap times to be displayed.
         ws.send(lapTimes);
@@ -212,7 +201,6 @@ function resetQualifying() {
     scannedCarId = '';
     scannedCarTimestamp = '';
     lapTimes = [];
-    count = 0;
 }
 
 app.get('/getUser', async (req,res) => {
@@ -220,8 +208,7 @@ app.get('/getUser', async (req,res) => {
     
     res.send({
         scannedId,
-        scannedName,
-        count
+        scannedName
     });
 })
 
