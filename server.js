@@ -69,9 +69,13 @@ wss.on('connection', (ws) => {
         if (data?.timestamp === scannedCarTimestamp) {
             return;
         }
+
+        const lapTimeInMilis = new Date(dataObj.timestamp).getTime() - scannedCarTimestamp.getTime();
+
         //we should update the timestamp and lap counter
         scannedCarTimestamp = new Date(dataObj.timestamp);
-        lapTimes.push(scannedCarTimestamp);
+
+        lapTimes.push(lapTimeInMilis);
         count++;
 
       // Give to the ws client all lap times to be displayed.
@@ -101,10 +105,20 @@ app.get('/', async (req, res) => {
 //POST new entry
 app.post('/lap', async (req, res) => {
     const {lap_time} = req.body;
-    console.log('Adding fastest lap time to the database');
+    console.log('Finding the current player in the database..');
 
+    //if scannedId exists in the database then we should UPDATE otherwise INSERT
+    
         try {
-            await pool.query('INSERT INTO monaco (name, lap_time, team_name) VALUES ($1, $2, $3)', [scannedName, lap_time, scannedCarId])
+            await pool.query(`INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (employee_id)
+                DO UPDATE
+                SET
+                    team_name=EXCLUDED.team_name,
+                    lap_time=EXCLUDED.lap_time,
+                    attempts = monaco.attempts+1`, [scannedName, lap_time, scannedCarId, 0, scannedId]);
+        
             res.status(200).send({ message: "Successfully inserted entry into moncaco" })
             resetQualifying();
         } catch (err) {
@@ -161,10 +175,21 @@ app.get('/removeAllEntries', async (req, res) => {
     }
 });
 
+app.get('/removeTableFromDb', async (req, res) => {
+    try {
+        await pool.query('DROP TABLE monaco')
+
+        res.status(200).send({ message: "Successfully deleted monaco from db" })
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+});
+
 //CREATE TABLE
 app.get('/setup', async (req, res) => {
     try {
-        await pool.query('CREATE TABLE monaco( id SERIAL PRIMARY KEY, name VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100))')
+        await pool.query('CREATE TABLE monaco( id SERIAL, name VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )')
 
         res.status(200).send({ message: "Successfully created table" })
     } catch (err) {
@@ -226,7 +251,7 @@ function resetQualifying() {
     count = 0;
 }
 
-app.get('/user', async (req,res) => {
+app.get('/getUser', async (req,res) => {
     console.log('sending user data to the frontend');
     
     res.send({
@@ -235,6 +260,17 @@ app.get('/user', async (req,res) => {
         count
     });
 })
+
+app.get('/getLeaderboard', async (req,res) => {
+    try {
+        const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10')
+        res.status(200).send(data.rows)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+});
+
 app.listen(port, () => console.log(`Server has started on port: ${port}`))
 
 

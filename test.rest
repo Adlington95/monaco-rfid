@@ -20,7 +20,7 @@ POST http://localhost:13000/lap
 Content-Type: application/json
   
   {
-    "lap_time": "59:00.000"
+    "lap_time": "19:00.001"
   }
 
 ### Scan into system after storing this, required by websocket
@@ -33,12 +33,17 @@ Content-Type: application/json
   }
 
 ### Get individual leaderboard
-# GET http://localhost:13000/getIndividualLeaderboard
+GET http://localhost:13000/getLeaderboard
 
 # ### Get team leaderboard
 # GET http://localhost:13000/getTeamLeaderboard
 
 ### Get current scanned in user and their lap data
-GET http://localhost:13000/user
+GET http://localhost:13000/getUser
 
-###TODO: create websocket that gets pinged every 1 second to listen to the rfid scanner
+### DELETE ALL ENTRIES 
+GET http://localhost:13000/removeAllEntries
+
+### DELETE DB Structure 
+GET http://localhost:13000/removeTableFromDb
+
