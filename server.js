@@ -5,9 +5,9 @@ const fetch = require('node-fetch')
 const WebSocket = require('ws')
 
 const port = 3000
-const rfidAddress = '169.254.39.234'
-const webUsername = 'admin'
-const webPassword = 'Z3braT3ch*1'
+const rfidAddress = process.env.RFID_ADDRESS;
+const webUsername = process.env.WEB_USERNAME;
+const webPassword = process.env.WEB_PASSWORD;
 
 const app = express()
 app.use(express.json())
