@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db:/var/lib/postgresql/data
   app:
     image: my-node-app
     ports:
@@ -14,3 +16,6 @@ services:
       RFID_ADDRESS: ${RFID_ADDRESS}
       WEB_PASSWORD: ${WEB_PASSWORD}
       WEB_USERNAME: ${WEB_USERNAME}
+volumes:
+  db:
+    external: true

@@ -12,8 +12,10 @@ function App() {
     fetch('http://localhost:13000')
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         setMonacoData(data)
       });
+
   }, []);
 
   return (

@@ -1,21 +1,12 @@
-###
-POST http://192.168.0.53:13000/
-Content-Type: application/json
-  
-  {
-    "name": "Posted name from other machine",
-    "lap_time": "2:00.000",
-    "team_name": "Posted from Laptop"
-  }
-###
+### Set up the database (only run once per device)
 GET http://localhost:13000/setup
-###
+### Start RFID
 GET http://localhost:3000/start
-###
+### Stop RFID
 GET http://localhost:13000/stop
-###
+### Get all rows from the database
 GET http://localhost:13000
-###
+### Add dummy row to database
 POST http://localhost:13000/
 Content-Type: application/json
   
@@ -24,13 +15,30 @@ Content-Type: application/json
     "lap_time": "1:00.000",
     "team_name": "Adlington Racing"
   }
-
-###
-POST http://localhost:13000/
+### POST fastest lap time
+POST http://localhost:13000/lap
 Content-Type: application/json
   
   {
-    "name": "Luke Walton",
-    "lap_time": "59:00.000",
-    "team_name": "Team win"
+    "lap_time": "59:00.000"
   }
+
+### Scan into system after storing this, required by websocket
+POST http://localhost:13000/userscan
+Content-Type: application/json
+  
+  {
+    "name": "Marc Adlington Scanned",
+    "id": "453456123"
+  }
+
+### Get individual leaderboard
+# GET http://localhost:13000/getIndividualLeaderboard
+
+# ### Get team leaderboard
+# GET http://localhost:13000/getTeamLeaderboard
+
+### Get current scanned in user and their lap data
+GET http://localhost:13000/user
+
+###TODO: create websocket that gets pinged every 1 second to listen to the rfid scanner
