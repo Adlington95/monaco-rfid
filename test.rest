@@ -1,36 +1,41 @@
-###
-POST http://192.168.0.53:13000/
-Content-Type: application/json
-  
-  {
-    "name": "Posted name from other machine",
-    "lap_time": "2:00.000",
-    "team_name": "Posted from Laptop"
-  }
-###
+### Set up the database (only run once per device)
 GET http://localhost:13000/setup
-###
+### Start RFID
 GET http://localhost:3000/start
-###
+### Stop RFID
 GET http://localhost:13000/stop
-###
+### Get all rows from the database
 GET http://localhost:13000
-###
-POST http://localhost:13000/
+
+### POST fastest lap time
+POST http://localhost:13000/lap
 Content-Type: application/json
   
   {
-    "name": "Marc Adlington",
-    "lap_time": "1:00.000",
-    "team_name": "Adlington Racing"
+    "lap_time": "19:00.001"
   }
 
-###
-POST http://localhost:13000/
+### Scan into system after storing this, required by websocket
+POST http://localhost:13000/scanUser
 Content-Type: application/json
   
   {
-    "name": "Luke Walton",
-    "lap_time": "59:00.000",
-    "team_name": "Team win"
+    "name": "Marc Adlington Scanned",
+    "id": "453456123"
   }
+
+### Get individual leaderboard
+GET http://localhost:13000/getLeaderboard
+
+# ### Get team leaderboard
+# GET http://localhost:13000/getTeamLeaderboard
+
+### Get current scanned in user and their lap data
+GET http://localhost:13000/getUser
+
+### DELETE ALL ENTRIES 
+GET http://localhost:13000/removeAllEntries
+
+### DELETE DB Structure 
+GET http://localhost:13000/removeTableFromDb
+
