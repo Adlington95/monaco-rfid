@@ -93,7 +93,7 @@ wss.on('connection', (ws) => {
 app.get('/', async (req, res) => {
     try {
         const data = await pool.query('SELECT * FROM monaco')
-        res.status(200).send(data.rows)
+        res.status(200).send(data.rows);
     } catch (err) {
         console.log(err)
         res.sendStatus(500)
@@ -229,6 +229,31 @@ app.get('/getLeaderboard', async (req,res) => {
     try {
         const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10')
         res.status(200).send(data.rows)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+});
+
+app.get('/getTeamLeaderboard', async (req,res) => {
+    try {
+        const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC')
+        //create array from data.rows of the top 10 employee_id based on their lap_time value in ascending order. The same employee_id cannot appear twice
+       const idsList = [];
+       const dataList = [];
+    
+        data.rows.forEach((rowItem) => {
+            if (!idsList.includes(rowItem.team_name)) {
+                idsList.push(rowItem.team_name);
+                dataList.push({
+                    team_name: rowItem.team_name,
+                    lap_time: rowItem.lap_time
+                });
+            }
+       });
+
+
+        res.status(200).send(dataList);
     } catch (err) {
         console.log(err)
         res.sendStatus(500)
