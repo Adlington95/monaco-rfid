@@ -15,39 +15,40 @@ class WebSocketState with ChangeNotifier {
   final Uri uri = Uri.parse('ws://$serverUrl:$websocketPort');
 
   String _message = '';
-
   String get message => _message;
 
   List<double> lapTimes = [];
-  List<double> practiceLapTimes = [];
 
   void addMessage(String message) {
     if (message.contains('connected')) {
       router.go(PracticeInstructionsPage.name);
       return;
+    } else {
+      lapTimes = message.replaceAll(RegExp(r'[\[\]]'), '').split(',').map((element) {
+        return double.tryParse(element)!;
+      }).toList();
     }
 
-    final double? lapTime = double.tryParse(message);
-
-    if (lapTime != null && practiceLapTimes.length < 3) {
-      practiceLapTimes.add(lapTime);
-    } else if (lapTime != null && lapTimes.length < 10) {
-      lapTimes.add(lapTime);
-    }
-
-    if (practiceLapTimes.isEmpty && lapTime == null) {
-    } else if (practiceLapTimes.length == 1) {
+    if (lapTimes.length == 1) {
       router.go(PracticeCountdownPage.name);
-    } else if (practiceLapTimes.length == 3) {
+    } else if (lapTimes.length == 3) {
       router.go(QualifyingPage.name);
-    } else if (lapTimes.length == 10) {
+    } else if (lapTimes.length == 13) {
       router.go(LeaderBoardsPage.name);
     }
 
     notifyListeners();
   }
 
-  int get practiceLapsRemaining => 3 - practiceLapTimes.length;
+  int get practiceLapsRemaining => (3 - lapTimes.length).clamp(1, 3);
+
+  String lapTime(int index) {
+    if (lapTimes.length > 2 + index) {
+      return lapTimes[index + 2].toStringAsFixed(3);
+    } else {
+      return '';
+    }
+  }
 
   void connect() {
     _channel = WebSocketChannel.connect(uri);
@@ -79,7 +80,6 @@ class WebSocketState with ChangeNotifier {
 
   void clearData() {
     lapTimes = [];
-    practiceLapTimes = [];
   }
 
   @override

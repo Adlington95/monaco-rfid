@@ -23,7 +23,7 @@ class PracticeInstructionsPage extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: kDebugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('60000') : null,
+      onTap: kDebugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]') : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(400, 180, 400, 140),
         child: Column(
