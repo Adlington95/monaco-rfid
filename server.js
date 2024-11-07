@@ -53,6 +53,9 @@ wss.on('connection', (ws) => {
         if (!scannedCarId && dataObj?.data?.idHex) {
             scannedCarId = dataObj.data.idHex;
             //the car has been placed under the rfid sensor and is ready for qualifying
+            ws.send({
+                connected: true
+            });
             return;
         }
 
