@@ -16,6 +16,9 @@ services:
       RFID_ADDRESS: ${RFID_ADDRESS}
       WEB_PASSWORD: ${WEB_PASSWORD}
       WEB_USERNAME: ${WEB_USERNAME}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 volumes:
   db:
     external: true

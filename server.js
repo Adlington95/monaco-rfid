@@ -5,9 +5,9 @@ const fetch = require('node-fetch')
 const WebSocket = require('ws')
 
 const port = 3000
-const rfidAddress = '169.254.39.234'
-const webUsername = 'admin'
-const webPassword = 'Z3braT3ch*1'
+const rfidAddress = process.env.RFID_ADDRESS;
+const webUsername = process.env.WEB_USERNAME;
+const webPassword = process.env.WEB_PASSWORD;
 
 const app = express()
 app.use(express.json())
@@ -25,9 +25,6 @@ let scannedName = '';
 //id of the scanned in user
 let scannedId = '';
 
-//current count of laps
-let count = 0;
-
 //scanned car id
 let scannedCarId = '';
 
@@ -37,12 +34,6 @@ let scannedCarTimestamp = '';
 //lap times of the scanned car
 let lapTimes = [];
 
-
-//end count of qualifying
-const END_COUNT = 10;
-
-//start count of qualifying
-const START_COUNT = 3;
 // create variable named wss
 const wss = new WebSocket.Server({ port: 8080 });
 // Handle WebSocket connections
@@ -62,6 +53,9 @@ wss.on('connection', (ws) => {
         if (!scannedCarId && dataObj?.data?.idHex) {
             scannedCarId = dataObj.data.idHex;
             //the car has been placed under the rfid sensor and is ready for qualifying
+            ws.send({
+                connected: true
+            });
             return;
         }
 
@@ -72,11 +66,9 @@ wss.on('connection', (ws) => {
 
         const lapTimeInMilis = new Date(dataObj.timestamp).getTime() - scannedCarTimestamp.getTime();
 
-        //we should update the timestamp and lap counter
         scannedCarTimestamp = new Date(dataObj.timestamp);
 
         lapTimes.push(lapTimeInMilis);
-        count++;
 
         // Give to the ws client all lap times to be displayed.
         ws.send(lapTimes);
@@ -93,7 +85,7 @@ wss.on('connection', (ws) => {
 app.get('/', async (req, res) => {
     try {
         const data = await pool.query('SELECT * FROM monaco')
-        res.status(200).send(data.rows)
+        res.status(200).send(data.rows);
     } catch (err) {
         console.log(err)
         res.sendStatus(500)
@@ -212,7 +204,6 @@ function resetQualifying() {
     scannedCarId = '';
     scannedCarTimestamp = '';
     lapTimes = [];
-    count = 0;
 }
 
 app.get('/getUser', async (req, res) => {
@@ -220,8 +211,7 @@ app.get('/getUser', async (req, res) => {
 
     res.send({
         scannedId,
-        scannedName,
-        count
+        scannedName
     });
 })
 
@@ -229,6 +219,31 @@ app.get('/getLeaderboard', async (req, res) => {
     try {
         const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10')
         res.status(200).send(data.rows)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+});
+
+app.get('/getTeamLeaderboard', async (req,res) => {
+    try {
+        const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC')
+        //create array from data.rows of the top 10 employee_id based on their lap_time value in ascending order. The same employee_id cannot appear twice
+       const idsList = [];
+       const dataList = [];
+    
+        data.rows.forEach((rowItem) => {
+            if (!idsList.includes(rowItem.team_name)) {
+                idsList.push(rowItem.team_name);
+                dataList.push({
+                    team_name: rowItem.team_name,
+                    lap_time: rowItem.lap_time
+                });
+            }
+       });
+
+
+        res.status(200).send(dataList);
     } catch (err) {
         console.log(err)
         res.sendStatus(500)
