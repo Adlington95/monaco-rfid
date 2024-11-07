@@ -16,11 +16,11 @@ class TranslucentCard extends StatelessWidget {
       Container(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white.withOpacity(0.6), width: 1),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(8),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: child,

@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutterfrontend/components/leaderboard.dart';
-import 'package:flutterfrontend/models/constructor_standing_item.dart';
+import 'package:flutterfrontend/pages/scan_id.dart';
+import 'package:flutterfrontend/state/dw_state.dart';
+import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../models/driver_standing_item.dart';
 
-class LeaderBoardsPage extends StatelessWidget {
+class LeaderBoardsPage extends StatefulWidget {
+  static const String name = '/leaderboards';
+
+  const LeaderBoardsPage({super.key});
+
+  @override
+  State<LeaderBoardsPage> createState() => _LeaderBoardsPageState();
+}
+
+class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
   final List<DriverStandingItem> driverStandings = [
     const DriverStandingItem('Driver 1', 3, 'LEADER', PlaceChange.none, false),
     const DriverStandingItem('Driver 2', 4, '+0.5535s', PlaceChange.none, false),
@@ -17,18 +29,15 @@ class LeaderBoardsPage extends StatelessWidget {
     const DriverStandingItem('Driver 8', 10, '+2.5789s', PlaceChange.down, false),
   ];
 
-  final List<ConstructorStandingItem> constructorStandings = [
-    ConstructorStandingItem('Mclaren', PlaceChange.none, false, color: Colors.orange),
-    ConstructorStandingItem('Ferrari', PlaceChange.none, false, color: Colors.red),
-    ConstructorStandingItem('Red Bull', PlaceChange.none, false, color: Colors.deepPurple),
-    ConstructorStandingItem('Mercedes', PlaceChange.none, false, color: Colors.blue),
-    ConstructorStandingItem('Aston Martin', PlaceChange.none, false, color: Colors.teal),
-    ConstructorStandingItem('Alpine', PlaceChange.none, false, color: Colors.blueAccent.shade700),
-    ConstructorStandingItem('Williams', PlaceChange.up, true, color: Colors.blue),
-    ConstructorStandingItem('Haaaas', PlaceChange.down, false, color: Colors.redAccent.shade700),
-  ];
+  @override
+  void initState() {
+    super.initState();
 
-  LeaderBoardsPage({super.key});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<DataWedgeState>(context, listen: false).clear();
+      Provider.of<WebSocketState>(context, listen: false).clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,16 +46,16 @@ class LeaderBoardsPage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(40),
         child: GestureDetector(
-          onTap: () => context.go('/scan-id'),
+          onTap: () => context.go(ScanIdPage.name),
           child: Row(
             children: [
               Expanded(
                 child: Leaderboard(driverStandings: driverStandings),
               ),
-              const SizedBox(width: 40),
-              Expanded(
-                child: Leaderboard(constructorStandings: constructorStandings),
-              ),
+              // const SizedBox(width: 40),
+              // Expanded(
+              //   child: Leaderboard(constructorStandings: constructorStandings),
+              // ),
             ],
           ),
         ),

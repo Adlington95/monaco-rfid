@@ -12,7 +12,7 @@ POST http://localhost:13000/lap
 Content-Type: application/json
   
   {
-    "lap_time": "19:00.001"
+    "lap_time": "18:00.001"
   }
 
 ### Scan into system after storing this, required by websocket
@@ -20,8 +20,8 @@ POST http://localhost:13000/scanUser
 Content-Type: application/json
   
   {
-    "name": "Marc Adlington Scanned",
-    "id": "453456123"
+    "name": "Marc Adlington 2",
+    "id": "45345rrrr6123"
   }
 
 ### Get individual leaderboard

@@ -37,3 +37,7 @@ TODO
 Once the connection is ready, you can connect the server side to it. If you ever want to change any of these settings (IP address, port etc), you need to Disconnect from the connection screen, wait, and then edit the connection settings as above.
 
 3. Start the server. Send a GET request to /start to start the connection to the RFID reader.
+
+<i>
+docker volume create db
+<i>
