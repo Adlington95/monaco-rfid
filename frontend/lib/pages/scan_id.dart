@@ -6,8 +6,8 @@ import 'package:flutterfrontend/state/dw_state.dart';
 import 'package:provider/provider.dart';
 
 class ScanIdPage extends StatefulWidget {
-  static const name = '/scan-id';
   const ScanIdPage({super.key});
+  static const name = '/scan-id';
 
   @override
   State<ScanIdPage> createState() => _ScanIdPageState();
@@ -35,6 +35,6 @@ class _ScanIdPageState extends State<ScanIdPage> {
             : provider.scanBarcode,
         data: provider.loggedInUser,
       );
-    });
+    },);
   }
 }

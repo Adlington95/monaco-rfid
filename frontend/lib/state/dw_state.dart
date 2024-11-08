@@ -27,7 +27,7 @@ class DataWedgeState with ChangeNotifier {
 
   Future<void> changePage() async {
     if (loggedInUser != null) {
-      await Future.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
       if (loggedInUser != null) router.go(CarStartPage.name, extra: loggedInUser);
     }
   }
@@ -38,9 +38,9 @@ class DataWedgeState with ChangeNotifier {
         fdw = FlutterDataWedge();
         await fdw?.initialize();
         await fdw?.createDefaultProfile(profileName: 'f1');
-        fdw?.enableScanner(true);
-        fdw?.activateScanner(true);
-        scanBarcode(init: true);
+        await fdw?.enableScanner(true);
+        await fdw?.activateScanner(true);
+        await scanBarcode(init: true);
       }
     } catch (e) {
       error = e.toString();
@@ -49,7 +49,7 @@ class DataWedgeState with ChangeNotifier {
 
   Future<void> scanBarcode({bool init = false}) async {
     try {
-      fdw?.scannerControl(true);
+      await fdw?.scannerControl(true);
       listener();
     } catch (e) {
       debugPrint(e.toString());
@@ -65,13 +65,18 @@ class DataWedgeState with ChangeNotifier {
       try {
         final obj = jsonDecode(result.data);
 
-        final ScanUserBody body = ScanUserBody.fromJson(obj);
+        final body = ScanUserBody.fromJson(obj as Map<String, dynamic>);
         final res = await http.post(Uri.parse('$restUrl/scanUser'), body: body.toJson());
 
         if (res.statusCode == 200) {
-          final userObj = jsonDecode(res.body);
+          final userObj = jsonDecode(res.body) as Map<String, dynamic>;
           userObj['id'] = userObj['id'].toString();
-          final user = User(userObj['name'], userObj['id'], userObj['attempts'], userObj['company']);
+          final user = User(
+            userObj['name'] as String,
+            userObj['id'] as String,
+            userObj['attempts'] as int,
+            userObj['company'] as String,
+          );
           loggedInUser = user;
         } else {
           throw Exception('Failed to scan user');

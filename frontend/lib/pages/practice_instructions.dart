@@ -4,8 +4,8 @@ import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class PracticeInstructionsPage extends StatelessWidget {
-  static const name = '/practice';
   const PracticeInstructionsPage({super.key});
+  static const name = '/practice';
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class PracticeInstructionsPage extends StatelessWidget {
           offset: const Offset(0, 4),
           blurRadius: 4,
           color: Colors.black.withOpacity(0.25),
-        )
+        ),
       ],
       fontSize: 64,
       fontWeight: FontWeight.w800,
@@ -25,7 +25,7 @@ class PracticeInstructionsPage extends StatelessWidget {
     return GestureDetector(
       onTap: kDebugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]') : null,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(400, 180, 400, 140),
+        padding: const EdgeInsets.fromLTRB(340, 180, 340, 140),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -46,5 +46,5 @@ class PracticeInstructionsPage extends StatelessWidget {
 void main() {
   runApp(const MaterialApp(
     home: PracticeInstructionsPage(),
-  ));
+  ),);
 }

@@ -6,8 +6,8 @@ import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class CarStartPage extends StatefulWidget {
-  static const String name = '/car_start';
   const CarStartPage({super.key});
+  static const String name = '/car_start';
 
   @override
   State<CarStartPage> createState() => _CarStartPageState();
@@ -19,9 +19,7 @@ class _CarStartPageState extends State<CarStartPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((callback) {
       Provider.of<DataWedgeState>(context, listen: false).clear();
-      final WebSocketState wsState = Provider.of<WebSocketState>(context, listen: false);
-
-      wsState.connect();
+      Provider.of<WebSocketState>(context, listen: false).connect();
     });
   }
 
@@ -45,7 +43,7 @@ class _CarStartPageState extends State<CarStartPage> {
                         offset: const Offset(0, 4),
                         blurRadius: 4,
                         color: Colors.black.withOpacity(0.25),
-                      )
+                      ),
                     ],
                   ),
                   textAlign: TextAlign.center,
@@ -53,8 +51,9 @@ class _CarStartPageState extends State<CarStartPage> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                  onTap: kDebugMode ? () => state.addMessage('{"connected":true}') : null,
-                  child: SvgPicture.asset('lib/assets/car.svg', width: 200, height: 200)),
+                onTap: kDebugMode ? () => state.addMessage('{"connected":true}') : null,
+                child: SvgPicture.asset('lib/assets/car.svg', width: 200, height: 200),
+              ),
             ],
           ),
         );

@@ -2,33 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutterfrontend/components/leaderboard.dart';
 import 'package:flutterfrontend/pages/scan_id.dart';
 import 'package:flutterfrontend/state/dw_state.dart';
+import 'package:flutterfrontend/state/rest_state.dart';
 import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../models/driver_standing_item.dart';
-
 class LeaderBoardsPage extends StatefulWidget {
-  static const String name = '/leaderboards';
-
   const LeaderBoardsPage({super.key});
+  static const String name = '/leaderboards';
 
   @override
   State<LeaderBoardsPage> createState() => _LeaderBoardsPageState();
 }
 
 class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
-  final List<DriverStandingItem> driverStandings = [
-    const DriverStandingItem('Driver 1', 3, 'LEADER', PlaceChange.none, false),
-    const DriverStandingItem('Driver 2', 4, '+0.5535s', PlaceChange.none, false),
-    const DriverStandingItem('Driver 3', 5, '+0.7625s', PlaceChange.none, false),
-    const DriverStandingItem('Driver 4', 6, '+1.2343s', PlaceChange.none, false),
-    const DriverStandingItem('Driver 5', 7, '+1.5333s', PlaceChange.none, false),
-    const DriverStandingItem('Driver 6', 8, '+1.7999s', PlaceChange.none, false),
-    const DriverStandingItem('Driver 7', 9, '+2.2896s', PlaceChange.up, true),
-    const DriverStandingItem('Driver 8', 10, '+2.5789s', PlaceChange.down, false),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -41,25 +28,24 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(fontFamily: 'Titillium'),
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: GestureDetector(
-          onTap: () => context.go(ScanIdPage.name),
-          child: Row(
-            children: [
-              Expanded(
-                child: Leaderboard(driverStandings: driverStandings),
-              ),
-              // const SizedBox(width: 40),
-              // Expanded(
-              //   child: Leaderboard(constructorStandings: constructorStandings),
-              // ),
-            ],
+    return FutureBuilder(
+      future: Provider.of<RestState>(context, listen: false).fetchDriverStandings(),
+      builder: (context, future) {
+        if (future.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (future.hasError) {
+          return const Center(child: Text('Error fetching driver standings'));
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 140, left: 140, right: 140),
+          child: GestureDetector(
+            onTap: () => context.go(ScanIdPage.name),
+            child: const Leaderboard(),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -4,8 +4,8 @@ import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class PracticeCountdownPage extends StatelessWidget {
-  static const name = '/practice-countdown';
   const PracticeCountdownPage({super.key});
+  static const name = '/practice-countdown';
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class PracticeCountdownPage extends StatelessWidget {
                     offset: const Offset(0, 4),
                     blurRadius: 4,
                     color: Colors.black.withOpacity(0.25),
-                  )
+                  ),
                 ],
               ),
               textAlign: TextAlign.center,

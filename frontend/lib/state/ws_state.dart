@@ -2,15 +2,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutterfrontend/constants.dart';
 import 'package:flutterfrontend/main.dart';
-import 'package:flutterfrontend/pages/leaderboards.dart';
+import 'package:flutterfrontend/pages/finish.dart';
 import 'package:flutterfrontend/pages/practice_coutdown.dart';
 import 'package:flutterfrontend/pages/practice_instructions.dart';
 import 'package:flutterfrontend/pages/qualifying.dart';
+import 'package:flutterfrontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketState with ChangeNotifier {
+  WebSocketState(this.restState);
+
+  final RestState restState;
+
   WebSocketChannel? _channel;
-  StreamSubscription? _subscription;
+  StreamSubscription<dynamic>? _subscription;
 
   final Uri uri = Uri.parse('ws://$serverUrl:$websocketPort');
 
@@ -34,13 +39,26 @@ class WebSocketState with ChangeNotifier {
     } else if (lapTimes.length == 3) {
       router.go(QualifyingPage.name);
     } else if (lapTimes.length == 13) {
-      router.go(LeaderBoardsPage.name);
+      sendLapTime(fastestLap);
     }
 
     notifyListeners();
   }
 
+  Future<void> sendLapTime(double lapTime) async {
+    await restState.postFastestLap(lapTime);
+    await restState.fetchDriverStandings();
+    router.go(FinishPage.name);
+  }
+
   int get practiceLapsRemaining => (3 - lapTimes.length).clamp(1, 3);
+
+  double get averageSpeed => 10;
+
+  DateTime startTime = DateTime(2024, 11, 8, 11, 42, 40);
+
+  double get fastestLap =>
+      lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value < element ? value : element);
 
   String lapTime(int index) {
     if (lapTimes.length > 2 + index) {
@@ -50,15 +68,25 @@ class WebSocketState with ChangeNotifier {
     }
   }
 
-  void connect() {
-    _channel = WebSocketChannel.connect(uri);
-    debugPrint('Connected to: $uri');
-    _subscription = _channel!.stream.listen((data) {
-      _message = data;
+  Future<void> connect() async {
+    try {
+      _channel = WebSocketChannel.connect(uri);
+      await _channel?.ready;
+      debugPrint('Connected to: $uri');
+      _subscription = _channel!.stream.listen((data) {
+        try {
+          // TODO: type this
+          _message = data.toString();
 
-      debugPrint('Received: $_message');
-      notifyListeners();
-    });
+          debugPrint('Received: $_message');
+          notifyListeners();
+        } catch (e) {
+          debugPrint('Error parsing message: $data');
+        }
+      });
+    } catch (e) {
+      debugPrint('Error connecting to: $uri');
+    }
   }
 
   void sendMessage(String message) {

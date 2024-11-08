@@ -1,52 +1,105 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutterfrontend/components/card.dart';
+import 'package:flutterfrontend/components/dashboard.dart';
+import 'package:flutterfrontend/components/formatted_duration.dart';
+import 'package:flutterfrontend/components/lap_counter.dart';
 import 'package:flutterfrontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class QualifyingPage extends StatelessWidget {
-  static const name = '/qualifying';
-
   const QualifyingPage({super.key});
+  static const name = '/qualifying';
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 6,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TranslucentCard(
-                      child: Padding(
-                    padding: const EdgeInsets.all(24).copyWith(right: 120),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('LAP TIMES', style: TextStyle(fontSize: 40)),
-                        ...List.generate(10, (index) => RowItem(index: index + 1))
-                      ].gap(12),
+    return Consumer<WebSocketState>(
+      builder: (context, state, child) {
+        return Row(
+          children: [
+            Expanded(
+              flex: 6,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: kDebugMode
+                          ? () => state.addMessage(
+                                [
+                                  ...state.lapTimes,
+                                  (100000 +
+                                          (100000 *
+                                              (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
+                                      .toInt(),
+                                ].toString(),
+                              )
+                          : null,
+                      child: const LapCounter(),
                     ),
-                  )),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 7,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TranslucentCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            SvgPicture.asset('lib/assets/monaco.svg', height: 180),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 30),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text(
+                                    'LAP 1/10',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 48,
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      const Text(
+                                        'FASTEST LAP',
+                                        style: TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      FormattedDuration(
+                                        Duration(milliseconds: state.fastestLap.toInt()),
+                                        style: const TextStyle(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Dashboard(),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-          const Expanded(
-            flex: 7,
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: TranslucentCard(
-                  child: Column(
-                children: [Text('Lap Times', style: TextStyle(fontSize: 40))],
-              )),
-            ),
-          )
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
@@ -58,54 +111,58 @@ class RowItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WebSocketState>(builder: (context, state, child) {
-      final String time = state.lapTime(index);
-      return Row(
-        children: [
-          Container(
-            height: 52,
-            width: 80,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)),
-              color: Zeta.of(context).colors.textDefault,
-            ),
-            child: Center(
-              child: Text(
-                index.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Titillium',
-                  height: 1,
+    return Consumer<WebSocketState>(
+      builder: (context, state, child) {
+        final time = state.lapTime(index);
+        return Row(
+          children: [
+            Container(
+              height: 52,
+              width: 80,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)),
+                color: Zeta.of(context).colors.textDefault,
+              ),
+              child: Center(
+                child: Text(
+                  index.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Titillium',
+                    height: 1,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: Zeta.of(context).colors.textSubtle.withOpacity(0.5),
-                borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      time,
-                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w300, fontFamily: 'Titillium'),
-                    ),
-                  ),
-                ],
+            Expanded(
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Zeta.of(context).colors.textSubtle.withOpacity(0.5),
+                  borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
+                ),
+                child: time == ''
+                    ? const Nothing()
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: FormattedDuration(
+                              Duration(milliseconds: double.parse(time).toInt()),
+                              style:
+                                  const TextStyle(fontSize: 30, fontWeight: FontWeight.w300, fontFamily: 'Titillium'),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
-          ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }
