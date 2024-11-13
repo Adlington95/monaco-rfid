@@ -12,6 +12,7 @@ services:
     image: my-node-app
     ports:
       - 13000:3000
+      - 18080:8080
     environment:
       RFID_ADDRESS: ${RFID_ADDRESS}
       WEB_PASSWORD: ${WEB_PASSWORD}

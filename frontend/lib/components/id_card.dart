@@ -4,19 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class User {
-  User(this.name, this.company, this.previousAttempts, this.id);
+  User(
+    this.name,
+    this.previousAttempts,
+    this.id,
+    // this.company,
+  );
   final String name;
-  final String company;
   final int previousAttempts;
   final String id;
+  // final String company;
 }
 
 class IdCard extends StatelessWidget {
-  const IdCard({super.key, this.data, required this.title, this.onTap});
+  const IdCard({super.key, this.data, required this.title, this.onTap, required this.isLoading});
 
   final User? data;
   final String title;
   final VoidCallback? onTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +76,10 @@ class IdCard extends StatelessWidget {
                       const Row(
                         children: [Icon(ZetaIcons.barcode_qr_code, color: Colors.white, size: 62)],
                       ),
-                      if (data != null) ...[
+                      if (isLoading) ...[
+                        const SizedBox(height: 20),
+                        const CircularProgressIndicator(),
+                      ] else if (data != null) ...[
                         Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
                         Text(
                           'Previous attempts: ${data!.previousAttempts}',

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutterfrontend/components/leaderboard.dart';
-import 'package:flutterfrontend/pages/scan_id.dart';
-import 'package:flutterfrontend/state/dw_state.dart';
-import 'package:flutterfrontend/state/rest_state.dart';
-import 'package:flutterfrontend/state/ws_state.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:frontend/components/leaderboard.dart';
+import 'package:frontend/pages/scan_id.dart';
+import 'package:frontend/state/dw_state.dart';
+import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
+import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:zeta_flutter/zeta_flutter.dart';
 
 class LeaderBoardsPage extends StatefulWidget {
   const LeaderBoardsPage({super.key});
@@ -28,24 +31,108 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Provider.of<RestState>(context, listen: false).fetchDriverStandings(),
-      builder: (context, future) {
-        if (future.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (future.hasError) {
-          return const Center(child: Text('Error fetching driver standings'));
-        }
+    return PopScope(
+      canPop: false,
+      child: FutureBuilder(
+        future: Provider.of<RestState>(context, listen: false).fetchDriverStandings(),
+        builder: (context, future) {
+          if (future.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (future.hasError) {
+            return const Center(child: Text('Error fetching driver standings'));
+          }
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 140, left: 140, right: 140),
-          child: GestureDetector(
-            onTap: () => context.go(ScanIdPage.name),
-            child: const Leaderboard(),
+          return Padding(
+            padding: const EdgeInsets.only(top: 20, left: 140, right: 140),
+            child: Column(
+              children: [
+                const GameTitle(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
+                  decoration: ShapeDecoration(
+                    gradient: LinearGradient(
+                      begin: const Alignment(0.93, -0.36),
+                      end: const Alignment(-0.93, 0.36),
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.1),
+                      ],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                    ),
+                    shadows: const [
+                      BoxShadow(
+                        color: Color(0x19000000),
+                        blurRadius: 120,
+                        offset: Offset(0, 61.34),
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    onTap: () => context.push(ScanIdPage.name),
+                    child: const Leaderboard(),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class GameTitle extends StatelessWidget {
+  const GameTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 6, left: 4),
+            decoration: const ShapeDecoration(
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  width: 8,
+                  strokeAlign: BorderSide.strokeAlignCenter,
+                  color: Colors.white,
+                ),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(34), topRight: Radius.circular(34)),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 16, 32, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SvgPicture.asset('lib/assets/zebra-word.svg', height: 60),
+                  Text(
+                    Provider.of<GameState>(context).eventName,
+                    style: const TextStyle(
+                      fontSize: 42,
+                      color: Colors.white,
+                      fontFamily: 'F1',
+                      fontWeight: FontWeight.w800,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        );
-      },
+        ),
+        const Expanded(child: Nothing()),
+      ],
     );
   }
 }

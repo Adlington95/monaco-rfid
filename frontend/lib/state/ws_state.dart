@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutterfrontend/constants.dart';
-import 'package:flutterfrontend/main.dart';
-import 'package:flutterfrontend/pages/finish.dart';
-import 'package:flutterfrontend/pages/practice_coutdown.dart';
-import 'package:flutterfrontend/pages/practice_instructions.dart';
-import 'package:flutterfrontend/pages/qualifying.dart';
-import 'package:flutterfrontend/state/rest_state.dart';
+import 'package:frontend/constants.dart';
+import 'package:frontend/main.dart';
+import 'package:frontend/pages/finish.dart';
+import 'package:frontend/pages/practice_coutdown.dart';
+import 'package:frontend/pages/practice_instructions.dart';
+import 'package:frontend/pages/qualifying.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketState with ChangeNotifier {
@@ -17,7 +17,7 @@ class WebSocketState with ChangeNotifier {
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _subscription;
 
-  final Uri uri = Uri.parse('ws://$serverUrl:$websocketPort');
+  final Uri uri = Uri.parse('ws://$defaultServerUrl:$defaultWebsocketPort');
 
   String _message = '';
   String get message => _message;
@@ -26,7 +26,7 @@ class WebSocketState with ChangeNotifier {
 
   void addMessage(String message) {
     if (message.contains('connected')) {
-      router.go(PracticeInstructionsPage.name);
+      router.pushReplacement(PracticeInstructionsPage.name);
       return;
     } else {
       lapTimes = message.replaceAll(RegExp(r'[\[\]]'), '').split(',').map((element) {
@@ -35,9 +35,9 @@ class WebSocketState with ChangeNotifier {
     }
 
     if (lapTimes.length == 1) {
-      router.go(PracticeCountdownPage.name);
+      router.pushReplacement(PracticeCountdownPage.name);
     } else if (lapTimes.length == 3) {
-      router.go(QualifyingPage.name);
+      router.pushReplacement(QualifyingPage.name);
     } else if (lapTimes.length == 13) {
       sendLapTime(fastestLap);
     }
@@ -48,7 +48,7 @@ class WebSocketState with ChangeNotifier {
   Future<void> sendLapTime(double lapTime) async {
     await restState.postFastestLap(lapTime);
     await restState.fetchDriverStandings();
-    router.go(FinishPage.name);
+    await router.pushReplacement(FinishPage.name);
   }
 
   int get practiceLapsRemaining => (3 - lapTimes.length).clamp(1, 3);

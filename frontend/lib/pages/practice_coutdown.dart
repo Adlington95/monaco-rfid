@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfrontend/state/ws_state.dart';
+import 'package:frontend/constants.dart';
+import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class PracticeCountdownPage extends StatelessWidget {
@@ -12,7 +12,7 @@ class PracticeCountdownPage extends StatelessWidget {
     return Consumer<WebSocketState>(
       builder: (context, state, child) => GestureDetector(
         onTap:
-            kDebugMode ? () => state.addMessage('[100000,20000${state.lapTimes.length == 2 ? ',200000' : ''}]') : null,
+            debugMode ? () => state.addMessage('[100000,20000${state.lapTimes.length == 2 ? ',200000' : ''}]') : null,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(60),

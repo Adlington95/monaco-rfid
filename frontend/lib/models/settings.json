@@ -1,0 +1,11 @@
+{
+  "track_name": "Monaco",
+  "game_title": "2025 Monaco Grand Prix",
+  "qualifying_laps": 10,
+  "practice_laps": 3,
+  "server_url": "192.168.0.84",
+  "rest_port": "13000",
+  "ws_port": "8080",
+  "ws_endpoint": "/",
+  "track_length": 3.33
+}

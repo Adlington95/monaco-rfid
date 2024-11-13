@@ -1,21 +1,31 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutterfrontend/pages/car_start.dart';
-import 'package:flutterfrontend/pages/finish.dart';
-import 'package:flutterfrontend/pages/leaderboards.dart';
-import 'package:flutterfrontend/pages/practice_coutdown.dart';
-import 'package:flutterfrontend/pages/practice_instructions.dart';
-import 'package:flutterfrontend/pages/qualifying.dart';
-import 'package:flutterfrontend/pages/scan_id.dart';
-import 'package:flutterfrontend/state/dw_state.dart';
-import 'package:flutterfrontend/state/rest_state.dart';
-import 'package:flutterfrontend/state/ws_state.dart';
+import 'package:frontend/constants.dart';
+import 'package:frontend/pages/car_start.dart';
+import 'package:frontend/pages/finish.dart';
+import 'package:frontend/pages/leaderboards.dart';
+import 'package:frontend/pages/practice_coutdown.dart';
+import 'package:frontend/pages/practice_instructions.dart';
+import 'package:frontend/pages/qualifying.dart';
+import 'package:frontend/pages/scan_id.dart';
+import 'package:frontend/pages/settings.dart';
+import 'package:frontend/state/dw_state.dart';
+import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
+import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
-void main() => runApp(const MyApp());
+//TODO: Add a timer that returns to the main leaderboard screen if nothing happens for a minute
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  final state = await GameState.loadFromPreferences();
+  runApp(MyApp(state: state));
+}
 
 CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
@@ -55,13 +65,16 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
         Positioned(
           right: 40,
           top: 40,
-          child: IconButton(
-            icon: const Icon(ZetaIcons.restart_alt),
-            iconSize: 60,
-            onPressed: () {
+          child: GestureDetector(
+            onLongPress: () {
               Provider.of<DataWedgeState>(context, listen: false).clear();
-              router.go(kDebugMode ? '/' : ScanIdPage.name);
+              router.push(SettingsPage.name);
             },
+            child: Icon(
+              ZetaIcons.settings,
+              color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
+              size: 60,
+            ),
           ),
         ),
       ],
@@ -74,7 +87,7 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      redirect: (context, state) => kDebugMode ? LeaderBoardsPage.name : ScanIdPage.name,
+      redirect: (context, state) => debugMode ? LeaderBoardsPage.name : ScanIdPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const LeaderBoardsPage()),
     ),
     GoRoute(
@@ -105,18 +118,25 @@ final router = GoRouter(
       path: FinishPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const FinishPage()),
     ),
+    GoRoute(
+      path: SettingsPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const SettingsPage()),
+    ),
   ],
 );
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.state});
+
+  final GameState state;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => DataWedgeState()),
-        ChangeNotifierProvider(create: (context) => RestState()),
+        ChangeNotifierProvider(create: (context) => state),
+        ChangeNotifierProvider(create: (context) => DataWedgeState(gameState: state)),
+        ChangeNotifierProvider(create: (context) => RestState(gameState: state)),
         ChangeNotifierProxyProvider<RestState, WebSocketState>(
           create: (context) => WebSocketState(Provider.of<RestState>(context, listen: false)),
           update: (context, restState, wsState) => wsState ?? WebSocketState(restState),

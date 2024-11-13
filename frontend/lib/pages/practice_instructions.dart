@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfrontend/state/ws_state.dart';
+import 'package:frontend/constants.dart';
+import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class PracticeInstructionsPage extends StatelessWidget {
@@ -23,7 +23,7 @@ class PracticeInstructionsPage extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: kDebugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]') : null,
+      onTap: debugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]') : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(340, 180, 340, 140),
         child: Column(
@@ -44,7 +44,9 @@ class PracticeInstructionsPage extends StatelessWidget {
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: PracticeInstructionsPage(),
-  ),);
+  runApp(
+    const MaterialApp(
+      home: PracticeInstructionsPage(),
+    ),
+  );
 }

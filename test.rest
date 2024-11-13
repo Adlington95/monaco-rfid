@@ -1,7 +1,7 @@
 ### Set up the database (only run once per device)
 GET http://localhost:13000/setup
 ### Start RFID
-GET http://localhost:3000/start
+GET http://localhost:13000/start
 ### Stop RFID
 GET http://localhost:13000/stop
 ### Get all rows from the database
@@ -21,7 +21,7 @@ Content-Type: application/json
   
   {
     "name": "Marc Adlington 2",
-    "id": "45345rrrr6123"
+    "id": "45345rrrwr6123"
   }
 
 ### Get individual leaderboard

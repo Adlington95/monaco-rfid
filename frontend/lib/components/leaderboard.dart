@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutterfrontend/components/card.dart';
-import 'package:flutterfrontend/components/formatted_duration.dart';
-import 'package:flutterfrontend/components/lap_counter.dart';
-import 'package:flutterfrontend/models/driver_standing_item.dart';
-import 'package:flutterfrontend/state/rest_state.dart';
+import 'package:frontend/components/card.dart';
+import 'package:frontend/components/formatted_duration.dart';
+import 'package:frontend/components/lap_counter.dart';
+import 'package:frontend/models/driver_standing_item.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
@@ -75,46 +75,50 @@ class _NewWidgetState extends State<NewWidget> {
         return TranslucentCard(
           child: Container(
             padding: const EdgeInsets.all(24),
-            height: 650,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Driver Standings', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400)),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text('TRIES', style: widget.textStyle.apply(fontStyle: FontStyle.italic)),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: state.driverStandings.length,
-                    shrinkWrap: true,
-                    controller: _scrollController,
-                    itemBuilder: (context, index) {
-                      final element = state.driverStandings[index];
-                      return Row(
-                        children: [
-                          Expanded(child: MyListIem(index: index + 1, child: Text(element.name))),
-                          SizedBox(
-                            width: 40,
-                            child: element.change != null && element.change != PlaceChange.none
-                                ? RotatedBox(
-                                    quarterTurns: index == 1 ? 3 : 1,
-                                    child: const Icon(ZetaIcons.chevron_left, size: 38),
-                                  )
-                                : const Nothing(),
-                          ),
-                          FormattedDuration(Duration(milliseconds: element.time), style: widget.textStyle),
-                          SizedBox(width: 80, child: Text('${element.tries}', style: widget.textStyle)),
-                        ].gap(24),
-                      ).paddingBottom(8);
-                    },
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 570,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Driver Standings', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400)),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text('TRIES', style: widget.textStyle.apply(fontStyle: FontStyle.italic)),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: state.driverStandings.length,
+                      shrinkWrap: true,
+                      controller: _scrollController,
+                      itemBuilder: (context, index) {
+                        final element = state.driverStandings[index];
+                        return Row(
+                          children: [
+                            Expanded(child: MyListIem(index: index + 1, child: Text(element.name))),
+                            SizedBox(
+                              width: 40,
+                              child: element.change != null && element.change != PlaceChange.none
+                                  ? RotatedBox(
+                                      quarterTurns: index == 1 ? 3 : 1,
+                                      child: const Icon(ZetaIcons.chevron_left, size: 38),
+                                    )
+                                  : const Nothing(),
+                            ),
+                            FormattedDuration(Duration(milliseconds: element.time), style: widget.textStyle),
+                            SizedBox(width: 80, child: Text('${element.tries}', style: widget.textStyle)),
+                          ].gap(24),
+                        ).paddingBottom(8);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

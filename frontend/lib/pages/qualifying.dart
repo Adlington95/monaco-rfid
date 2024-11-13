@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutterfrontend/components/card.dart';
-import 'package:flutterfrontend/components/dashboard.dart';
-import 'package:flutterfrontend/components/formatted_duration.dart';
-import 'package:flutterfrontend/components/lap_counter.dart';
-import 'package:flutterfrontend/state/ws_state.dart';
+import 'package:frontend/components/card.dart';
+import 'package:frontend/components/dashboard.dart';
+import 'package:frontend/components/formatted_duration.dart';
+import 'package:frontend/components/lap_counter.dart';
+import 'package:frontend/constants.dart';
+import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
@@ -25,7 +25,7 @@ class QualifyingPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: kDebugMode
+                      onTap: debugMode
                           ? () => state.addMessage(
                                 [
                                   ...state.lapTimes,
