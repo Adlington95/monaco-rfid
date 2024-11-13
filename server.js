@@ -9,12 +9,13 @@ const rfidAddress = process.env.RFID_ADDRESS;
 const webUsername = process.env.WEB_USERNAME;
 const webPassword = process.env.WEB_PASSWORD;
 
+const debounceTime = 3000; // In milliseconds
+
 const app = express()
 app.use(express.json())
 app.use(cors())
 
 
-// TODO: Write logic for if we cant get STOP to work
 // TODO: Write logic for the lights to go on
 
 // Naughty line needed as I can't be bothered with SSL 
@@ -32,13 +33,13 @@ let scannedId = '';
 //scanned car id
 let scannedCarId = '';
 
-//scanned car id
-let scannedCarTimestamp = '';
 
 //lap times of the scanned car
 let lapTimes = [];
 
 let rfidTimes = [];
+
+let lastData = {};
 
 // create variable named wss
 const wss = new WebSocket.Server({ port: 8080 });
@@ -109,18 +110,33 @@ app.post('/rfid', async (req, res) => {
     try {
         let json = req.body;
         if (json && Array.isArray(json) && json.length > 0 && json[0].data && json[0].data.idHex) {
-            if (scannedCarId == null) {
+
+            if (scannedCarId == null && json != lastData) {
+                // If no car is setup, and the rfid reader reports a difference
+
                 scannedCarId = json[0].data.idHex;
                 wss.clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({ message: 'Car scanned', carId: scannedCarId }));
                     }
                 });
-            }
-            /// Response is from RFID Reader
-            // scannedCarId ??= json[0].data.idHex;
-            if (rfidTimes[rfidTimes.length - 1] != json[0].timestamp) {
-                rfidTimes.push(json[0].timestamp);
+            } else if (scannedCarId != null && json != lastData) {
+                // If a car is setup, and the rfid reader reports a difference
+                let carData = json.find(element => element.data.idHex === scannedCarId);
+                if (rfidData.length > 0 && carData && carData.timestamp != rfidTimes[rfidTimes.length - 1]) {
+                    const newTime = Date.parse(carData.timestamp);
+                    const oldTime = Date.parse(rfidTimes[rfidTimes.length - 1]);
+                    const lapTime = newTime - oldTime;
+                    if (lapTime > debounceTime) {
+                        rfidTimes.push(carData.timestamp);
+                        lapTimes.push(lapTime)
+                        wss.clients.forEach(client => {
+                            if (client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({ lapTimes: lapTimes }));
+                            }
+                        });
+                    }
+                }
             }
 
         } else {

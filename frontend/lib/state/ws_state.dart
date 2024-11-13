@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
@@ -19,19 +20,28 @@ class WebSocketState with ChangeNotifier {
 
   final Uri uri = Uri.parse('ws://$defaultServerUrl:$defaultWebsocketPort');
 
-  String _message = '';
-  String get message => _message;
-
   List<double> lapTimes = [];
+  String carId = '';
 
   void addMessage(String message) {
-    if (message.contains('connected')) {
+    if (message.contains('Car scanned')) {
+      try {
+        final obj = jsonDecode(message);
+        // ignore: avoid_dynamic_calls
+        carId = obj['carId'] as String;
+      } catch (e) {
+        debugPrint('Error parsing message: $message');
+      }
       router.pushReplacement(PracticeInstructionsPage.name);
       return;
     } else {
-      lapTimes = message.replaceAll(RegExp(r'[\[\]]'), '').split(',').map((element) {
-        return double.tryParse(element)!;
-      }).toList();
+      try {
+        final obj = jsonDecode(message);
+        // ignore: avoid_dynamic_calls
+        lapTimes = obj['lapTimes'] as List<double>;
+      } catch (e) {
+        debugPrint('Error parsing message: $message');
+      }
     }
 
     if (lapTimes.length == 1) {
@@ -46,7 +56,7 @@ class WebSocketState with ChangeNotifier {
   }
 
   Future<void> sendLapTime(double lapTime) async {
-    await restState.postFastestLap(lapTime);
+    await restState.postFastestLap(lapTime, carId);
     await restState.fetchDriverStandings();
     await router.pushReplacement(FinishPage.name);
   }
@@ -75,10 +85,8 @@ class WebSocketState with ChangeNotifier {
       debugPrint('Connected to: $uri');
       _subscription = _channel!.stream.listen((data) {
         try {
-          // TODO: type this
-          _message = data.toString();
-
-          debugPrint('Received: $_message');
+          debugPrint('Received: $data');
+          addMessage(data.toString());
           notifyListeners();
         } catch (e) {
           debugPrint('Error parsing message: $data');

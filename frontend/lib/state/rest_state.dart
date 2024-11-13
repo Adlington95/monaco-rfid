@@ -12,10 +12,10 @@ class RestState with ChangeNotifier {
 
   final List<DriverStandingItem> driverStandings = [];
 
-  Future<void> postFastestLap(double fastestLap) async {
+  Future<void> postFastestLap(double fastestLap, String carId) async {
     await http.post(
       Uri.parse('${gameState.restUrl}/lap'),
-      body: jsonEncode({'lap': fastestLap}),
+      body: jsonEncode({'lap_time': fastestLap, 'car_id': carId}),
       headers: {'Content-Type': 'application/json'},
     );
   }
