@@ -77,7 +77,7 @@ class QualifyingPage extends StatelessWidget {
                                         ),
                                       ),
                                       FormattedDuration(
-                                        Duration(milliseconds: state.fastestLap.toInt()),
+                                        Duration(milliseconds: state.fastestLap),
                                         style: const TextStyle(
                                           fontSize: 48,
                                           fontWeight: FontWeight.w400,

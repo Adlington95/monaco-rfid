@@ -39,3 +39,17 @@ GET http://localhost:13000/removeAllEntries
 ### DELETE DB Structure 
 GET http://localhost:13000/removeTableFromDb
 
+
+
+### POST RFID data
+POST http://localhost:13000/rfid
+Content-Type: application/json
+
+[  
+  {
+    "timestamp":"2024-11-15T18:33:50",
+    "data":{
+      "idHex": "00000000000001"
+    }
+  }
+]

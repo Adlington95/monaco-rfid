@@ -135,8 +135,12 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => state),
-        ChangeNotifierProvider(create: (context) => DataWedgeState(gameState: state)),
         ChangeNotifierProvider(create: (context) => RestState(gameState: state)),
+        ChangeNotifierProxyProvider<RestState, DataWedgeState>(
+          create: (context) =>
+              DataWedgeState(gameState: state, restState: Provider.of<RestState>(context, listen: false)),
+          update: (context, restState, dwState) => dwState ?? DataWedgeState(gameState: state, restState: restState),
+        ),
         ChangeNotifierProxyProvider<RestState, WebSocketState>(
           create: (context) => WebSocketState(Provider.of<RestState>(context, listen: false)),
           update: (context, restState, wsState) => wsState ?? WebSocketState(restState),

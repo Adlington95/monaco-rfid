@@ -30,13 +30,13 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 let token;
 
 //name of the scanned in user
-let scannedName = '';
+let scannedName = null;
 
 //id of the scanned in user
-let scannedId = '';
+let scannedId = null;
 
 //scanned car id
-let scannedCarId = '';
+let scannedCarId = null
 
 //lap times of the scanned car
 let lapTimes = [];
@@ -113,25 +113,43 @@ app.post('/rfid', async (req, res) => {
     console.log('RFID POST request received', new Date().toLocaleTimeString());
     try {
         let json = req.body;
-        if (json && Array.isArray(json) && json.length > 0 && json[0].data && json[0].data.idHex) {
+        console.log(json)
+        console.log('ARRAY ' + Array.isArray(json))
+        console.log('LENGTH ' + json.length)
+        console.log('DATA ' + json[0].data)
+        console.log('ID ' + json[0].data.idHex)
 
+        if (json && Array.isArray(json) && json.length > 0 && json[0].data && json[0].data.idHex) {
+            console.log('First if')
             if (scannedCarId == null && json != lastData) {
                 // If no car is setup, and the rfid reader reports a difference
-
                 scannedCarId = json[0].data.idHex;
+                rfidTimes.push(json[0].timestamp);
                 wss.clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({ message: 'Car scanned', carId: scannedCarId }));
                     }
                 });
-            } else if (scannedCarId != null && json != lastData) {
+                return;
+            }
+            console.log('Scanned car id: ' + scannedCarId)
+            console.log('Last data: ' + JSON.stringify(lastData))
+            console.log('json data: ' + JSON.stringify(json))
+            console.log('Second if ', scannedCarId != null && json != lastData)
+            if (scannedCarId != null && json != lastData) {
+                console.log('Addding lap time')
                 // If a car is setup, and the rfid reader reports a difference
                 let carData = json.find(element => element.data.idHex === scannedCarId);
-                if (rfidData.length > 0 && carData && carData.timestamp != rfidTimes[rfidTimes.length - 1]) {
+
+                if ((carData && carData.timestamp != rfidTimes[rfidTimes.length - 1])) {
                     const newTime = Date.parse(carData.timestamp);
                     const oldTime = Date.parse(rfidTimes[rfidTimes.length - 1]);
                     const lapTime = newTime - oldTime;
-                    if (lapTime > debounceTime) {
+                    console.log('oldTime: ' + oldTime)
+                    console.log('newTime: ' + newTime)
+                    console.log(lapTime)
+                    if (rfidTimes.length == 0 || (lapTime > debounceTime)) {
+                        console.log('Lap time: ' + lapTime)
                         rfidTimes.push(carData.timestamp);
                         lapTimes.push(lapTime)
                         wss.clients.forEach(client => {
@@ -139,9 +157,14 @@ app.post('/rfid', async (req, res) => {
                                 client.send(JSON.stringify({ lapTimes: lapTimes }));
                             }
                         });
+                    } else {
+                        console.log('Lap times too quick!')
                     }
+                } else {
+                    console.log("lap failed")
                 }
             }
+
 
         } else {
             return;
@@ -211,7 +234,6 @@ app.get('/setup', async (req, res) => {
         res.sendStatus(500)
     }
 })
-
 
 // Connect to RFID Reader
 app.get('/start', async (req, res) => {
@@ -298,6 +320,77 @@ app.post('/lights', async (req, res) => {
     }
 });
 
+const Status = {
+    'READY': 1,
+    'USER_SCANNED': 2,
+    'CAR_SCANNED': 3,
+    'PRACTICE': 4,
+    'QUALIFYING': 5,
+    'QUALIFYING_COMPLETE': 6,
+    'UNKNOWN': 0,
+}
+
+app.get('/status', async (req, res) => {
+    let status = Status.UNKNOWN;
+
+    if (!scannedId) {
+        status = Status.READY;
+    } else if (scannedId && !scannedCarId) {
+        status = Status.USER_SCANNED;
+    } else if (scannedId && scannedCarId && lapTimes.length === 0) {
+        status = Status.CAR_SCANNED;
+    } else if (scannedId && scannedCarId && lapTimes.length > 0 && lapTimes.length <= 4) {
+        status = Status.PRACTICE;
+    } else if (scannedId && scannedCarId && lapTimes.length > 4) {
+        status = Status.QUALIFYING;
+    }
+    //TODO: Add check for qualifying complete
+
+    res.status(200).send({ status: status })
+});
+
+app.post('/status', async (req, res) => {
+
+    let status = req.body.status;
+    console.log(req.body)
+
+    switch (status) {
+        case Status.READY:
+            resetQualifying();
+            break;
+        case Status.USER_SCANNED:
+            scannedCarId = null;
+            scannedCarTimestamp = null;
+            lapTimes = [];
+            rfidTimes = [];
+            break;
+        case Status.CAR_SCANNED:
+            scannedCarTimestamp = null;
+            lapTimes = [];
+            break;
+        case Status.PRACTICE:
+            while (lapTimes.length > 3) lapTimes.shift();
+            break;
+        case Status.QUALIFYING:
+            while (lapTimes.length > 4) lapTimes.shift();
+            break;
+        case Status.QUALIFYING_COMPLETE:
+            // Handle qualifying complete status
+            break;
+        default:
+            console.log('Unknown status');
+    }
+
+
+
+
+
+    console.log('Status updated to ' + status);
+    //TODO: 
+
+    res.status(200).send({ message: 'Status updated' })
+});
+
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 function lightToggle(num, on) {
@@ -316,10 +409,10 @@ function lightToggle(num, on) {
 
 function resetQualifying() {
     console.log('resetting qualifying local data');
-    scannedId = '';
-    scannedName = '';
-    scannedCarId = '';
-    scannedCarTimestamp = '';
+    scannedId = null
+    scannedName = null
+    scannedCarId = null
+    scannedCarTimestamp = null
     lapTimes = [];
 }
 
@@ -429,7 +522,3 @@ async function rfidStop() {
     }
 }
 
-
-async function lightCountdown() {
-
-}

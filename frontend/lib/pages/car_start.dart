@@ -19,7 +19,6 @@ class _CarStartPageState extends State<CarStartPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((callback) {
       Provider.of<DataWedgeState>(context, listen: false).clear();
-      Provider.of<WebSocketState>(context, listen: false).connect();
     });
   }
 

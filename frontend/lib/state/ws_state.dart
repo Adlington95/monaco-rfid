@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/pages/finish.dart';
@@ -20,8 +21,10 @@ class WebSocketState with ChangeNotifier {
 
   final Uri uri = Uri.parse('ws://$defaultServerUrl:$defaultWebsocketPort');
 
-  List<double> lapTimes = [];
+  List<int> lapTimes = [];
   String carId = '';
+
+  bool get connected => _channel != null;
 
   void addMessage(String message) {
     if (message.contains('Car scanned')) {
@@ -37,8 +40,15 @@ class WebSocketState with ChangeNotifier {
     } else {
       try {
         final obj = jsonDecode(message);
+
         // ignore: avoid_dynamic_calls
-        lapTimes = obj['lapTimes'] as List<double>;
+        final lapTimesJson = obj['lapTimes'] as List<dynamic>;
+        final newLapTimes = <int>[];
+        for (final lapTime in lapTimesJson) {
+          newLapTimes.add(lapTime as int);
+        }
+        // ignore: avoid_dynamic_calls
+        lapTimes = newLapTimes;
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
@@ -55,7 +65,7 @@ class WebSocketState with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendLapTime(double lapTime) async {
+  Future<void> sendLapTime(int lapTime) async {
     await restState.postFastestLap(lapTime, carId);
     await restState.fetchDriverStandings();
     await router.pushReplacement(FinishPage.name);
@@ -67,7 +77,7 @@ class WebSocketState with ChangeNotifier {
 
   DateTime startTime = DateTime(2024, 11, 8, 11, 42, 40);
 
-  double get fastestLap =>
+  int get fastestLap =>
       lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value < element ? value : element);
 
   String lapTime(int index) {
@@ -83,15 +93,32 @@ class WebSocketState with ChangeNotifier {
       _channel = WebSocketChannel.connect(uri);
       await _channel?.ready;
       debugPrint('Connected to: $uri');
-      _subscription = _channel!.stream.listen((data) {
-        try {
-          debugPrint('Received: $data');
-          addMessage(data.toString());
-          notifyListeners();
-        } catch (e) {
-          debugPrint('Error parsing message: $data');
-        }
-      });
+      _subscription = _channel!.stream.listen(
+        (data) {
+          try {
+            debugPrint('Received: $data');
+            addMessage(data.toString());
+            notifyListeners();
+          } catch (e) {
+            debugPrint('Error parsing message: $data');
+          }
+        },
+        onDone: () {
+          clear();
+          if (lapTimes.length < 13) {
+            Fluttertoast.showToast(msg: 'Connection lost');
+            router.go('/');
+          }
+        },
+        onError: (obj) {
+          clear();
+
+          if (lapTimes.length < 13) {
+            Fluttertoast.showToast(msg: 'Connection lost');
+            router.go('/');
+          }
+        },
+      );
     } catch (e) {
       debugPrint('Error connecting to: $uri');
     }

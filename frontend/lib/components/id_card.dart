@@ -1,20 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/models/user.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
-
-class User {
-  User(
-    this.name,
-    this.previousAttempts,
-    this.id,
-    // this.company,
-  );
-  final String name;
-  final int previousAttempts;
-  final String id;
-  // final String company;
-}
 
 class IdCard extends StatelessWidget {
   const IdCard({super.key, this.data, required this.title, this.onTap, required this.isLoading});

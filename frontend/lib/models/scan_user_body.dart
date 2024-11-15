@@ -1,10 +1,18 @@
-class ScanUserBody {
+import 'dart:convert';
 
+class ScanUserBody {
   ScanUserBody(this.name, this.id);
 
-  ScanUserBody.fromJson(Map<String, dynamic> json)
-      : name = json['name'].toString(),
-        id = json['id'].toString();
+  factory ScanUserBody.fromJsonString(String jsonString) {
+    try {
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+
+      return ScanUserBody(json['name'].toString(), json['id'].toString());
+    } catch (e) {
+      return ScanUserBody(jsonString, jsonString);
+    }
+  }
+
   final String name;
   final String id;
 

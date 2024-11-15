@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
+import 'package:frontend/main.dart';
+import 'package:frontend/models/user.dart';
+import 'package:frontend/pages/car_start.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameState with ChangeNotifier {
@@ -48,10 +51,27 @@ class GameState with ChangeNotifier {
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
-
   set isLoading(bool value) {
     notifyListeners();
     _isLoading = value;
+  }
+
+  User? _loggedInUser;
+  User? get loggedInUser => _loggedInUser;
+  set loggedInUser(User? value) {
+    _loggedInUser = value;
+    if (value != null) {
+      notifyListeners();
+      changePage();
+    }
+  }
+
+  Future<void> changePage() async {
+    if (loggedInUser != null) {
+      await Future<void>.delayed(const Duration(seconds: 5));
+      // TODO: If the user scans the car too quickly, the page will revert back ot the wrong page here
+      if (loggedInUser != null) await router.pushReplacement(CarStartPage.name, extra: loggedInUser);
+    }
   }
 
   static Future<GameState> loadFromPreferences() async {

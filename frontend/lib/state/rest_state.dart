@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/models/driver_standing_item.dart';
+import 'package:frontend/models/scan_user_body.dart';
+import 'package:frontend/models/status.dart';
+import 'package:frontend/models/user.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,10 +14,16 @@ class RestState with ChangeNotifier {
   RestState({required this.gameState});
 
   final GameState gameState;
-
   final List<DriverStandingItem> driverStandings = [];
 
-  Future<void> postFastestLap(double fastestLap, String carId) async {
+  Status _status = Status.UNKNOWN;
+  Status get status => _status;
+  set status(Status value) {
+    _status = value;
+    notifyListeners();
+  }
+
+  Future<void> postFastestLap(int fastestLap, String carId) async {
     await http.post(
       Uri.parse('${gameState.restUrl}/lap'),
       body: jsonEncode({'lap_time': fastestLap, 'car_id': carId}),
@@ -63,6 +74,81 @@ class RestState with ChangeNotifier {
     //   ..addAll(newStandings);
 
     notifyListeners();
+  }
+
+  Future<Status> getStatus({bool retry = false}) async {
+    try {
+      debugPrint('Getting status');
+      final response = await http.get(Uri.parse('${gameState.restUrl}/status')).timeout(const Duration(seconds: 2));
+      if (response.statusCode == 200) {
+        // ignore: avoid_dynamic_calls
+        status = Status.values[((await json.decode(response.body))['status'] as int) - 1];
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      status = Status.UNKNOWN;
+    }
+    if (retry && status == Status.UNKNOWN) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      unawaited(getStatus(retry: true));
+    }
+    debugPrint('Status: $status');
+    return status;
+  }
+
+  Future<void> resetStatus({Status status = Status.READY}) async {
+    debugPrint('Resetting status');
+    try {
+      final response = await http.post(
+        Uri.parse('${gameState.restUrl}/status'),
+        body: jsonEncode({'status': status.index + 1}),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        this.status = status;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> postUser(ScanUserBody body) async {
+    try {
+      final res = await http.post(
+        Uri.parse('${gameState.restUrl}/scanUser'),
+        body: jsonEncode({'id': body.id, 'name': body.name}),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (res.statusCode == 200) {
+        if (res.body == '[]') {
+          gameState.loggedInUser = User(body.name, 0, body.id);
+          return;
+        }
+        final userObj = jsonDecode(res.body) as Map<String, dynamic>;
+        userObj['id'] = userObj['id'].toString();
+        final user = User(
+          userObj['name'] as String,
+          userObj['attempts'] as int,
+          userObj['id'] as String,
+        );
+        gameState.loggedInUser = user;
+      } else {
+        throw Exception('Failed to scan user');
+      }
+    } catch (e) {
+      unawaited(
+        Fluttertoast.showToast(
+          msg: 'Unable to connect to server',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 32,
+        ),
+      );
+      debugPrint(e.toString());
+      rethrow;
+    }
   }
 
   void clear() {

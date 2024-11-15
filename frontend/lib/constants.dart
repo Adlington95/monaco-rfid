@@ -1,7 +1,8 @@
 // Defaults for the application
 
 // Server connection
-const defaultServerUrl = '169.254.39.254';
+const defaultServerUrl = '192.168.0.84';
+// const defaultServerUrl = '169.254.39.254';
 const defaultRestPort = '13000';
 const defaultWebsocketPort = '18080';
 
