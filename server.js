@@ -16,8 +16,12 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-
-// TODO: Write logic for the lights to go on
+// TODO: Test if the RFID reader can be connected to
+// TODO: Write safety function for if the token is invalid
+// TODO: Determine if the RFID reader can be stopped (POST for stop doesnt seem to work)
+// TODO: Test the basic logic for the lap times
+// TODO: Test the Web socket
+// TODO: Test logic for the lights to go on
 
 // Naughty line needed as I can't be bothered with SSL 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
@@ -33,7 +37,6 @@ let scannedId = '';
 
 //scanned car id
 let scannedCarId = '';
-
 
 //lap times of the scanned car
 let lapTimes = [];
@@ -173,7 +176,6 @@ app.post('/lap', async (req, res) => {
         console.log(err)
         res.sendStatus(500)
     }
-
 });
 
 app.get('/removeAllEntries', async (req, res) => {
@@ -261,6 +263,56 @@ app.post('/scanUser', async (req, res) => {
     }
 
 })
+
+app.post('/lights', async (req, res) => {
+    try {
+        // All lights off
+        lightToggle(1, false);
+        lightToggle(2, false);
+        lightToggle(3, false);
+        lightToggle(4, false);
+
+        // Small wait
+        await delay(3000);
+
+        // Lights on in sequence
+        lightToggle(1, true);
+        await delay(1000);
+        lightToggle(2, true);
+        await delay(1000);
+        lightToggle(3, true);
+        await delay(1000);
+        lightToggle(4, true);
+
+        // Random delay
+        await delay(Math.floor(Math.random() * 5000) + 800);
+
+        // All lights off
+        lightToggle(1, false);
+        lightToggle(2, false);
+        lightToggle(3, false);
+        lightToggle(4, false);
+    } catch (e) {
+        console.error(e)
+        res.sendStatus(500)
+    }
+});
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+function lightToggle(num, on) {
+    fetch(`https://${rfidAddress}/cloud/gpo`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            "port": num,
+            "state": !on
+        })
+    });
+}
+
 
 function resetQualifying() {
     console.log('resetting qualifying local data');
