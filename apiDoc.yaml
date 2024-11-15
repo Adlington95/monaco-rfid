@@ -1,0 +1,289 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: GET all entries
+      operationId: GetAllEntries
+      tags:
+        - Entries
+      responses:
+        '200':
+          description: List of all entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    lap_time:
+                      type: string
+                    team_name:
+                      type: string
+                    attempts:
+                      type: integer
+                    employee_id:
+                      type: string
+              example:
+                - id: 1
+                  name: John Doe
+                  lap_time: "1:23.456"
+                  team_name: Team A
+                  attempts: 1
+                  employee_id: "12345"
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /rfid:
+    post:
+      summary: RFID POST request
+      operationId: PostRFID
+      tags:
+        - RFID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      idHex:
+                        type: string
+            example:
+                - timestamp: "2021-05-12T12:00:00"
+                  data: {
+                    idHex: "1234567890"
+                  }
+      responses:
+        '200':
+          description: Success message.
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /lap:
+    post:
+      summary: POST new lap entry
+      operationId: PostLap
+      tags:
+        - Lap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lap_time:
+                  type: string
+      responses:
+        '200':
+          description: Successfully inserted entry into monaco
+          content:
+            application/json:
+              schema:
+                type: string
+               
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /removeAllEntries:
+    get:
+      summary: Remove all entries
+      operationId: RemoveAllEntries
+      tags:
+        - Entries
+      responses:
+        '200':
+          description: Successfully deleted all entries, but maintained the table structure
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /removeTableFromDb:
+    get:
+      summary: Remove table from database
+      operationId: RemoveTableFromDb
+      tags:
+        - Database
+      responses:
+        '200':
+          description: Successfully deleted monaco from db
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /setup:
+    get:
+      summary: Create table
+      operationId: SetupTable
+      tags:
+        - Database
+      responses:
+        '200':
+          description: Successfully created table
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /start:
+    get:
+      summary: Start RFID reader
+      operationId: StartRFID
+      tags:
+        - RFID
+      responses:
+        '200':
+          description: Success message.
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /stop:
+    get:
+      summary: Stop RFID reader
+      operationId: StopRFID
+      tags:
+        - RFID
+      responses:
+        '200':
+          description: Success message.
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /scanUser:
+    post:
+      summary: Scan user
+      operationId: ScanUser
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                id:
+                  type: string
+      responses:
+        '200':
+          description: User data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    lap_time:
+                      type: string
+                    team_name:
+                      type: string
+                    attempts:
+                      type: integer
+                    employee_id:
+                      type: string    
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /getUser:
+    get:
+      summary: Get user data
+      operationId: GetUser
+      tags:
+        - User
+      responses:
+        '200':
+          description: Scanned user data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scannedId:
+                    type: string
+                  scannedName:
+                    type: string
+  /getLeaderboard:
+    get:
+      summary: Get leaderboard
+      operationId: GetLeaderboard
+      tags:
+        - Leaderboard
+      responses:
+        '200':
+          description: List of top 10 entries ordered by lap time.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    lap_time:
+                      type: string
+                    team_name:
+                      type: string
+                    attempts:
+                      type: integer
+                    employee_id:
+                      type: string    
+        '500':
+          description: InternalServerError The server encountered an internal error.
+  /getTeamLeaderboard:
+    get:
+      summary: Get team leaderboard
+      operationId: GetTeamLeaderboard
+      tags:
+        - Leaderboard
+      responses:
+        '200':
+          description: List of top teams ordered by lap time.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    team_name:
+                      type: string
+                    lap_time:
+                      type: string   
+        '500':
+          description: InternalServerError The server encountered an internal error.

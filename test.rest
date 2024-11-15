@@ -21,7 +21,7 @@ Content-Type: application/json
   
   {
     "name": "Marc Adlington 2",
-    "id": "45345rrrwr6123"
+    "id": "453456123"
   }
 
 ### Get individual leaderboard

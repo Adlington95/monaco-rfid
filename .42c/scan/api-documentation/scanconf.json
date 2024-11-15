@@ -1,0 +1,564 @@
+{
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "laxTestingModeEnabled": false,
+    "apiConnectivityCheck": true,
+    "logLevel": "error",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestHeaderNameRequestType": "x-scan-request-type",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxRequestRetryAttempts": 5,
+    "maxScanDuration": 1800,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxRequestSizeHappyPath": 8092,
+    "reportMaxRequestSizeTest": 8092,
+    "reportIncludeRequestBody": true,
+    "reportIncludeResponseBody": true,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true
+  },
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": []
+    },
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
+    }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "host": {
+          "name": "SCAN42C_HOST",
+          "from": "environment",
+          "required": true
+        }
+      }
+    }
+  },
+  "operations": {
+    "GetAllEntries": {
+      "operationId": "GetAllEntries",
+      "request": {
+        "operationId": "GetAllEntries",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "GetAllEntries",
+            "method": "GET",
+            "url": "{{host}}/"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/GetAllEntries/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "GetLeaderboard": {
+      "operationId": "GetLeaderboard",
+      "request": {
+        "operationId": "GetLeaderboard",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "GetLeaderboard",
+            "method": "GET",
+            "url": "{{host}}/getLeaderboard"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/GetLeaderboard/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "GetTeamLeaderboard": {
+      "operationId": "GetTeamLeaderboard",
+      "request": {
+        "operationId": "GetTeamLeaderboard",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "GetTeamLeaderboard",
+            "method": "GET",
+            "url": "{{host}}/getTeamLeaderboard"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/GetTeamLeaderboard/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "GetUser": {
+      "operationId": "GetUser",
+      "request": {
+        "operationId": "GetUser",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "GetUser",
+            "method": "GET",
+            "url": "{{host}}/getUser"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/GetUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "PostLap": {
+      "operationId": "PostLap",
+      "request": {
+        "operationId": "PostLap",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "PostLap",
+            "method": "POST",
+            "url": "{{host}}/lap",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {}
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/PostLap/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "PostRFID": {
+      "operationId": "PostRFID",
+      "request": {
+        "operationId": "PostRFID",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "PostRFID",
+            "method": "POST",
+            "url": "{{host}}/rfid",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": [
+                {},
+                {},
+                {},
+                {}
+              ]
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/PostRFID/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "RemoveAllEntries": {
+      "operationId": "RemoveAllEntries",
+      "request": {
+        "operationId": "RemoveAllEntries",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "RemoveAllEntries",
+            "method": "GET",
+            "url": "{{host}}/removeAllEntries"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/RemoveAllEntries/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "RemoveTableFromDb": {
+      "operationId": "RemoveTableFromDb",
+      "request": {
+        "operationId": "RemoveTableFromDb",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "RemoveTableFromDb",
+            "method": "GET",
+            "url": "{{host}}/removeTableFromDb"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/RemoveTableFromDb/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "ScanUser": {
+      "operationId": "ScanUser",
+      "request": {
+        "operationId": "ScanUser",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "ScanUser",
+            "method": "POST",
+            "url": "{{host}}/scanUser",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {}
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/ScanUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "SetupTable": {
+      "operationId": "SetupTable",
+      "request": {
+        "operationId": "SetupTable",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "SetupTable",
+            "method": "GET",
+            "url": "{{host}}/setup"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/SetupTable/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "StartRFID": {
+      "operationId": "StartRFID",
+      "request": {
+        "operationId": "StartRFID",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "StartRFID",
+            "method": "GET",
+            "url": "{{host}}/start"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/StartRFID/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "StopRFID": {
+      "operationId": "StopRFID",
+      "request": {
+        "operationId": "StopRFID",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "StopRFID",
+            "method": "GET",
+            "url": "{{host}}/stop"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/StopRFID/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    }
+  },
+  "authenticationDetails": []
+}

@@ -1,3 +1,4 @@
+
 const express = require('express')
 const pool = require('./db')
 const cors = require('cors')
@@ -166,7 +167,7 @@ app.post('/lap', async (req, res) => {
                     lap_time=EXCLUDED.lap_time,
                     attempts = monaco.attempts+1`, [scannedName, lap_time, scannedCarId, 0, scannedId]);
 
-        res.status(200).send({ message: "Successfully inserted entry into moncaco" })
+        res.status(200).send({ message: "Successfully inserted entry into monaco" })
         resetQualifying();
     } catch (err) {
         console.log(err)
@@ -251,6 +252,8 @@ app.post('/scanUser', async (req, res) => {
 
         const data = await pool.query('SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1', [scannedId])
 
+        //returns [] if the user does not exist in the database
+        //return [UserData] if the user does exist in the database
         res.status(200).send(data.rows);
     } catch (e) {
         console.error(e)
