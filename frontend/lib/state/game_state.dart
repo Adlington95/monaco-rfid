@@ -11,7 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GameState with ChangeNotifier {
   GameState({
-    required this.serverUrl,
+    required this.isEmulator,
+    required String serverUrl,
     required this.restPort,
     required this.websocketPort,
     required this.circuitName,
@@ -19,9 +20,10 @@ class GameState with ChangeNotifier {
     required this.practiceLaps,
     required this.qualifyingLaps,
     required this.eventName,
-  });
+  }) : _serverUrl = serverUrl;
 
   GameState._({
+    required this.isEmulator,
     String? serverUrl,
     String? restPort,
     String? websocketPort,
@@ -30,7 +32,7 @@ class GameState with ChangeNotifier {
     int? practiceLaps,
     int? qualifyingLaps,
     String? eventName,
-  })  : serverUrl = serverUrl ?? defaultServerUrl,
+  })  : _serverUrl = serverUrl ?? defaultServerUrl,
         restPort = restPort ?? defaultRestPort,
         websocketPort = websocketPort ?? defaultWebsocketPort,
         circuitName = circuitName ?? defaultCircuitName,
@@ -39,7 +41,15 @@ class GameState with ChangeNotifier {
         qualifyingLaps = qualifyingLaps ?? defaultQualifyingLaps,
         eventName = eventName ?? defaultEventName;
 
-  String serverUrl;
+  String _serverUrl;
+  String get serverUrl => _serverUrl;
+  set serverUrl(String value) {
+    _serverUrl = value;
+    notifyListeners();
+  }
+
+  final bool isEmulator;
+
   String restPort;
   String websocketPort;
   String circuitName;
@@ -74,10 +84,11 @@ class GameState with ChangeNotifier {
     }
   }
 
-  static Future<GameState> loadFromPreferences() async {
+  static Future<GameState> loadFromPreferences({required bool isEmulator}) async {
     final prefs = await SharedPreferences.getInstance();
 
     return GameState._(
+      isEmulator: isEmulator,
       serverUrl: prefs.getString(serverUrlKey),
       restPort: prefs.getString(restPortKey),
       websocketPort: prefs.getString(websocketPortKey),
@@ -88,45 +99,45 @@ class GameState with ChangeNotifier {
     );
   }
 
-  static Future<GameState> loadFromJson() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-      if (result == null) return GameState._();
-      final file = File(result.files.single.path!);
-      final content = await file.readAsString();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+  // static Future<GameState> loadFromJson() async {
+  //   try {
+  //     final result = await FilePicker.platform.pickFiles(
+  //       type: FileType.custom,
+  //       allowedExtensions: ['json'],
+  //     );
+  //     if (result == null) return GameState._(isEmulator: isEmulator);
+  //     final file = File(result.files.single.path!);
+  //     final content = await file.readAsString();
+  //     final json = jsonDecode(content) as Map<String, dynamic>;
 
-      return GameState._(
-        serverUrl: json[serverUrlKey] as String?,
-        restPort: json[restPortKey] as String?,
-        websocketPort: json[websocketPortKey] as String?,
-        circuitName: json[circuitNameKey] as String?,
-        circuitLength: json[circuitLengthKey] as double?,
-        practiceLaps: json[practiceLapsKey] as int?,
-        qualifyingLaps: json[qualifyingLapsKey] as int?,
-      );
-    } catch (e) {
-      return GameState._();
-    }
-  }
+  //     return GameState._(
+  //       serverUrl: json[serverUrlKey] as String?,
+  //       restPort: json[restPortKey] as String?,
+  //       websocketPort: json[websocketPortKey] as String?,
+  //       circuitName: json[circuitNameKey] as String?,
+  //       circuitLength: json[circuitLengthKey] as double?,
+  //       practiceLaps: json[practiceLapsKey] as int?,
+  //       qualifyingLaps: json[qualifyingLapsKey] as int?,
+  //     );
+  //   } catch (e) {
+  //     return GameState._();
+  //   }
+  // }
 
-  Future<void> applyFromJson() async {
-    isLoading = true;
-    final other = await loadFromJson();
+  // Future<void> applyFromJson() async {
+  //   isLoading = true;
+  //   final other = await loadFromJson();
 
-    serverUrl = other.serverUrl;
-    restPort = other.restPort;
-    websocketPort = other.websocketPort;
-    circuitName = other.circuitName;
-    circuitLength = other.circuitLength;
-    practiceLaps = other.practiceLaps;
-    qualifyingLaps = other.qualifyingLaps;
+  //   serverUrl = other.serverUrl;
+  //   restPort = other.restPort;
+  //   websocketPort = other.websocketPort;
+  //   circuitName = other.circuitName;
+  //   circuitLength = other.circuitLength;
+  //   practiceLaps = other.practiceLaps;
+  //   qualifyingLaps = other.qualifyingLaps;
 
-    isLoading = false;
-  }
+  //   isLoading = false;
+  // }
 
   Future<void> saveToSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
@@ -162,6 +173,6 @@ class GameState with ChangeNotifier {
     await file.writeAsString(jsonEncode(json));
   }
 
-  String get restUrl => 'http://$defaultServerUrl:$defaultRestPort';
-  String get wsUrl => 'ws://$defaultServerUrl:$defaultWebsocketPort';
+  Uri get restUrl => Uri.parse('http://$serverUrl:$restPort');
+  Uri get wsUrl => Uri.parse('ws://$serverUrl:$websocketPort');
 }

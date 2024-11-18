@@ -78,7 +78,7 @@ class RestState with ChangeNotifier {
 
   Future<Status> getStatus({bool retry = false}) async {
     try {
-      debugPrint('Getting status');
+      debugPrint('Getting status:  ${gameState.restUrl}');
       final response = await http.get(Uri.parse('${gameState.restUrl}/status')).timeout(const Duration(seconds: 2));
       if (response.statusCode == 200) {
         // ignore: avoid_dynamic_calls

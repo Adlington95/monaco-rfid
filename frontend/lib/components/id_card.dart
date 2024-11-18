@@ -25,7 +25,7 @@ class IdCard extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 82, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontSize: 82, fontWeight: FontWeight.w800, color: Colors.white),
           ),
         ),
         const SizedBox(height: 20),
@@ -39,12 +39,12 @@ class IdCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: const Alignment(0.93, -0.36),
                 end: const Alignment(-0.93, 0.36),
-                colors: [Colors.white.withOpacity(0.30000001192092896), Colors.white.withOpacity(0.05000000074505806)],
+                colors: [Colors.white.withOpacity(0.3), Colors.white.withOpacity(0.05)],
               ),
               shape: RoundedRectangleBorder(
                 side: BorderSide(
                   width: 1.47,
-                  color: Colors.white.withOpacity(0.30000001192092896),
+                  color: Colors.white.withOpacity(0.3),
                 ),
                 borderRadius: BorderRadius.circular(40),
               ),

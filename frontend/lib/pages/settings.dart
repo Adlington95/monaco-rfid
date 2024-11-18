@@ -1,49 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:provider/provider.dart';
-import 'package:zeta_flutter/generated/icons/icons.g.dart';
+import 'package:restart_app/restart_app.dart';
+import 'package:zeta_flutter/zeta_flutter.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
   static const String name = '/settings';
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<GameState>(
-      builder: (context, state, child) => ListView(
+      builder: (context, state, child) => Column(
         children: [
-          ListTile(
-            leading: const Icon(ZetaIcons.upload),
-            title: const Text('Load Config from JSON'),
-            onTap: state.applyFromJson,
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  const ListTile(
+                    leading: Icon(ZetaIcons.upload),
+                    title: Text('Load Config from JSON'),
+                    // onTap: state.applyFromJson,
+                    enabled: false,
+                  ),
+                  //TODO: Getting an error from file picker package
+                  const ListTile(
+                    leading: Icon(ZetaIcons.download),
+                    title: Text('Save config to JSON'),
+                    // onTap: state.saveToJson,
+                    enabled: false,
+                  ),
+
+                  ListTile(
+                    leading: const Icon(Icons.help),
+                    title: const Text('Server IP address'),
+                    subtitle: ZetaTextInput(
+                      onSaved: (value) => value != null ? state.serverUrl = value : null,
+                      initialValue: state.serverUrl,
+                    ),
+                  ),
+
+                  ListTile(
+                    leading: const Icon(Icons.help),
+                    title: const Text('Rest port'),
+                    subtitle: ZetaTextInput(
+                      onSaved: (value) => value != null ? state.restPort = value : null,
+                      initialValue: state.restPort,
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.help),
+                    title: const Text('WebSocket port'),
+                    subtitle: ZetaTextInput(
+                      onSaved: (value) => value != null ? state.websocketPort = value : null,
+                      initialValue: state.websocketPort,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          //TODO: Getting an error from file picker package
-          ListTile(
-            leading: const Icon(ZetaIcons.download),
-            title: const Text('Save config to JSON'),
-            onTap: state.saveToJson,
-            enabled: false,
-          ),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Privacy'),
-            onTap: () {
-              // Navigate to privacy settings
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
-            onTap: () {
-              // Navigate to help & support
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About'),
-            onTap: () {
-              // Navigate to about page
-            },
+          Container(
+            height: 60,
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ZetaButton(
+                  label: 'Save',
+                  onPressed: () async {
+                    _formKey.currentState?.save();
+                    await state.saveToSharedPreferences();
+                    await Restart.restartApp();
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

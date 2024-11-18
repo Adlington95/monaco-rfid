@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,7 +24,9 @@ import 'package:zeta_flutter/zeta_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-  final state = await GameState.loadFromPreferences();
+
+  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+  final state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
   runApp(MyApp(state: state));
 }
 
@@ -153,7 +156,6 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             fontFamily: 'F1',
-            colorScheme: const ColorScheme.dark(),
           ),
           builder: (_, child) => Scaffold(body: child ?? const Nothing()),
         ),

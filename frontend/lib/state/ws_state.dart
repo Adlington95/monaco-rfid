@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/pages/finish.dart';
 import 'package:frontend/pages/practice_coutdown.dart';
@@ -19,7 +18,7 @@ class WebSocketState with ChangeNotifier {
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _subscription;
 
-  final Uri uri = Uri.parse('ws://$defaultServerUrl:$defaultWebsocketPort');
+  // final Uri uri = restState.gameState.wsUrl;
 
   List<int> lapTimes = [];
   String carId = '';
@@ -90,9 +89,9 @@ class WebSocketState with ChangeNotifier {
 
   Future<void> connect() async {
     try {
-      _channel = WebSocketChannel.connect(uri);
+      _channel = WebSocketChannel.connect(restState.gameState.wsUrl);
       await _channel?.ready;
-      debugPrint('Connected to: $uri');
+      debugPrint('Connected to: $restState.gameState.wsUrl');
       _subscription = _channel!.stream.listen(
         (data) {
           try {
@@ -120,7 +119,7 @@ class WebSocketState with ChangeNotifier {
         },
       );
     } catch (e) {
-      debugPrint('Error connecting to: $uri');
+      debugPrint('Error connecting to: $restState.gameState.wsUrl');
     }
   }
 
