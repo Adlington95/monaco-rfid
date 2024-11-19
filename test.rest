@@ -53,3 +53,16 @@ Content-Type: application/json
     }
   }
 ]
+
+
+### POST Status
+POST http://localhost:13000/status
+Content-Type: application/json
+
+
+  {
+    "status":1
+  }
+
+### PUT Lights
+POST http://localhost:13000/lights
