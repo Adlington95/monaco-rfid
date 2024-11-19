@@ -37,6 +37,7 @@ class _CarStartPageState extends State<CarStartPage> {
                   style: TextStyle(
                     fontSize: 82,
                     fontWeight: FontWeight.w800,
+                    color: Colors.white,
                     shadows: <Shadow>[
                       Shadow(
                         offset: const Offset(0, 4),
