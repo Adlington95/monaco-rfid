@@ -5,22 +5,20 @@ const cors = require('cors')
 const fetch = require('node-fetch')
 const WebSocket = require('ws')
 
-const port = 3000
+const port = 13000
 const rfidAddress = process.env.RFID_ADDRESS;
 const webUsername = process.env.WEB_USERNAME;
 const webPassword = process.env.WEB_PASSWORD;
 
-const debounceTime = 3000; // In milliseconds
+const debounceTime = 1000; // In milliseconds
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 
-// TODO: Test if the RFID reader can be connected to
 // TODO: Write safety function for if the token is invalid
 // TODO: Determine if the RFID reader can be stopped (POST for stop doesnt seem to work)
 // TODO: Test the basic logic for the lap times
-// TODO: Test the Web socket
 // TODO: Test logic for the lights to go on
 
 // Naughty line needed as I can't be bothered with SSL 
@@ -43,18 +41,18 @@ let lapTimes = [];
 
 let rfidTimes = [];
 
-let lastData = {};
+let lastData;
 
-let cutOffTime = 0;
+let rfidOn = true;
 
-let rfidOn = false;
 // create variable named wss
 const wss = new WebSocket.Server({ port: 8080 });
+
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
     console.log('Client connected');
-    cutOffTime = new Date();
     ws.on('message', (data) => {
+        if (!rfidOn) rfidOn = true;
         //if the only has scanned in via barcode, proceed, else do nothing
         if (!scannedName || !scannedId) {
             return;
@@ -95,6 +93,7 @@ wss.on('connection', (ws) => {
 
     // Handle client disconnection
     ws.on('close', () => {
+        rfidOn = false;
         console.log('Client disconnected');
     });
 });
@@ -111,83 +110,94 @@ app.get('/', async (req, res) => {
     }
 })
 
+function rfidScannedCar(json) {
+    console.log('Scanning car')
 
-app.post('/rfid', async (req, res) => {
-    if (rfidOn) {
-        console.log('RFID POST request received', new Date().toISOString());
-        try {
+    scannedCarId = json.data.idHex;
+    rfidTimes.push(json.timestamp);
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ message: 'Car scanned', carId: scannedCarId }));
+        }
+    });
 
-            let json = req.body;
-            console.log(json)
-            if (
-                // wss.readyState === WebSocket.OPEN &&
-                json && Array.isArray(json) && json.length > 0 && json[0].data && json[0].data.
-                    idHex
-                && json.includes(element => (element.timestamp && Date.parse(element.timestamp) > cutOffTime.getTime()))
-            ) {
-                console.log('Stringifying data')
-                const oldObj = JSON.stringify(lastData)
-                const newObj = JSON.stringify(json)
+}
 
-                if (oldObj != newObj) {
-                    if (scannedCarId == null) {
-                        console.log('First if')
-                        // If no car is setup, and the rfid reader reports a difference
-                        scannedCarId = json[0].data.idHex;
-                        rfidTimes.push(json[0].timestamp);
-                        wss.clients.forEach(client => {
-                            if (client.readyState === WebSocket.OPEN) {
-                                client.send(JSON.stringify({ message: 'Car scanned', carId: scannedCarId }));
-                            }
-                        });
-                        lastData = json;
-                        return;
-                    } else {
-                        // console.log(json, lastData)
-                        console.log('Addding lap time')
-                        // If a car is setup, and the rfid reader reports a difference
-                        let carData = json.find(element => element.data.idHex === scannedCarId);
+function rfidLap(timestamp, previousTimeStamp) {
+    console.log('Adding new lap!');
 
-                        if ((carData && carData.timestamp != rfidTimes[rfidTimes.length - 1])) {
-                            const newTime = Date.parse(carData.timestamp);
+    const newTime = Date.parse(timestamp);
+    const oldTime = Date.parse(previousTimeStamp);
 
-                            const oldTime = Date.parse(rfidTimes[rfidTimes.length - 1]);
-                            const lapTime = newTime - oldTime;
-                            console.log(`Old Time: ${new Date(oldTime).toLocaleString()}`);
-                            console.log('newTime: ' + new Date(newTime).toLocaleString())
-                            console.log(lapTime)
-                            if (rfidTimes.length == 0 || (lapTime > debounceTime)) {
-                                console.log('Lap time: ' + lapTime)
-                                rfidTimes.push(carData.timestamp);
-                                lapTimes.push(lapTime)
-                                wss.clients.forEach(client => {
-                                    if (client.readyState === WebSocket.OPEN) {
-                                        client.send(JSON.stringify({ lapTimes: lapTimes }));
-                                    }
-                                });
-                                lastData = json;
+    const lapTime = newTime - oldTime;
 
-                            } else {
-                                console.log('Lap times too quick!')
-                            }
-                        } else {
-                            console.log("lap failed")
-                        }
-
-                    }
-                } else {
-                    console.log('No new data')
-                }
-
-
-            } else {
-                return;
+    if (lapTime > debounceTime) {
+        console.log('Lap time: ' + lapTime)
+        lapTimes.push(lapTime)
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ lapTimes: lapTimes }));
             }
+        });
 
-        } catch (e) {
-            console.error(e)
+    } else {
+        console.log('Lap times too quick!')
+    }
+}
+
+function rfidSaveData(json) {
+    lastData = json;
+}
+
+function rfidCheckValidity(newJson) {
+    return (
+        // wss.readyState === WebSocket.OPEN &&
+        scannedId &&
+        newJson && newJson.data && newJson.data.idHex
+        // json && Array.isArray(json) && json.length > 0 && json[0].data && json[0].data.idHex
+
+    );
+}
+
+function rfidCompareToPrevious(oldJson, newJson) {
+    return scannedCarId == newJson.data.idHex && newJson.timestamp !== oldJson.timestamp ? newJson : null;
+}
+
+let toggling = false;
+
+async function rfidToggle() {
+    if (toggling) return;
+
+    toggling = true;
+    await rfidStop();
+    await delay(debounceTime);
+    await rfidStart();
+    toggling = false;
+}
+
+app.post('/rfid', async (req, _) => {
+
+
+    // Check if this is an RFID data response
+    if (rfidCheckValidity(req.body)) {
+
+        // Save the previous data to compare against for lap time
+        const previousData = lastData;
+
+        // Parse the JSON data, only return new data
+        const json = rfidCompareToPrevious(previousData, req.body);
+        if (json) {
+            rfidSaveData();
+            rfidToggle();
+
+            if (!scannedCarId) {
+                rfidScannedCar(json);
+            } else {
+                rfidLap(correctLap.timestamp, rfidTimes[rfidTimes.length - 1]);
+            }
         }
     }
+    rfidSaveData(req.body);
 })
 
 //fastest lap
@@ -424,7 +434,6 @@ async function lightToggle(num, on) {
     });
 }
 
-
 function resetQualifying() {
     console.log('resetting qualifying local data');
     scannedId = null
@@ -517,7 +526,6 @@ async function rfidStart() {
 
     if (startResponse.ok) {
         console.log('RFID Started')
-        cutOffTime = Date();
         return;
     }
     const json = await startResponse.json();
@@ -527,6 +535,7 @@ async function rfidStart() {
         return rfidStart();
     } else if (startResponse.status === 422 && json && json.message.includes('Start currently ongoing')) {
         await rfidStop();
+        await delay(2000);
         await rfidStart();
     } else {
         console.error('RFID Start error')
@@ -563,4 +572,9 @@ async function rfidStop() {
     }
 
 }
+
+
+
+
+
 
