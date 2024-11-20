@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
+import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,9 @@ class PracticeInstructionsPage extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: debugMode ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]') : null,
+      onTap: Provider.of<GameState>(context).isEmulator
+          ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]')
+          : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(340, 180, 340, 140),
         child: Column(

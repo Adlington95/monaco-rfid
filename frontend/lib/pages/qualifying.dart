@@ -5,6 +5,7 @@ import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
 import 'package:frontend/constants.dart';
+import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
@@ -25,7 +26,7 @@ class QualifyingPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: debugMode
+                      onTap: Provider.of<GameState>(context).isEmulator
                           ? () => state.addMessage(
                                 [
                                   ...state.lapTimes,

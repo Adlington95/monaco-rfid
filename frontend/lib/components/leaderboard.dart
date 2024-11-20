@@ -23,6 +23,7 @@ class _LeaderboardState extends State<Leaderboard> {
       fontSize: 26,
       fontWeight: FontWeight.w600,
       fontFamily: 'Titillium',
+      color: Colors.white,
     );
     return const Hero(
       tag: 'leaderboard',
@@ -72,6 +73,8 @@ class _NewWidgetState extends State<NewWidget> {
   Widget build(BuildContext context) {
     return Consumer<RestState>(
       builder: (context, state, child) {
+        final fastestLap = state.driverStandings.first.time;
+
         return TranslucentCard(
           child: Container(
             padding: const EdgeInsets.all(24),
@@ -84,10 +87,31 @@ class _NewWidgetState extends State<NewWidget> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Driver Standings', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400)),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text('TRIES', style: widget.textStyle.apply(fontStyle: FontStyle.italic)),
+                      const Text(
+                        'Driver Standings',
+                        style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400, color: Colors.white),
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            child: Center(
+                              child: Text(
+                                'TRIES',
+                                style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 160,
+                            child: Center(
+                              child: Text(
+                                'TIME',
+                                style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ].gap(24),
                       ),
                     ],
                   ),
@@ -105,13 +129,35 @@ class _NewWidgetState extends State<NewWidget> {
                               width: 40,
                               child: element.change != null && element.change != PlaceChange.none
                                   ? RotatedBox(
-                                      quarterTurns: index == 1 ? 3 : 1,
-                                      child: const Icon(ZetaIcons.chevron_left, size: 38),
+                                      quarterTurns: element.change == PlaceChange.up ? 3 : 1,
+                                      child: Icon(
+                                        ZetaIcons.chevron_left,
+                                        size: 38,
+                                        color: element.change == PlaceChange.up ? Colors.green : Colors.red,
+                                      ),
                                     )
                                   : const Nothing(),
                             ),
-                            FormattedDuration(Duration(milliseconds: element.time), style: widget.textStyle),
-                            SizedBox(width: 80, child: Text('${element.tries}', style: widget.textStyle)),
+                            SizedBox(
+                              width: 80,
+                              child: Center(
+                                child: Text('${element.tries}', style: widget.textStyle),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 160,
+                              child: Center(
+                                child: (index == 0)
+                                    ? FormattedDuration(
+                                        Duration(milliseconds: fastestLap),
+                                        style: widget.textStyle,
+                                      )
+                                    : FormattedGap(
+                                        Duration(milliseconds: element.time - fastestLap),
+                                        style: widget.textStyle,
+                                      ),
+                              ),
+                            ),
                           ].gap(24),
                         ).paddingBottom(8);
                       },

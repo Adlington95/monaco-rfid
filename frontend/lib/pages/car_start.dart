@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/state/dw_state.dart';
+import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
@@ -51,7 +52,7 @@ class _CarStartPageState extends State<CarStartPage> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: debugMode ? () => state.addMessage('{"connected":true}') : null,
+                onTap: Provider.of<GameState>(context).isEmulator ? () => state.addMessage('{"connected":true}') : null,
                 child: SvgPicture.asset('lib/assets/car.svg', width: 200, height: 200),
               ),
             ],

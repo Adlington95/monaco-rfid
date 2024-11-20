@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/pages/car_start.dart';
 import 'package:frontend/pages/finish.dart';
 import 'package:frontend/pages/leaderboards.dart';
@@ -24,9 +25,13 @@ import 'package:zeta_flutter/zeta_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
-  final deviceInfo = await DeviceInfoPlugin().androidInfo;
-  final state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
+  final GameState state;
+  if (Platform.isAndroid) {
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
+  } else {
+    state = await GameState.loadFromPreferences(isEmulator: true);
+  }
   runApp(MyApp(state: state));
 }
 
@@ -90,7 +95,7 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      redirect: (context, state) => debugMode ? LeaderBoardsPage.name : ScanIdPage.name,
+      redirect: (context, state) => LeaderBoardsPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const LeaderBoardsPage()),
     ),
     GoRoute(

@@ -1,29 +1,11 @@
-import 'package:flutter/material.dart';
-
 class DriverStandingItem {
   const DriverStandingItem(this.name, this.id, this.tries, this.time, {this.change, this.diff, this.newRecord});
   factory DriverStandingItem.fromJson(Map<String, dynamic> json) {
-    var lapTimeInMilliseconds = 0;
-    try {
-      final laptimeString = json['lap_time'] as String;
-      final parts = laptimeString.split(':');
-      final minutes = int.parse(parts[0]);
-      final secondsAndMilliseconds = parts[1].split('.');
-      final seconds = int.parse(secondsAndMilliseconds[0]);
-      final milliseconds = int.parse(secondsAndMilliseconds[1]);
-
-      lapTimeInMilliseconds =
-          (Duration(minutes: minutes) + Duration(seconds: seconds) + Duration(milliseconds: milliseconds))
-              .inMilliseconds;
-    } catch (e) {
-      debugPrint('Error parsing lap time: $e');
-    }
-
     return DriverStandingItem(
       json['name'] as String,
       json['employee_id'] as String,
       (json['attempts'] as int) + 1,
-      lapTimeInMilliseconds,
+      int.tryParse(json['lap_time'] as String) ?? 0,
     );
   }
   final String name;

@@ -2,6 +2,7 @@
 
 // Server connection
 // const defaultServerUrl = '192.168.0.84';
+// const defaultServerUrl = 'localhost';
 const defaultServerUrl = '169.254.39.254';
 const defaultRestPort = '13000';
 const defaultWebsocketPort = '18080';
@@ -24,5 +25,3 @@ const circuitLengthKey = 'circuitLength';
 const practiceLapsKey = 'practiceLaps';
 const qualifyingLapsKey = 'qualifyingLaps';
 const defaultEventName = '2025 Monaco Grand Prix';
-
-const debugMode = false;
