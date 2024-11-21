@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/models/user.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
@@ -65,14 +66,40 @@ class IdCard extends StatelessWidget {
                         const Row(
                           children: [Icon(ZetaIcons.barcode_qr_code, color: Colors.white, size: 62)],
                         ),
-                        if (data != null) ...[
-                          Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
-                          Text(
-                            'Previous attempts: ${data!.previousAttempts}',
-                            style: const TextStyle(color: Colors.white, fontSize: 24),
+                        if (data != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Previous best:',
+                                    style: TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                  FormattedDuration(
+                                    Duration(milliseconds: data!.previousBest!),
+                                    style: const TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Attempts:',
+                                    style: TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                  Text(
+                                    '${data!.previousAttempts}',
+                                    style: const TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                ],
+                              ),
+                            ].gap(8),
                           ),
-                        ],
-                      ].gap(40),
+                      ].gap(20),
                     ),
                   ),
                 ),

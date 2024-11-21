@@ -21,25 +21,20 @@ class QualifyingPage extends StatelessWidget {
           children: [
             Expanded(
               flex: 6,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: Provider.of<GameState>(context).isEmulator
-                          ? () => state.addMessage(
-                                [
-                                  ...state.lapTimes,
-                                  (100000 +
-                                          (100000 *
-                                              (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
-                                      .toInt(),
-                                ].toString(),
-                              )
-                          : null,
-                      child: const LapCounter(),
-                    ),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 52),
+                child: GestureDetector(
+                  onTap: Provider.of<GameState>(context).isEmulator
+                      ? () => state.addMessage(
+                            [
+                              ...state.lapTimes,
+                              (100000 + (100000 * (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
+                                  .toInt(),
+                            ].toString(),
+                          )
+                      : null,
+                  child: const LapCounter(),
+                ),
               ),
             ),
             Expanded(

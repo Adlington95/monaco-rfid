@@ -8,11 +8,13 @@ class LeaderboardRow extends StatelessWidget {
     required this.index,
     this.child,
     this.highlighted = false,
+    this.isPurple = false,
   });
 
   final int index;
   final Widget? child;
   final bool highlighted;
+  final bool isPurple;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class LeaderboardRow extends StatelessWidget {
                 child: const ColoredBox(color: Colors.white),
               ),
             ),
-          _RowContents(highlighted: highlighted, index: index, child: child),
+          _RowContents(highlighted: highlighted, index: index, isPurple: isPurple, child: child),
         ],
       ),
     );
@@ -40,20 +42,26 @@ class _RowContents extends StatelessWidget {
     required this.highlighted,
     required this.index,
     required this.child,
+    required this.isPurple,
   });
 
   final bool highlighted;
   final int index;
   final Widget? child;
-
+  final bool isPurple;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
+        AnimatedContainer(
+          duration: Durations.medium2,
           height: 42,
           width: 70,
-          color: highlighted ? null : Zeta.of(context).colors.textDefault,
+          color: highlighted
+              ? null
+              : isPurple
+                  ? Zeta.of(context).colors.purple
+                  : Zeta.of(context).colors.textDefault,
           child: Center(
             child: Text(
               index.toString(),

@@ -152,6 +152,8 @@ class MyApp extends StatelessWidget {
 
   final GameState state;
 
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -172,6 +174,7 @@ class MyApp extends StatelessWidget {
         initialThemeMode: ThemeMode.light,
         builder: (context, light, dark, themeMode) => MaterialApp.router(
           routerConfig: router,
+          key: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(fontFamily: 'F1'),
           builder: (_, child) => Scaffold(body: child ?? const Nothing()),
