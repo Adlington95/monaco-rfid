@@ -232,7 +232,6 @@ async function rfidToggle() {
     if (toggling) return;
     toggling = true;
     await rfidStop();
-    await delay(debounceTime);
     await rfidStart();
     toggling = false;
 }
@@ -251,7 +250,7 @@ app.post('/rfid', async (req, _) => {
 
             if (!scannedCarId) {
                 rfidScannedCar(json);
-            } else {
+            } else if (scannedCarId == json.data.idHex) {
                 console.log(rfidTimes)
                 rfidLap(json.timestamp, rfidTimes[rfidTimes.length - 1]);
             }
