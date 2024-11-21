@@ -31,57 +31,60 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
-        child: Column(
-          children: [
-            const GameTitle(),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
-                decoration: ShapeDecoration(
-                  gradient: LinearGradient(
-                    begin: const Alignment(0.93, -0.36),
-                    end: const Alignment(-0.93, 0.36),
-                    colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.black.withOpacity(0.1),
+    return GestureDetector(
+      onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(ScanIdPage.name) : null,
+      child: PopScope(
+        canPop: false,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
+          child: Column(
+            children: [
+              const GameTitle(),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
+                  decoration: ShapeDecoration(
+                    gradient: LinearGradient(
+                      begin: const Alignment(0.93, -0.36),
+                      end: const Alignment(-0.93, 0.36),
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.1),
+                      ],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                    ),
+                    shadows: const [
+                      BoxShadow(
+                        color: Color(0x19000000),
+                        blurRadius: 120,
+                        offset: Offset(0, 61.34),
+                      ),
                     ],
                   ),
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
+                  child: GestureDetector(
+                    onTap: () => context.push(ScanIdPage.name),
+                    child: const Leaderboard(),
                   ),
-                  shadows: const [
-                    BoxShadow(
-                      color: Color(0x19000000),
-                      blurRadius: 120,
-                      offset: Offset(0, 61.34),
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: () => context.push(ScanIdPage.name),
-                  child: const Leaderboard(),
                 ),
               ),
-            ),
-            Shimmer.fromColors(
-              baseColor: Colors.white,
-              highlightColor: Colors.grey,
-              period: const Duration(milliseconds: 2500),
-              child: const Text(
-                'To start a new game, scan your ID card below or tap the screen',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ).paddingTop(40),
-            ),
-          ],
+              Shimmer.fromColors(
+                baseColor: Colors.white,
+                highlightColor: Colors.grey,
+                period: const Duration(milliseconds: 2500),
+                child: const Text(
+                  'To start a new game, scan your ID card below or tap the screen',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ).paddingTop(40),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/car_start_page.dart';
+import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
+import 'package:frontend/pages/practice_coutdown_page.dart';
+import 'package:frontend/pages/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying_page.dart';
+import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -50,9 +56,23 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: const Icon(Icons.https, color: Colors.white),
                     title: const Text(style: TextStyle(color: Colors.white), 'Server IP address'),
-                    subtitle: ZetaTextInput(
+                    subtitle: TextFormField(
                       onSaved: (value) => value != null ? state.serverUrl = value : null,
                       initialValue: state.serverUrl,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
                     ),
                   ),
 
@@ -65,9 +85,23 @@ class _SettingsPageState extends State<SettingsPage> {
                       'Rest port',
                       style: TextStyle(color: Colors.white),
                     ),
-                    subtitle: ZetaTextInput(
+                    subtitle: TextFormField(
                       onSaved: (value) => value != null ? state.restPort = value : null,
                       initialValue: state.restPort,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
                     ),
                   ),
                   ListTile(
@@ -79,22 +113,81 @@ class _SettingsPageState extends State<SettingsPage> {
                       'WebSocket port',
                       style: TextStyle(color: Colors.white),
                     ),
-                    subtitle: ZetaTextInput(
+                    subtitle: TextFormField(
                       onSaved: (value) => value != null ? state.websocketPort = value : null,
                       initialValue: state.websocketPort,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
                     ),
                   ),
-                  ListTile(
-                    title: const Text('Go to Leaderboard', style: TextStyle(color: Colors.white)),
-                    onTap: () => context.go(LeaderBoardsPage.name),
-                  ),
+                  const SizedBox(height: 40),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    width: 200,
+                    child: Row(
+                      children: [
+                        ZetaGroupButton.dropdown(
+                          label: 'Go to page',
+                          rounded: true,
+                          icon: Icons.find_in_page_rounded,
+                          items: [
+                            ZetaDropdownItem(label: 'Leaderboard Page', value: 'lp'),
+                            ZetaDropdownItem(label: 'Scan Id Page', value: 'si'),
+                            ZetaDropdownItem(label: 'Practice Instructions Page', value: 'pi'),
+                            ZetaDropdownItem(label: 'Car Start Page', value: 'cs'),
+                            ZetaDropdownItem(label: 'Practice Countdown Page', value: 'pc'),
+                            ZetaDropdownItem(label: 'Qualifying Page', value: 'q'),
+                            ZetaDropdownItem(label: 'Finish Page', value: 'f'),
+                          ],
+                          onChange: (item) {
+                            switch (item.value) {
+                              case 'lp':
+                                context.go(LeaderBoardsPage.name);
+                                break;
+                              case 'si':
+                                context.go(ScanIdPage.name);
+                                break;
+                              case 'pi':
+                                context.go(PracticeInstructionsPage.name);
+                                break;
+                              case 'cs':
+                                context.go(CarStartPage.name);
+                              case 'pc':
+                                context.go(PracticeCountdownPage.name);
+                                break;
+                              case 'q':
+                                context.go(QualifyingPage.name);
+                                break;
+                              case 'f':
+                                context.go(FinishPage.name);
+                                break;
+                              default:
+                                break;
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
           ),
           Container(
             height: 60,
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
