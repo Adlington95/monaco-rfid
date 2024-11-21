@@ -59,6 +59,12 @@ class _NewWidgetState extends State<NewWidget> {
     });
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> scroll({bool down = true}) async {
     await Future<void>.delayed(const Duration(seconds: 5));
     await _scrollController.animateTo(
