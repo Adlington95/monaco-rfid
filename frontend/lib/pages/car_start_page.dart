@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';

@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
-import 'package:frontend/pages/finish.dart';
-import 'package:frontend/pages/practice_coutdown.dart';
-import 'package:frontend/pages/practice_instructions.dart';
-import 'package:frontend/pages/qualifying.dart';
+import 'package:frontend/pages/finish_page.dart';
+import 'package:frontend/pages/practice_coutdown_page.dart';
+import 'package:frontend/pages/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying_page.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -34,7 +34,9 @@ class WebSocketState with ChangeNotifier {
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
-      router.pushReplacement(PracticeInstructionsPage.name);
+      router.pushReplacement(PracticeCountdownPage.name);
+
+      // router.pushReplacement(PracticeInstructionsPage.name);
       return;
     } else {
       try {
@@ -53,9 +55,10 @@ class WebSocketState with ChangeNotifier {
       }
     }
 
-    if (lapTimes.length == 1) {
-      router.pushReplacement(PracticeCountdownPage.name);
-    } else if (lapTimes.length == 3) {
+    // if (lapTimes.length == 1) {
+    //   router.pushReplacement(PracticeCountdownPage.name);
+    // } else
+    if (lapTimes.length == 3) {
       router.pushReplacement(QualifyingPage.name);
     } else if (lapTimes.length == 13) {
       sendLapTime(fastestLap);

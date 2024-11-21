@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/car_start.dart';
+import 'package:frontend/pages/car_start_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -34,17 +34,17 @@ class _ScanIdPageState extends State<ScanIdPage> {
   }
 
   Future<void> _future(DataWedgeState dwState, RestState restState) async {
-    final status = await restState.getStatus();
+    // final status = await restState.getStatus();
 
-    if (status == Status.UNKNOWN) {
-      await Future<void>.delayed(const Duration(seconds: 2));
-      unawaited(_future(dwState, restState));
-    } else {
-      unawaited(dwState.initScanner());
-      if (status != Status.READY) {
-        unawaited(restState.resetStatus());
-      }
-    }
+    // if (status == Status.UNKNOWN) {
+    //   await Future<void>.delayed(const Duration(seconds: 2));
+    //   unawaited(_future(dwState, restState));
+    // } else {
+    unawaited(dwState.initScanner());
+    // if (status != Status.READY) {
+    // unawaited(restState.resetStatus());
+    // }
+    // }
     if (!isLoaded) setState(() => isLoaded = true);
   }
 
@@ -64,8 +64,7 @@ class _ScanIdPageState extends State<ScanIdPage> {
           : context.watch<RestState>().status == Status.UNKNOWN
               ? const Text('Unable to connect to server')
               : IdCard(
-                  title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your ID card',
-                  isLoading: context.watch<DataWedgeState>().isLoading,
+                  title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your ID card below',
                   onTap: gameState.loggedInUser != null
                       ? () => router.pushReplacement(CarStartPage.name, extra: gameState.loggedInUser)
                       : context.read<DataWedgeState>().scanBarcode,

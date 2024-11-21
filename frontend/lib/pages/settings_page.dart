@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/state/game_state.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
@@ -25,23 +27,29 @@ class _SettingsPageState extends State<SettingsPage> {
               key: _formKey,
               child: ListView(
                 children: [
-                  const ListTile(
-                    leading: Icon(ZetaIcons.upload),
-                    title: Text('Load Config from JSON'),
-                    // onTap: state.applyFromJson,
-                    enabled: false,
-                  ),
-                  //TODO: Getting an error from file picker package
-                  const ListTile(
-                    leading: Icon(ZetaIcons.download),
-                    title: Text('Save config to JSON'),
-                    // onTap: state.saveToJson,
-                    enabled: false,
-                  ),
+                  // const ListTile(
+                  //   leading: Icon(ZetaIcons.upload),
+                  //   title: Text(
+                  //     style: TextStyle(color: Colors.white),
+                  //     'Load Config from JSON',
+                  //   ),
+                  //   // onTap: state.applyFromJson,
+                  //   enabled: false,
+                  // ),
+                  // //TODO: Getting an error from file picker package
+                  // const ListTile(
+                  //   leading: Icon(ZetaIcons.download),
+                  //   title: Text(
+                  //     'Save config to JSON',
+                  //     style: TextStyle(color: Colors.white),
+                  //   ),
+                  //   // onTap: state.saveToJson,
+                  //   enabled: false,
+                  // ),
 
                   ListTile(
-                    leading: const Icon(Icons.help),
-                    title: const Text('Server IP address'),
+                    leading: const Icon(Icons.https, color: Colors.white),
+                    title: const Text(style: TextStyle(color: Colors.white), 'Server IP address'),
                     subtitle: ZetaTextInput(
                       onSaved: (value) => value != null ? state.serverUrl = value : null,
                       initialValue: state.serverUrl,
@@ -49,20 +57,36 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
 
                   ListTile(
-                    leading: const Icon(Icons.help),
-                    title: const Text('Rest port'),
+                    leading: const Icon(
+                      Icons.api,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Rest port',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     subtitle: ZetaTextInput(
                       onSaved: (value) => value != null ? state.restPort = value : null,
                       initialValue: state.restPort,
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.help),
-                    title: const Text('WebSocket port'),
+                    leading: const Icon(
+                      Icons.web,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'WebSocket port',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     subtitle: ZetaTextInput(
                       onSaved: (value) => value != null ? state.websocketPort = value : null,
                       initialValue: state.websocketPort,
                     ),
+                  ),
+                  ListTile(
+                    title: const Text('Go to Leaderboard', style: TextStyle(color: Colors.white)),
+                    onTap: () => context.go(LeaderBoardsPage.name),
                   ),
                 ],
               ),

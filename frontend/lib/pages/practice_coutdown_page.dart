@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +29,7 @@ class PracticeCountdownPage extends StatelessWidget {
                     color: Colors.black.withOpacity(0.25),
                   ),
                 ],
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),

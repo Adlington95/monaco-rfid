@@ -6,7 +6,6 @@ class ScanUserBody {
   factory ScanUserBody.fromJsonString(String jsonString) {
     try {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
-
       return ScanUserBody(json['name'].toString(), json['id'].toString());
     } catch (e) {
       return ScanUserBody(jsonString, jsonString);

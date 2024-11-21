@@ -19,6 +19,7 @@ dependencies:
   provider: ^6.1.2
   restart_app: ^1.3.2
   shared_preferences: ^2.3.3
+  shimmer: ^3.0.0
   web_socket_channel: ^3.0.1
   zds_analysis: ^1.0.0
   zeta_flutter: ^0.17.0

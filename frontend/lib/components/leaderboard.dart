@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/components/card.dart';
 import 'package:frontend/components/formatted_duration.dart';
-import 'package:frontend/components/lap_counter.dart';
+import 'package:frontend/components/leaderboard_row.dart';
 import 'package:frontend/models/driver_standing_item.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:provider/provider.dart';
@@ -73,98 +73,117 @@ class _NewWidgetState extends State<NewWidget> {
   Widget build(BuildContext context) {
     return Consumer<RestState>(
       builder: (context, state, child) {
-        final fastestLap = state.driverStandings.first.time;
+        final fastestLap = state.driverStandings.isEmpty ? 0 : state.driverStandings.first.time;
 
         return TranslucentCard(
           child: Container(
             padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 570,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Driver Standings',
-                        style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400, color: Colors.white),
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 80,
-                            child: Center(
-                              child: Text(
-                                'TRIES',
-                                style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
-                              ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Driver Standings',
+                      style: TextStyle(fontSize: 42, fontWeight: FontWeight.w400, color: Colors.white),
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 80,
+                          child: Center(
+                            child: Text(
+                              'TRIES',
+                              style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
                             ),
                           ),
-                          SizedBox(
-                            width: 160,
-                            child: Center(
-                              child: Text(
-                                'TIME',
-                                style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
+                        ),
+                        SizedBox(
+                          width: 160,
+                          child: Center(
+                            child: Text(
+                              'TIME',
+                              style: widget.textStyle.apply(fontStyle: FontStyle.italic, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ].gap(24),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.driverStandings.length,
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    itemBuilder: (context, index) {
+                      final element = state.driverStandings[index];
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: LeaderboardRow(
+                              index: index + 1,
+                              highlighted: index == 0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(element.name),
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 40,
+                                        child: element.change != null && element.change != PlaceChange.none
+                                            ? RotatedBox(
+                                                quarterTurns: element.change == PlaceChange.up ? 3 : 1,
+                                                child: Icon(
+                                                  ZetaIcons.chevron_left,
+                                                  size: 38,
+                                                  color: element.change == PlaceChange.up ? Colors.green : Colors.red,
+                                                ),
+                                              )
+                                            : const Nothing(),
+                                      ),
+                                      SizedBox(
+                                        width: 80,
+                                        child: Center(
+                                          child: Text(
+                                            '${element.tries}',
+                                            style: widget.textStyle.copyWith(
+                                              color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 160,
+                                        child: Center(
+                                          child: (index == 0)
+                                              ? FormattedDuration(
+                                                  Duration(milliseconds: fastestLap),
+                                                  style: widget.textStyle.copyWith(
+                                                    color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                  ),
+                                                )
+                                              : FormattedGap(
+                                                  Duration(milliseconds: element.time - fastestLap),
+                                                  style: widget.textStyle.copyWith(
+                                                    color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ].gap(24),
-                      ),
-                    ],
+                      ).paddingBottom(8);
+                    },
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: state.driverStandings.length,
-                      shrinkWrap: true,
-                      controller: _scrollController,
-                      itemBuilder: (context, index) {
-                        final element = state.driverStandings[index];
-                        return Row(
-                          children: [
-                            Expanded(child: MyListIem(index: index + 1, child: Text(element.name))),
-                            SizedBox(
-                              width: 40,
-                              child: element.change != null && element.change != PlaceChange.none
-                                  ? RotatedBox(
-                                      quarterTurns: element.change == PlaceChange.up ? 3 : 1,
-                                      child: Icon(
-                                        ZetaIcons.chevron_left,
-                                        size: 38,
-                                        color: element.change == PlaceChange.up ? Colors.green : Colors.red,
-                                      ),
-                                    )
-                                  : const Nothing(),
-                            ),
-                            SizedBox(
-                              width: 80,
-                              child: Center(
-                                child: Text('${element.tries}', style: widget.textStyle),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 160,
-                              child: Center(
-                                child: (index == 0)
-                                    ? FormattedDuration(
-                                        Duration(milliseconds: fastestLap),
-                                        style: widget.textStyle,
-                                      )
-                                    : FormattedGap(
-                                        Duration(milliseconds: element.time - fastestLap),
-                                        style: widget.textStyle,
-                                      ),
-                              ),
-                            ),
-                          ].gap(24),
-                        ).paddingBottom(8);
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

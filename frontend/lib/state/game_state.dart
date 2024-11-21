@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/pages/car_start.dart';
+import 'package:frontend/pages/car_start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameState with ChangeNotifier {

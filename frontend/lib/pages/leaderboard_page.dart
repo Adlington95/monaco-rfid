@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/components/leaderboard.dart';
-import 'package:frontend/pages/scan_id.dart';
+import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
-import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class LeaderBoardsPage extends StatefulWidget {
@@ -33,57 +33,56 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      child: FutureBuilder(
-        future: Provider.of<RestState>(context, listen: false).fetchDriverStandings(),
-        builder: (context, future) {
-          if (future.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (future.hasError) {
-            return const Center(child: Text('Error fetching driver standings'));
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 20, left: 140, right: 140),
-            child: Column(
-              children: [
-                const GameTitle(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
-                  decoration: ShapeDecoration(
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.93, -0.36),
-                      end: const Alignment(-0.93, 0.36),
-                      colors: [
-                        Colors.black.withOpacity(0.3),
-                        Colors.black.withOpacity(0.1),
-                      ],
-                    ),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        bottomLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    shadows: const [
-                      BoxShadow(
-                        color: Color(0x19000000),
-                        blurRadius: 120,
-                        offset: Offset(0, 61.34),
-                      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
+        child: Column(
+          children: [
+            const GameTitle(),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
+                decoration: ShapeDecoration(
+                  gradient: LinearGradient(
+                    begin: const Alignment(0.93, -0.36),
+                    end: const Alignment(-0.93, 0.36),
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.1),
                     ],
                   ),
-                  child: GestureDetector(
-                    onTap: () => context.push(ScanIdPage.name),
-                    child: const Leaderboard(),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
                   ),
+                  shadows: const [
+                    BoxShadow(
+                      color: Color(0x19000000),
+                      blurRadius: 120,
+                      offset: Offset(0, 61.34),
+                    ),
+                  ],
                 ),
-              ],
+                child: GestureDetector(
+                  onTap: () => context.push(ScanIdPage.name),
+                  child: const Leaderboard(),
+                ),
+              ),
             ),
-          );
-        },
+            Shimmer.fromColors(
+              baseColor: Colors.white,
+              highlightColor: Colors.grey,
+              period: const Duration(milliseconds: 2500),
+              child: const Text(
+                'To start a new game, scan your ID card below or tap the screen',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ).paddingTop(40),
+            ),
+          ],
+        ),
       ),
     );
   }

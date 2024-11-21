@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/card.dart';
 import 'package:frontend/components/formatted_duration.dart';
+import 'package:frontend/components/leaderboard_row.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
@@ -18,7 +19,7 @@ class LapCounter extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('LAP TIMES', style: TextStyle(fontSize: 40)),
+              const Text('LAP TIMES', style: TextStyle(fontSize: 40, color: Colors.white)),
               ...List.generate(10, (index) => RowItem(index: index + 1)),
             ].gap(12),
           ),
@@ -39,7 +40,7 @@ class RowItem extends StatelessWidget {
       builder: (context, state, child) {
         final time = state.lapTime(index);
 
-        return MyListIem(
+        return LeaderboardRow(
           index: index,
           child: double.tryParse(time) != null
               ? FormattedDuration(
@@ -49,68 +50,6 @@ class RowItem extends StatelessWidget {
               : const Nothing(),
         );
       },
-    );
-  }
-}
-
-class MyListIem extends StatelessWidget {
-  const MyListIem({
-    super.key,
-    required this.index,
-    this.child,
-  });
-
-  final int index;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          height: 42,
-          width: 70,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)),
-            color: Zeta.of(context).colors.textDefault,
-          ),
-          child: Center(
-            child: Text(
-              index.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Titillium',
-                height: 1,
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 42,
-            decoration: BoxDecoration(
-              color: Zeta.of(context).colors.textSubtle.withOpacity(0.5),
-              borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
-            ),
-            child: child == null
-                ? const Nothing()
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: DefaultTextStyle(
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w300, fontFamily: 'Titillium'),
-                          child: child!,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-        ),
-      ],
     );
   }
 }

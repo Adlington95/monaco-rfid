@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/lap_counter.dart';
 import 'package:frontend/components/leaderboard.dart';
-import 'package:frontend/pages/leaderboards.dart';
+import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

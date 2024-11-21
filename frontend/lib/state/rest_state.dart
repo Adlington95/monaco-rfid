@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:collection/collection.dart';
@@ -11,7 +13,9 @@ import 'package:frontend/state/game_state.dart';
 import 'package:http/http.dart' as http;
 
 class RestState with ChangeNotifier {
-  RestState({required this.gameState});
+  RestState({required this.gameState}) {
+    initState();
+  }
 
   final GameState gameState;
   final List<DriverStandingItem> driverStandings = [];
@@ -21,6 +25,10 @@ class RestState with ChangeNotifier {
   set status(Status value) {
     _status = value;
     notifyListeners();
+  }
+
+  void initState() {
+    getStatus(retry: true);
   }
 
   Future<void> postFastestLap(int fastestLap, String carId) async {
@@ -81,7 +89,10 @@ class RestState with ChangeNotifier {
       debugPrint('Getting status:  ${gameState.restUrl}');
       final response = await http.get(Uri.parse('${gameState.restUrl}/status')).timeout(const Duration(seconds: 2));
       if (response.statusCode == 200) {
-        // ignore: avoid_dynamic_calls
+        if (status == Status.UNKNOWN) {
+          unawaited(fetchDriverStandings());
+        }
+
         status = Status.values[((await json.decode(response.body))['status'] as int) - 1];
       }
     } catch (e) {
@@ -120,17 +131,17 @@ class RestState with ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
       );
       if (res.statusCode == 200) {
-        if (res.body == '[]') {
-          gameState.loggedInUser = User(body.name, 0, body.id);
+        if (res.body.isEmpty) {
+          gameState.loggedInUser = User(
+            name: body.name,
+            previousAttempts: 0,
+            id: body.id,
+          );
           return;
         }
         final userObj = jsonDecode(res.body) as Map<String, dynamic>;
-        userObj['id'] = userObj['id'].toString();
-        final user = User(
-          userObj['name'] as String,
-          userObj['attempts'] as int,
-          userObj['id'] as String,
-        );
+        final user = User.fromJson(userObj);
+
         gameState.loggedInUser = user;
       } else {
         throw Exception('Failed to scan user');

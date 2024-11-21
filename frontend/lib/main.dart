@@ -4,14 +4,15 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/pages/car_start.dart';
-import 'package:frontend/pages/finish.dart';
-import 'package:frontend/pages/leaderboards.dart';
-import 'package:frontend/pages/practice_coutdown.dart';
-import 'package:frontend/pages/practice_instructions.dart';
-import 'package:frontend/pages/qualifying.dart';
-import 'package:frontend/pages/scan_id.dart';
-import 'package:frontend/pages/settings.dart';
+import 'package:frontend/models/status.dart';
+import 'package:frontend/pages/car_start_page.dart';
+import 'package:frontend/pages/finish_page.dart';
+import 'package:frontend/pages/leaderboard_page.dart';
+import 'package:frontend/pages/practice_coutdown_page.dart';
+import 'package:frontend/pages/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying_page.dart';
+import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/settings_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -50,7 +51,7 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
           bottom: 0,
           left: 0,
           right: 0,
-          child: ColoredBox(color: Zeta.of(context).colors.textSubtle),
+          child: ColoredBox(color: Zeta.of(context).colors.black),
         ),
         Positioned(
           left: 0,
@@ -68,6 +69,18 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
           child: Scaffold(
             body: Center(child: child),
             backgroundColor: Colors.transparent,
+          ),
+        ),
+        Positioned(
+          left: 40,
+          top: 40,
+          child: Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.watch<RestState>().status == Status.UNKNOWN ? Colors.red : Colors.green,
+            ),
           ),
         ),
         Positioned(
@@ -112,6 +125,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: CarStartPage.name,
+      redirect: (context, state) => PracticeInstructionsPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const CarStartPage()),
     ),
     GoRoute(
@@ -159,9 +173,7 @@ class MyApp extends StatelessWidget {
         builder: (context, light, dark, themeMode) => MaterialApp.router(
           routerConfig: router,
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            fontFamily: 'F1',
-          ),
+          theme: ThemeData(fontFamily: 'F1'),
           builder: (_, child) => Scaffold(body: child ?? const Nothing()),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +20,7 @@ class PracticeInstructionsPage extends StatelessWidget {
       fontSize: 64,
       fontWeight: FontWeight.w800,
       height: 1.5,
+      color: Colors.white,
     );
 
     return GestureDetector(

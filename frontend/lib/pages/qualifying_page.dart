@@ -4,7 +4,6 @@ import 'package:frontend/components/card.dart';
 import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
-import 'package:frontend/constants.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
@@ -61,27 +60,27 @@ class QualifyingPage extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  const Text(
-                                    'LAP 1/10',
-                                    style: TextStyle(
+                                  Text(
+                                    'LAP ${state.lapTimes.length - 2}/${state.restState.gameState.qualifyingLaps}',
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w300,
                                       fontSize: 48,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   Column(
                                     children: [
                                       const Text(
                                         'FASTEST LAP',
-                                        style: TextStyle(
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                        style:
+                                            TextStyle(fontSize: 32, fontWeight: FontWeight.w500, color: Colors.white),
                                       ),
                                       FormattedDuration(
                                         Duration(milliseconds: state.fastestLap),
                                         style: const TextStyle(
                                           fontSize: 48,
                                           fontWeight: FontWeight.w400,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ],
