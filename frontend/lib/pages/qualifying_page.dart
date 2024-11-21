@@ -152,8 +152,12 @@ class RowItem extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FormattedDuration(
                               Duration(milliseconds: double.parse(time).toInt()),
-                              style:
-                                  const TextStyle(fontSize: 30, fontWeight: FontWeight.w300, fontFamily: 'Titillium'),
+                              style: const TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w300,
+                                fontFamily: 'Titillium',
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],

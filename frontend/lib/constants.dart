@@ -15,8 +15,12 @@ const defaultCircuitLength = 3.337;
 const defaultPracticeLaps = 3;
 const defaultQualifyingLaps = 10;
 
-// Key for the shared preferences / JSON file
+const defaultEventName = '2025 Monaco Grand Prix';
 
+/// How long to show the finish screen in millis
+const defaultFinishPageDuration = 60000;
+
+// Key for the shared preferences / JSON file
 const serverUrlKey = 'serverUrl';
 const restPortKey = 'restPort';
 const websocketPortKey = 'websocketPort';
@@ -24,4 +28,4 @@ const circuitNameKey = 'circuitName';
 const circuitLengthKey = 'circuitLength';
 const practiceLapsKey = 'practiceLaps';
 const qualifyingLapsKey = 'qualifyingLaps';
-const defaultEventName = '2025 Monaco Grand Prix';
+const finishPageDurationKey = 'finishPageDuration';

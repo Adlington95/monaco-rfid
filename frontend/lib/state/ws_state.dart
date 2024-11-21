@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/practice_coutdown_page.dart';
-import 'package:frontend/pages/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying_page.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -17,8 +16,6 @@ class WebSocketState with ChangeNotifier {
 
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _subscription;
-
-  // final Uri uri = restState.gameState.wsUrl;
 
   List<int> lapTimes = [];
   String carId = '';
