@@ -16,14 +16,7 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-// TODO: Should we change it to average lap time or total time?
-
 // TODO: Test logic for the lights to go on
-// TODO: Update font colors
-// TODO: Start finish line sillyness
-// TODO: Disable barcode scanner on other pages
-// TODO: Have a better way to navigate between pages 
-// TODO: Add UI options for removing laptimes etc.
 // TODO: Can we even do head to head?
 
 // Naughty line needed as I can't be bothered with SSL 
@@ -631,7 +624,7 @@ async function rfidStop() {
         return rfidStart();
     } else {
         console.error('RFID Start error')
-        throw startResponse.statusText;
+        throw stopResponse.statusText;
     }
 
 }
