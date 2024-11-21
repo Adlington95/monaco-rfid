@@ -365,9 +365,9 @@ app.post('/scanUser', async (req, res) => {
 
         const data = await pool.query('SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1', [scannedId])
 
-        //returns [] if the user does not exist in the database
+        //returns nothing if the user does not exist in the database
         //return [UserData] if the user does exist in the database
-        res.status(200).send(data.rows);
+        res.status(200).send(data.rows[0]);
     } catch (e) {
         console.error(e)
         res.sendStatus(500)
