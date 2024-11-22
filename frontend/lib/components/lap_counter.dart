@@ -18,10 +18,15 @@ class LapCounter extends StatelessWidget {
           padding: const EdgeInsets.all(24).copyWith(right: 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               const Text('LAP TIMES', style: TextStyle(fontSize: 40, color: Colors.white)),
-              ...List.generate(10, (index) => RowItem(index: index + 1)),
-            ].gap(12),
+              Center(
+                child: Column(
+                  children: List.generate(10, (index) => RowItem(index: index + 1)).gap(12),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -42,6 +47,7 @@ class RowItem extends StatelessWidget {
 
         return LeaderboardRow(
           index: index,
+          isPurple: double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap,
           child: double.tryParse(time) != null
               ? FormattedDuration(
                   Duration(milliseconds: double.parse(time).toInt()),

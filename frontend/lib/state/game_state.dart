@@ -181,4 +181,9 @@ class GameState with ChangeNotifier {
 
   Uri get restUrl => Uri.parse('http://$serverUrl:$restPort');
   Uri get wsUrl => Uri.parse('ws://$serverUrl:$websocketPort');
+
+  void clear() {
+    _loggedInUser = null;
+    notifyListeners();
+  }
 }

@@ -5,10 +5,12 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/models/driver_standing_item.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:http/http.dart' as http;
 
@@ -31,10 +33,10 @@ class RestState with ChangeNotifier {
     getStatus(retry: true);
   }
 
-  Future<void> postFastestLap(int fastestLap, String carId) async {
+  Future<void> postAverageLap(int averageLap, String carId) async {
     await http.post(
       Uri.parse('${gameState.restUrl}/lap'),
-      body: jsonEncode({'lap_time': fastestLap, 'car_id': carId}),
+      body: jsonEncode({'lap_time': averageLap, 'car_id': carId}),
       headers: {'Content-Type': 'application/json'},
     );
   }
@@ -143,6 +145,11 @@ class RestState with ChangeNotifier {
         final user = User.fromJson(userObj);
 
         gameState.loggedInUser = user;
+
+        if (MyApp.navigatorKey.currentContext != null &&
+            ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != ScanIdPage.name) {
+          router.go(ScanIdPage.name);
+        }
       } else {
         throw Exception('Failed to scan user');
       }
@@ -164,6 +171,7 @@ class RestState with ChangeNotifier {
 
   void clear() {
     driverStandings.clear();
+    resetStatus();
     notifyListeners();
   }
 }

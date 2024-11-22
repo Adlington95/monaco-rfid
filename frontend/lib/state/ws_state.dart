@@ -64,8 +64,15 @@ class WebSocketState with ChangeNotifier {
     notifyListeners();
   }
 
+  int get averageLapTime {
+    if (lapTimes.isEmpty || lapTimes.length < 3) {
+      return 0;
+    }
+    return lapTimes.sublist(3).reduce((value, element) => value + element) ~/ lapTimes.length;
+  }
+
   Future<void> sendLapTime(int lapTime) async {
-    await restState.postFastestLap(lapTime, carId);
+    await restState.postAverageLap(lapTime, carId);
     await restState.fetchDriverStandings();
     await router.pushReplacement(FinishPage.name);
   }

@@ -1,10 +1,21 @@
+// Dan:
 // TODO: Ensure whole app can be navigated in debug mode
 // TODO: Finish page timer with countdown bar at the bottom of the screen 
 
+
+// Luke:
+// TODO: Check behaviour when barcode is scanned form leaderboard page
+// TODO: check behavior when car crosses the line too early
+
+
+
+
+
+
+
 // TODO: Hero animations between pages
-// TODO: User is not logged out on UI
-// TODO: Return average lap time
-// TODO: Highlight fastest lap in qualifying - make the number of the lap background purple
-// TODO: Barcode scanner doesnt work on leaderboard page
-// TODO: Animation controller not disposed on leaderboard page
-// TODO: Fix gesture detector on qualifying page
+// TODO: Have a way to delete lap times
+// TODO: Fix speedometer on qualifying page
+// TODO: Time out app from any screen after X seconds. Return to leaderboard page.
+// TODO: Split practice and quali laps in state to avoid getting out of sync
+// TODO: If user is new, show the car start page

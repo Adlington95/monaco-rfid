@@ -4,6 +4,7 @@ import 'package:frontend/components/leaderboard.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,11 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DataWedgeState>(context, listen: false).clear();
+      Provider.of<RestState>(context, listen: false).clear();
       Provider.of<WebSocketState>(context, listen: false).clear();
+      Provider.of<GameState>(context, listen: false).clear();
+
+      context.read<DataWedgeState>().initScanner();
     });
   }
 
