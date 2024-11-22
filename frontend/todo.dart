@@ -1,13 +1,10 @@
 // Dan:
-// TODO: Ensure whole app can be navigated in debug mode
 // TODO: Finish page timer with countdown bar at the bottom of the screen 
 
 
 // Luke:
 // TODO: Check behaviour when barcode is scanned form leaderboard page
 // TODO: check behavior when car crosses the line too early
-
-
 
 
 

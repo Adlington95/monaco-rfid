@@ -4,13 +4,12 @@ import 'package:frontend/components/card.dart';
 import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
-import 'package:frontend/main.dart';
 import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
-import 'package:go_router/go_router.dart';
 
 class QualifyingPage extends StatelessWidget {
   const QualifyingPage({super.key});
