@@ -29,25 +29,6 @@ class QualifyingPage extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(FinishPage.name) : null,
-                      // ? () => state.addMessage(
-                      // {
-                      //     "lapTimes": [
-                      //       ...state.lapTimes,
-                      //       (100000 +
-                      //               (100000 *
-                      //                   (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
-                      //           .toInt(),
-                      //     ]
-                      //   }.toString()
-
-                      // [
-                      //   ...state.lapTimes,
-                      //   (100000 +
-                      //           (100000 *
-                      //               (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
-                      //       .toInt(),
-                      // ].toString(),
-
                       child: const LapCounter(),
                     ),
                   ),
