@@ -142,7 +142,7 @@ class _NewWidgetState extends State<NewWidget> {
                                             ? RotatedBox(
                                                 quarterTurns: element.change == PlaceChange.up ? 3 : 1,
                                                 child: Icon(
-                                                  ZetaIcons.chevron_left,
+                                                  ZetaIcons.chevron_right,
                                                   size: 38,
                                                   color: element.change == PlaceChange.up ? Colors.green : Colors.red,
                                                 ),

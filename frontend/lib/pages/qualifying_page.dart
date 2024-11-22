@@ -4,10 +4,13 @@ import 'package:frontend/components/card.dart';
 import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
+import 'package:frontend/main.dart';
+import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class QualifyingPage extends StatelessWidget {
   const QualifyingPage({super.key});
@@ -21,20 +24,15 @@ class QualifyingPage extends StatelessWidget {
           children: [
             Expanded(
               flex: 6,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 52),
-                child: GestureDetector(
-                  onTap: Provider.of<GameState>(context).isEmulator
-                      ? () => state.addMessage(
-                            [
-                              ...state.lapTimes,
-                              (100000 + (100000 * (0.1 + 0.9 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000)))
-                                  .toInt(),
-                            ].toString(),
-                          )
-                      : null,
-                  child: const LapCounter(),
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(FinishPage.name) : null,
+                      child: const LapCounter(),
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -147,12 +145,8 @@ class RowItem extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FormattedDuration(
                               Duration(milliseconds: double.parse(time).toInt()),
-                              style: const TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w300,
-                                fontFamily: 'Titillium',
-                                color: Colors.white,
-                              ),
+                              style:
+                                  const TextStyle(fontSize: 30, fontWeight: FontWeight.w300, fontFamily: 'Titillium'),
                             ),
                           ),
                         ],

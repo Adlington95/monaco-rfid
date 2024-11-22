@@ -12,8 +12,20 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const large = TextStyle(fontWeight: FontWeight.w400, fontSize: 80, height: 1.2, fontFamily: 'Titillium');
-    const small = TextStyle(fontWeight: FontWeight.w500, fontSize: 22, height: 1, fontFamily: 'Titillium');
+    const large = TextStyle(
+      fontWeight: FontWeight.w400,
+      fontSize: 80,
+      height: 1.2,
+      fontFamily: 'Titillium',
+      color: Colors.white,
+    );
+    const small = TextStyle(
+      fontWeight: FontWeight.w500,
+      fontSize: 22,
+      height: 1,
+      fontFamily: 'Titillium',
+      color: Colors.white,
+    );
 
     return Consumer<WebSocketState>(
       builder: (context, state, child) => SizedBox(

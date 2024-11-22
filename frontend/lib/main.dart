@@ -27,12 +27,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   final GameState state;
-  if (Platform.isAndroid) {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
-  } else {
-    state = await GameState.loadFromPreferences(isEmulator: true);
-  }
+  // if (Platform.isAndroid) {
+  //   final deviceInfo = await DeviceInfoPlugin().androidInfo;
+  //   state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
+  // } else {
+  //   state = await GameState.loadFromPreferences(isEmulator: true);
+  // }
+  state = await GameState.loadFromPreferences(isEmulator: true);
+
   runApp(MyApp(state: state));
 }
 
@@ -176,7 +178,14 @@ class MyApp extends StatelessWidget {
           routerConfig: router,
           key: navigatorKey,
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(fontFamily: 'F1'),
+          theme: ThemeData(
+            fontFamily: 'F1',
+            textTheme: const TextTheme(
+              bodyLarge: TextStyle(),
+              bodyMedium: TextStyle(),
+              bodySmall: TextStyle(),
+            ).apply(bodyColor: Colors.white),
+          ),
           builder: (_, child) => Scaffold(body: child ?? const Nothing()),
         ),
       ),

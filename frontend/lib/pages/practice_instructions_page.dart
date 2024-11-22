@@ -25,7 +25,7 @@ class PracticeInstructionsPage extends StatelessWidget {
 
     return GestureDetector(
       onTap: Provider.of<GameState>(context).isEmulator
-          ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('[60000]')
+          ? () => Provider.of<WebSocketState>(context, listen: false).addMessage('{"lapTimes": [60000]}')
           : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(340, 180, 340, 140),
