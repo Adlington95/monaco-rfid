@@ -111,12 +111,14 @@ class _FinishPageState extends State<FinishPage> {
             Positioned(
               bottom: 0,
               width: MediaQuery.of(context).size.width,
-              child: ZetaProgressBar(
-                isThin: true,
-                label: '',
-                progress: _elapsedMilliseconds / 60000,
-                type: ZetaProgressBarType.standard,
-                rounded: false,
+              child: Theme(
+                data: ThemeData(colorScheme: Theme.of(context).colorScheme.copyWith(primary: Colors.white)),
+                child: ZetaProgressBar.standard(
+                  isThin: true,
+                  label: '',
+                  progress: _elapsedMilliseconds / 60000,
+                  rounded: false,
+                ),
               ),
             ),
           ],
