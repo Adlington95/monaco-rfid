@@ -6,16 +6,25 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "",
-    "dev": "node server/server.js"
+    "dev": "tsx server/server.ts",
+    "build": "tsc",
+    "start:prod": "node dist/server/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "node-fetch": "^2.7.0",
     "pg": "^8.13.1",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
+    "@types/pg": "^8.11.10",
+    "@types/ws": "^8.5.13"
   }
 }

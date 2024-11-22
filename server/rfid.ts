@@ -1,7 +1,6 @@
 import { RfidResponse } from "./models";
-import { debounceTime, wss } from "./server";
-
-const nodefetch = require("node-fetch");
+import { debounceTime, wss, token, toggling, setToggling, setToken } from "./server";
+import fetch from "node-fetch";
 
 const webUsername = process.env.WEB_USERNAME;
 const webPassword = process.env.WEB_PASSWORD;
@@ -11,38 +10,31 @@ const rfidAddress = process.env.RFID_ADDRESS;
  * Logs into RFID Reader with secure credentials and returns a token to be
  * used for all future communications.
  */
-export const rfidGetToken = async (): Promise<string | undefined> => {
-  try {
-    const loginResponse = await nodefetch(`https://${rfidAddress}/cloud/localRestLogin`, {
-      headers: {
-        Authorization: `Basic ${btoa(webUsername + ":" + webPassword)}`,
-      },
-    });
+export const rfidGetToken = async (): Promise<string> => {
+  const loginResponse = await fetch(`https://${rfidAddress}/cloud/localRestLogin`, {
+    headers: { Authorization: `Basic ${Buffer.from(`${webUsername}:${webPassword}`).toString("base64")}` },
+  });
 
-    if (loginResponse.ok) {
-      const json = await loginResponse.json();
-      const token = json.message;
-      console.log("Token retrieved: " + token);
-      return token;
-    }
-  } catch (e) {
-    console.error(e);
+  if (!loginResponse.ok) {
+    console.error("RFID Login error");
+    throw new Error(loginResponse.statusText);
   }
-  return;
+
+  const { message: token } = await loginResponse.json();
+  console.log("Token retrieved: " + token);
+  return token;
 };
 
 /**
  * Starts the RFID Reader sending HTTP POST requests.
  */
-export const rfidStart = async (token: string | undefined): Promise<void> => {
-  if (token == undefined) {
-    token = await rfidGetToken();
+export const rfidStart = async (): Promise<void> => {
+  if (token === undefined || token === null) {
+    setToken(await rfidGetToken());
   }
-  const startResponse = await nodefetch(`https://${rfidAddress}/cloud/start`, {
+  const startResponse = await fetch(`https://${rfidAddress}/cloud/start`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (startResponse.ok) {
@@ -52,11 +44,11 @@ export const rfidStart = async (token: string | undefined): Promise<void> => {
   const json = await startResponse.json();
 
   if (startResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
-    token = undefined;
-    return rfidStart(token);
+    setToken(null);
+    return rfidStart();
   } else if (startResponse.status === 422 && json && json.message.includes("Start currently ongoing")) {
-    await rfidStop(token);
-    await rfidStart(token);
+    await rfidStop();
+    await rfidStart();
   } else {
     console.error("RFID Start error");
     throw startResponse.statusText;
@@ -66,15 +58,13 @@ export const rfidStart = async (token: string | undefined): Promise<void> => {
 /**
  * Stops the RFID reader from sending HTTP POST requests
  */
-export const rfidStop = async (token: string | undefined): Promise<void> => {
-  if (token == undefined) {
-    token = await rfidGetToken();
+export const rfidStop = async (): Promise<void> => {
+  if (token === undefined || token === null) {
+    setToken(await rfidGetToken());
   }
-  const stopResponse = await nodefetch(`https://${rfidAddress}/cloud/stop`, {
+  const stopResponse = await fetch(`https://${rfidAddress}/cloud/stop`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (stopResponse.ok) {
@@ -84,8 +74,8 @@ export const rfidStop = async (token: string | undefined): Promise<void> => {
   const json = await stopResponse.json();
 
   if (stopResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
-    token = undefined;
-    return rfidStart(token);
+    setToken(null);
+    return rfidStart();
   } else {
     console.error("RFID Start error");
     throw stopResponse.statusText;
@@ -126,77 +116,110 @@ export const rfidLap = (timestamp: string, previousTimeStamp: string, lapTimes: 
   return lapTimes;
 };
 
-export const rfidSaveData = (json: RfidResponse[], lastData: string[]) => {
+/**
+ * Saves the new JSON data to the last data map
+ * @param json - The new JSON data
+ * @param lastData - The previous JSON data
+ * @returns The updated last data map
+ */
+export const rfidSaveData = (json: RfidResponse[], lastData: Map<string, string>) => {
   json.forEach((element) => {
     const elementId = element.data.idHex;
-
-    if (lastData && lastData[elementId]) {
-      const oldTime = Date.parse(lastData[elementId]);
-      const newTime = Date.parse(element.timestamp);
-      if (newTime > oldTime) {
-        lastData[element.data.idHex] = element.timestamp;
-      }
-    } else {
-      lastData[element.data.idHex] = element.timestamp;
+    const newTime = Date.parse(element.timestamp);
+    if (!lastData.get(elementId) || newTime > Date.parse(lastData.get(elementId)!)) {
+      lastData.set(elementId, element.timestamp);
     }
   });
-
   return lastData;
 };
 
-export const rfidCheckValidity = (newJson: RfidResponse, scannedId: String | undefined) => {
+/**
+ * Checks if the new JSON data is valid
+ * @param newJson - The new JSON data
+ * @param scannedId - The scanned ID used to check if the app is in the correct state
+ * @returns If the data is valid, true is returned. Otherwise, false is returned.
+ */
+export const rfidCheckValidity = (newJson: RfidResponse[], scannedId: String | undefined): boolean => {
+  console.log("Checking validity");
+
   return (
     // wss.readyState === WebSocket.OPEN &&
-    scannedId && newJson && Array.isArray(newJson) && newJson.length > 0 && newJson[0].data && newJson[0].data.idHex
+    (scannedId && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
   );
 };
 
-function rfidCompareToPrevious(oldJson: RfidResponse, newJson: RfidResponse[]) {
-  // console.log(newJson)
-  if (oldJson) {
-    // const count = newJson.filter(element => {
-    //     return !(oldJson[element.data.idHex] && oldJson[element.data.idHex] === element.timestamp);
-    // });
+/**
+ * Compares the new JSON data to the previous JSON data to determine if there is any new data
+ * @param oldJson - The previous JSON data
+ * @param newJson - The new JSON data
+ * @returns If new data is found, the first new entry is returned. Otherwise, null is returned.
+ */
+export const rfidCompareToPrevious = (oldJson: Map<string, string>, newJson: RfidResponse[]): RfidResponse | null => {
+  const newEntries = newJson.filter((element) => {
+    const elementId = element.data.idHex;
+    return !oldJson.get(elementId) || oldJson.get(elementId)! < element.timestamp;
+  });
 
-    const count = newJson.reduce((acc, element) => {
-      const elementId = element.data.idHex;
-      if (oldJson[elementId] == null || oldJson[elementId] == undefined) {
-        acc.set(elementId, element.timestamp);
-      } else if (oldJson[elementId] && oldJson[elementId] < element.timestamp) {
-        acc.set(elementId, element.timestamp);
-      }
-
-      return acc;
-    }, new Map());
-    console.log(count);
-    console.log(count.size);
-    console.log(typeof count);
-    if (count.size == 0) {
-      console.log("No new RFID Data");
-      return null;
-    } else if (count.size == 1) {
-      console.log("1 new entry found");
-      console.log(count[0]);
-
-      const first = count.entries().next().value;
-      return { data: { idHex: first[0] }, timestamp: first[1] };
-    } else {
-      console.log(count.size + " new entries found");
-      console.log("Returning first new value");
-
-      const first = count.entries().next().value;
-      return { data: { idHex: first[0] }, timestamp: first[1] };
-    }
-  } else {
-    console.log("No previous data to compare against");
+  if (newEntries.length === 0) {
+    console.log("No new RFID Data");
     return null;
   }
-}
 
-async function rfidToggle() {
+  const firstNewEntry = newEntries[0];
+  console.log(`${newEntries.length} new entries found`);
+  return firstNewEntry;
+};
+
+/**
+ * Toggles the RFID reader on or off
+ * @param token - The token to use for the request
+ * @param toggling - Whether or not the RFID reader is currently toggling
+ */
+export const rfidToggle = async () => {
   if (toggling) return;
-  toggling = true;
-  await rfidStop(token);
-  await rfidStart(token);
-  toggling = false;
-}
+  setToggling(true);
+  try {
+    await rfidStop();
+    await rfidStart();
+  } catch (e) {
+    console.log(e);
+  } finally {
+    setToggling(false);
+  }
+};
+
+/**
+ * Toggles a light on or off
+ * @param num - The port number of the light
+ * @param on - The desired state of the light
+ * @param token - The token to use for the request
+ */
+export const lightToggle = async (num: number, on: boolean): Promise<void> => {
+  if (token === undefined || token === null) {
+    setToken(await rfidGetToken());
+  }
+
+  try {
+    const response = await fetch(`https://${rfidAddress}/cloud/gpo`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ port: num, state: !on }),
+    });
+
+    if (response.ok) {
+      return;
+    }
+
+    const json = await response.json();
+
+    if (response.status === 500 && json.message.includes("token signature verification failed")) {
+      return lightToggle(num, on);
+    } else {
+      console.error("Light Toggle error");
+      throw new Error(response.statusText);
+    }
+  } catch (error) {
+    console.error("Light Toggle error", error);
+    throw error;
+  }
+};
