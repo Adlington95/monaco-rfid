@@ -258,13 +258,43 @@ app.post('/rfid', async (req, _) => {
 
 //fastest lap
 //POST new entry
+const getTopValues = async () => {
+    const fastestLap = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 1');
+    const fastestOverall = await pool.query('SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 1');
+    const mostAttempts = await pool.query('SELECT * FROM monaco ORDER BY attempts ASC LIMIT 1');
+
+    return {
+        fastestLap: fastestLap.rows[0],
+        fastestOverall: fastestOverall.rows[0],
+        mostAttempts: mostAttempts.rows[0]
+    }
+}
 app.post('/lap', async (req, res) => {
-    const { lap_time, overall_time } = req.body;
+    const { lap_time, overall_time, attempts } = req.body;
+    let newFastestLap = false;
+    let newFastestOverall = false;
+    let newMostAttempts = false;
     console.log('Finding the current player in the database..');
 
+  
     //if scannedId exists in the database then we should UPDATE otherwise INSERT
 
     try {
+        const {fastestLap, fastestOverall, mostAttempts} = await getTopValues();
+
+        if (lap_time < fastestLap.lap_time) {
+            newFastestLap = true;
+        }
+    
+        if (overall_time < fastestOverall.overall_time) {
+            newFastestOverall = true;
+        }
+
+        if (attempts > mostAttempts.attempts) {
+            newMostAttempts = true;
+        }
+    
+
         await pool.query(`INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id, overall_time)
                 VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (employee_id)
@@ -275,7 +305,7 @@ app.post('/lap', async (req, res) => {
                     attempts = monaco.attempts+1
                     overall_time=EXCLUDED.overall_time`, [scannedName, lap_time, scannedCarId, 0, scannedId, overall_time]);
 
-        res.status(200).send({ message: "Successfully inserted entry into monaco" })
+        res.status(200).send({ message: "Successfully inserted entry into monaco", newFastestLap, newFastestOverall, newMostAttempts });
         resetQualifying();
     } catch (err) {
         console.log(err)
