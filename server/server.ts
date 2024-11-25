@@ -160,15 +160,29 @@ app.get("/getOverallLeaderboard", async (req, res) => {
   }
 });
 
-app.post("/fakeLaps", async (req, res) => {
-  console.log("Setting fak laps");
-  lapTimes.set(carIds[0], [1800, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000]);
+const fakeWS = () => {
+  console.log("Sending fake laps, ", lapTimes);
   wss.clients.forEach((client) => {
     if (client.readyState === websocket.OPEN) {
       // const newMap = JSON.stringify(Object.fromEntries(lapTimes));
       client.send(JSON.stringify(Object.fromEntries(lapTimes)));
     }
   });
+};
+
+app.post("/fakeLaps", async (req, res) => {
+  console.log("Setting fake laps");
+  carIds[0] = "1";
+
+  const intervalId = setInterval(() => {
+    const existingLaps = lapTimes.get("1") ?? [];
+    lapTimes.set("1", [...existingLaps, Math.floor(Math.random() * 3000) + 5000]);
+    fakeWS();
+    if (lapTimes.get("1")?.length === 13) {
+      res.sendStatus(200);
+      clearInterval(intervalId);
+    }
+  }, req.body.cadence * 1000);
 });
 
 // Post RFID data
