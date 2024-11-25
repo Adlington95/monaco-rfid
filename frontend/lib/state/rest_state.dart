@@ -20,7 +20,7 @@ class RestState with ChangeNotifier {
   }
 
   final GameState gameState;
-  final List<DriverStandingItem> driverStandings = [];
+  List<DriverStandingItem>? driverStandings;
 
   Status _status = Status.UNKNOWN;
   Status get status => _status;
@@ -54,9 +54,9 @@ class RestState with ChangeNotifier {
         var foundNewRecord = false;
         (jsonDecode(response.body) as List<dynamic>).forEachIndexed((index, standing) {
           var newItem = DriverStandingItem.fromJson(standing as Map<String, dynamic>);
-          if (driverStandings.isNotEmpty) {
+          if (driverStandings != null && driverStandings!.isNotEmpty) {
             if (!foundNewRecord) {
-              if (newItem.id != driverStandings[index].id) {
+              if (newItem.id != driverStandings?[index].id) {
                 foundNewRecord = true;
                 newItem = newItem.copyWith(change: PlaceChange.up, newRecord: true);
               }
@@ -66,9 +66,7 @@ class RestState with ChangeNotifier {
           }
           newStandings.add(newItem);
         });
-        driverStandings
-          ..clear()
-          ..addAll(newStandings);
+        driverStandings = [...newStandings];
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -96,9 +94,7 @@ class RestState with ChangeNotifier {
       debugPrint('Getting status:  ${gameState.restUrl}');
       final response = await http.get(Uri.parse('${gameState.restUrl}/status')).timeout(const Duration(seconds: 2));
       if (response.statusCode == 200) {
-        if (status == Status.UNKNOWN) {
-          unawaited(fetchDriverStandings());
-        }
+        unawaited(fetchDriverStandings());
 
         status = Status.values[((await json.decode(response.body))['status'] as int) - 1];
       }
@@ -175,7 +171,6 @@ class RestState with ChangeNotifier {
   }
 
   void clear() {
-    driverStandings.clear();
     resetStatus();
     notifyListeners();
   }

@@ -16,4 +16,3 @@
 // TODO: Time out app from any screen after X seconds. Return to leaderboard page.
 // TODO: Split practice and quali laps in state to avoid getting out of sync
 // TODO: If user is new, show the car start page
-// TODO: Leaderboard only works on first load

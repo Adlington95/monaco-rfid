@@ -37,7 +37,7 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(ScanIdPage.name) : null,
+      onTap: () => context.push(ScanIdPage.name),
       child: PopScope(
         canPop: false,
         child: Padding(
@@ -73,10 +73,9 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
                       ),
                     ],
                   ),
-                  child: GestureDetector(
-                    onTap: () => context.push(ScanIdPage.name),
-                    child: const Leaderboard(),
-                  ),
+                  child: context.watch<RestState>().driverStandings == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : const Leaderboard(),
                 ),
               ),
               Shimmer.fromColors(

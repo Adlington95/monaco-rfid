@@ -34,10 +34,7 @@ class _LeaderboardState extends State<Leaderboard> {
 }
 
 class NewWidget extends StatefulWidget {
-  const NewWidget({
-    super.key,
-    required this.textStyle,
-  });
+  const NewWidget({super.key, required this.textStyle});
 
   final TextStyle textStyle;
 
@@ -47,16 +44,11 @@ class NewWidget extends StatefulWidget {
 
 class _NewWidgetState extends State<NewWidget> {
   final ScrollController _scrollController = ScrollController();
-  late final int length;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      length = Provider.of<RestState>(context, listen: false).driverStandings.length;
-
-      scroll();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => scroll());
   }
 
   @override
@@ -70,7 +62,9 @@ class _NewWidgetState extends State<NewWidget> {
     if (mounted) {
       await _scrollController.animateTo(
         down ? _scrollController.position.maxScrollExtent : 0,
-        duration: Duration(seconds: length * 2),
+        duration: context.read<RestState>().driverStandings != null
+            ? Duration(seconds: context.read<RestState>().driverStandings!.length * 2)
+            : Duration.zero,
         curve: Curves.linear,
       );
     }
@@ -81,7 +75,8 @@ class _NewWidgetState extends State<NewWidget> {
   Widget build(BuildContext context) {
     return Consumer<RestState>(
       builder: (context, state, child) {
-        final fastestLap = state.driverStandings.isEmpty ? 0 : state.driverStandings.first.time;
+        final fastestLap =
+            state.driverStandings == null || state.driverStandings!.isEmpty ? 0 : state.driverStandings!.first.time;
 
         return TranslucentCard(
           child: Container(
@@ -121,11 +116,11 @@ class _NewWidgetState extends State<NewWidget> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: state.driverStandings.length,
+                    itemCount: state.driverStandings?.length,
                     shrinkWrap: true,
                     controller: _scrollController,
                     itemBuilder: (context, index) {
-                      final element = state.driverStandings[index];
+                      final element = state.driverStandings![index];
                       return Row(
                         children: [
                           Expanded(
