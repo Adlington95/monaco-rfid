@@ -259,20 +259,21 @@ app.post('/rfid', async (req, _) => {
 //fastest lap
 //POST new entry
 app.post('/lap', async (req, res) => {
-    const { lap_time } = req.body;
+    const { lap_time, overall_time } = req.body;
     console.log('Finding the current player in the database..');
 
     //if scannedId exists in the database then we should UPDATE otherwise INSERT
 
     try {
-        await pool.query(`INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id)
-                VALUES ($1, $2, $3, $4, $5)
+        await pool.query(`INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id, overall_time)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (employee_id)
                 DO UPDATE
                 SET
                     team_name=EXCLUDED.team_name,
                     lap_time=EXCLUDED.lap_time,
-                    attempts = monaco.attempts+1`, [scannedName, lap_time, scannedCarId, 0, scannedId]);
+                    attempts = monaco.attempts+1
+                    overall_time=EXCLUDED.overall_time`, [scannedName, lap_time, scannedCarId, 0, scannedId, overall_time]);
 
         res.status(200).send({ message: "Successfully inserted entry into monaco" })
         resetQualifying();
@@ -307,7 +308,7 @@ app.get('/removeTableFromDb', async (req, res) => {
 //CREATE TABLE
 app.get('/setup', async (req, res) => {
     try {
-        await pool.query('CREATE TABLE monaco( id SERIAL, name VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )')
+        await pool.query('CREATE TABLE monaco( id SERIAL, name VARCHAR(100), overall_time (VARCHAR(100)), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )')
 
         res.status(200).send({ message: "Successfully created table" })
     } catch (err) {
@@ -511,6 +512,16 @@ app.get('/getUser', async (req, res) => {
 app.get('/getLeaderboard', async (req, res) => {
     try {
         const data = await pool.query('SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10')
+        res.status(200).send(data.rows)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+});
+
+app.get('/getOverallLeaderboard', async (req, res) => {
+    try {
+        const data = await pool.query('SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 10')
         res.status(200).send(data.rows)
     } catch (err) {
         console.log(err)

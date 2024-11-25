@@ -12,7 +12,8 @@ POST http://localhost:13000/lap
 Content-Type: application/json
   
   {
-    "lap_time": "18:00.001"
+    "lap_time": "18:00.001",
+    "overall_time": "100:00.001",
   }
 
 ### Scan into system after storing this, required by websocket
@@ -29,6 +30,9 @@ GET http://localhost:13000/getLeaderboard
 
 ### Get team leaderboard
 GET http://localhost:13000/getTeamLeaderboard
+
+### Get individual overall time leaderboard
+GET http://localhost:13000/getOverallLeaderboard
 
 ### Get current scanned in user and their lap data
 GET http://localhost:13000/getUser
