@@ -38,14 +38,8 @@ export let token: string | undefined | null;
 // name of the scanned in user
 let scannedName: string | undefined;
 
-// id of the scanned in user
-export let qualifyingUserId: string | undefined;
-
 // Whether the RFID reader is toggling
 export let toggling: boolean = false;
-
-//scanned car id
-let qualifyingCarId: string | undefined;
 
 let raceCarIds: string[] = [];
 let raceUserIds: string[] = [];
@@ -105,7 +99,7 @@ app.get("/removeTableFromDb", async (req, res: Response) => {
 app.get("/setup", async (_, res: Response) => {
   try {
     await pool.query(
-      "CREATE TABLE monaco( id SERIAL, name VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )"
+      "CREATE TABLE monaco( id SERIAL, name VARCHAR(100), overall_time VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )"
     );
 
     res.status(200).send({ message: "Successfully created table" });
@@ -148,11 +142,19 @@ app.get("/getUser", async (_, res: Response) => {
 
   res.send({ scannedId: qualifyingUserId, scannedName });
 });
-
-// Get the leaderboard
-app.get("/getLeaderboard", async (_, res: Response) => {
+app.get("/getLeaderboard", async (req, res) => {
   try {
     const data = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10");
+    res.status(200).send(data.rows);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/getOverallLeaderboard", async (req, res) => {
+  try {
+    const data = await pool.query("SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 10");
     res.status(200).send(data.rows);
   } catch (err) {
     console.log(err);
@@ -217,26 +219,58 @@ const addToRFIDTimes = (json: RfidResponse) => {
   rfidTimes.set(json.data.idHex, userRfidTimes);
 };
 
-// Post new lap
-app.post("/lap", async (req: Request, res: Response) => {
-  const { lap_time } = req.body;
+const getTopValues = async () => {
+  const fastestLap = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 1");
+  const fastestOverall = await pool.query("SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 1");
+  const mostAttempts = await pool.query("SELECT * FROM monaco ORDER BY attempts ASC LIMIT 1");
+
+  return {
+    fastestLap: fastestLap.rows[0],
+    fastestOverall: fastestOverall.rows[0],
+    mostAttempts: mostAttempts.rows[0],
+  };
+};
+
+app.post("/lap", async (req, res) => {
+  const { lap_time, overall_time, attempts } = req.body;
+  let newFastestLap = false;
+  let newFastestOverall = false;
+  let newMostAttempts = false;
   console.log("Finding the current player in the database..");
 
   //if scannedId exists in the database then we should UPDATE otherwise INSERT
-  try {
-    await pool.query(
-      `INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id)
-                VALUES ($1, $2, $3, $4, $5)
-                ON CONFLICT (employee_id)
-                DO UPDATE
-                SET
-                    team_name=EXCLUDED.team_name,
-                    lap_time=EXCLUDED.lap_time,
-                    attempts = monaco.attempts+1`,
-      [scannedName, lap_time, qualifyingCarId, 0, qualifyingUserId]
-    );
 
-    res.status(200).send({ message: "Successfully inserted entry into monaco" });
+  try {
+    const { fastestLap, fastestOverall, mostAttempts } = await getTopValues();
+
+    if (lap_time < fastestLap.lap_time) {
+      newFastestLap = true;
+    }
+
+    if (overall_time < fastestOverall.overall_time) {
+      newFastestOverall = true;
+    }
+
+    if (attempts > mostAttempts.attempts) {
+      newMostAttempts = true;
+    }
+    if (status !== Status.RACE) {
+      await pool.query(
+        `INSERT INTO monaco (name, lap_time, team_name, attempts, employee_id, overall_time)
+              VALUES ($1, $2, $3, $4, $5, $6)
+              ON CONFLICT (employee_id)
+              DO UPDATE
+              SET
+                  team_name=EXCLUDED.team_name,
+                  lap_time=EXCLUDED.lap_time,
+                  attempts = monaco.attempts+1
+                  overall_time=EXCLUDED.overall_time`,
+        [scannedName, lap_time, carIds, 0, scannedId, overall_time]
+      );
+    }
+    res
+      .status(200)
+      .send({ message: "Successfully inserted entry into monaco", newFastestLap, newFastestOverall, newMostAttempts });
     resetQualifying();
   } catch (err) {
     console.log(err);
