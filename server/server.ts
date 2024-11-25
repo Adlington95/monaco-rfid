@@ -16,6 +16,7 @@ import {
 import { pool } from "./db";
 import { delay } from "./utils";
 import { RfidResponse, Status, User } from "./models";
+import { mockLapWS } from "./mocks";
 
 const port = 3000;
 
@@ -160,31 +161,6 @@ app.get("/getOverallLeaderboard", async (req, res) => {
   }
 });
 
-const fakeWS = () => {
-  console.log("Sending fake laps, ", lapTimes);
-  wss.clients.forEach((client) => {
-    if (client.readyState === websocket.OPEN) {
-      // const newMap = JSON.stringify(Object.fromEntries(lapTimes));
-      client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-    }
-  });
-};
-
-app.post("/fakeLaps", async (req, res) => {
-  console.log("Setting fake laps");
-  carIds[0] = "1";
-
-  const intervalId = setInterval(() => {
-    const existingLaps = lapTimes.get("1") ?? [];
-    lapTimes.set("1", [...existingLaps, Math.floor(Math.random() * 3000) + 5000]);
-    fakeWS();
-    if (lapTimes.get("1")?.length === 13) {
-      res.sendStatus(200);
-      clearInterval(intervalId);
-    }
-  }, req.body.cadence * 1000);
-});
-
 // Post RFID data
 app.post("/rfid", async (req, _) => {
   console.log("RFID data received.");
@@ -198,14 +174,10 @@ app.post("/rfid", async (req, _) => {
       rfidToggle();
       if (status !== Status.RACE) {
         // Qualifying
-        console.log(carIds);
-        console.log(json.data.idHex);
+
         if (carIds.length > 0 && carIds[0] === json.data.idHex) {
           const userRfidTimes = rfidTimes.get(json.data.idHex);
           const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-
-          console.log(userRfidTimes);
-          console.log(lastRFIDTime);
 
           if (lastRFIDTime) {
             console.log("Last RFID time: " + lastRFIDTime);
@@ -215,13 +187,11 @@ app.post("/rfid", async (req, _) => {
             );
             wss.clients.forEach((client) => {
               if (client.readyState === websocket.OPEN) {
-                // const newMap = JSON.stringify(Object.fromEntries(lapTimes));
                 client.send(JSON.stringify(Object.fromEntries(lapTimes)));
               }
             });
           } else {
             console.log("No previous RFID time");
-            // rfidTimes.set(json.data.idHex, [json.timestamp
           }
         } else if (carIds.length === 0) {
           rfidScannedCar(json);
@@ -256,11 +226,22 @@ app.post("/rfid", async (req, _) => {
         // }
       } else {
         // Race
-        if (carIds.length > 2) {
-          carIds.push(json.data.idHex);
-        } else if (carIds.includes(json.data.idHex)) {
-          // rfidRaceLap(json.timestamp, rfidTimes[rfidTimes.length - 1], lapTimes);
+
+        if (users.length === 0) {
+          console.log("No user scanned");
+          return;
         }
+        if (carIds.length < 2 && users.length === carIds.length + 1) {
+          carIds.push(json.data.idHex);
+        }
+        // TODO: Continue here
+
+        // if(carIds.length === 0 && users.length === 0) {
+        //   carIds.push(json.data.idHex);
+        // }
+        // If no cars and no users
+        // then add car
+        //
       }
       addToRFIDTimes(json);
     }
@@ -341,15 +322,20 @@ app.post("/scanUser", async (req: Request, res: Response) => {
   try {
     const response = req.body;
     const { name, id } = response;
-    users.push({ name, id } as User);
+    // TODO: I guess we should lock this to a single user when in qualifying mode just in case
+    if (!users.some((user) => user.id === id)) {
+      users.push({ name, id } as User);
 
-    console.log("Set scanned id to " + id);
+      console.log("Set scanned id to " + id);
 
-    const data = await pool.query("SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1", [id]);
+      const data = await pool.query("SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1", [id]);
 
-    //returns nothing if the user does not exist in the database
-    //return [UserData] if the user does exist in the database
-    res.status(200).send(data.rows[0]);
+      //returns nothing if the user does not exist in the database
+      //return [UserData] if the user does exist in the database
+      res.status(200).send(data.rows[0]);
+    } else {
+      res.sendStatus(400).send({ message: "User already scanned" });
+    }
   } catch (e) {
     console.error(e);
     res.sendStatus(500);
@@ -403,6 +389,21 @@ app.post("/status", async (req: Request, res: Response) => {
   console.log("Status updated to " + newStatus);
 
   res.status(200).send({ message: "Status updated" });
+});
+
+app.post("/fakeLaps", async (req, res) => {
+  console.log("Setting fake laps");
+  carIds[0] = "1";
+
+  const intervalId = setInterval(() => {
+    const existingLaps = lapTimes.get("1") ?? [];
+    lapTimes.set("1", [...existingLaps, Math.floor(Math.random() * 3000) + 5000]);
+    mockLapWS(lapTimes);
+    if (lapTimes.get("1")?.length === 13) {
+      res.sendStatus(200);
+      clearInterval(intervalId);
+    }
+  }, req.body.cadence * 1000);
 });
 
 // Start Rest Server

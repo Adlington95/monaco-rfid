@@ -3,16 +3,9 @@
 
 
 // Luke:
-// TODO: Check behaviour when barcode is scanned form leaderboard page
-// TODO: check behavior when car crosses the line too early
-
-
-
-
+// TODO: Fix behavior when car crosses the line too early
+// TODO: If user is new, show the car start page
 
 // TODO: Hero animations between pages
 // TODO: Have a way to delete lap times
-// TODO: Fix speedometer on qualifying page
 // TODO: Time out app from any screen after X seconds. Return to leaderboard page.
-// TODO: Split practice and quali laps in state to avoid getting out of sync
-// TODO: If user is new, show the car start page
