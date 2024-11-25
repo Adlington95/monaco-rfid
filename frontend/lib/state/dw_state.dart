@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_datawedge/flutter_datawedge.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/models/scan_user_body.dart';
+import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
 
@@ -22,7 +24,7 @@ class DataWedgeState with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> initScanner() async {
+  Future<void> initScanner({bool redirect = false}) async {
     try {
       if (Platform.isAndroid) {
         fdw = FlutterDataWedge();
@@ -30,23 +32,23 @@ class DataWedgeState with ChangeNotifier {
         await fdw?.createDefaultProfile(profileName: 'f1');
         await fdw?.enableScanner(true);
         await fdw?.activateScanner(true);
-        await scanBarcode(init: true);
+        await scanBarcode(redirect: redirect);
       }
     } catch (e) {
       error = e.toString();
     }
   }
 
-  Future<void> scanBarcode({bool init = false}) async {
+  Future<void> scanBarcode({bool redirect = false}) async {
     try {
       await fdw?.scannerControl(true);
-      listener();
+      listener(redirect: redirect);
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  void listener() {
+  void listener({bool redirect = false}) {
     fdw?.onScanResult.listen((ScanResult result) async {
       if (isLoading) return;
       isLoading = true;
@@ -56,6 +58,9 @@ class DataWedgeState with ChangeNotifier {
 
       try {
         await restState.postUser(body);
+        if (redirect) {
+          router.go(ScanIdPage.name);
+        }
       } catch (e) {
         unawaited(initScanner());
       }

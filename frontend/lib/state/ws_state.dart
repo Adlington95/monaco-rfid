@@ -31,6 +31,8 @@ class WebSocketState with ChangeNotifier {
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
+
+      //TODO: Here add redirect to other instruction page
       router.pushReplacement(PracticeCountdownPage.name);
 
       return;

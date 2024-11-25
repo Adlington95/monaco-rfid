@@ -67,11 +67,13 @@ class _NewWidgetState extends State<NewWidget> {
 
   Future<void> scroll({bool down = true}) async {
     await Future<void>.delayed(const Duration(seconds: 5));
-    await _scrollController.animateTo(
-      down ? _scrollController.position.maxScrollExtent : 0,
-      duration: Duration(seconds: length * 2),
-      curve: Curves.linear,
-    );
+    if (mounted) {
+      await _scrollController.animateTo(
+        down ? _scrollController.position.maxScrollExtent : 0,
+        duration: Duration(seconds: length * 2),
+        curve: Curves.linear,
+      );
+    }
     unawaited(scroll(down: !down));
   }
 
