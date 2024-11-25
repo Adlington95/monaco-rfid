@@ -63,9 +63,8 @@ Content-Type: application/json
 POST http://localhost:13000/status
 Content-Type: application/json
 
-
   {
-    "status":1
+    "status":3
   }
 
 ### PUT Lights

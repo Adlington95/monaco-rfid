@@ -11,3 +11,8 @@ export type RfidResponse = {
   };
   timestamp: string;
 };
+
+export type User = {
+  id: string;
+  name: string;
+};

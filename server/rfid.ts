@@ -1,5 +1,5 @@
-import { RfidResponse } from "./models";
-import { debounceTime, wss, token, toggling, setToggling, setToken } from "./server";
+import { RfidResponse, User } from "./models";
+import { debounceTime, wss, setToggling, setToken, token, toggling } from "./server";
 import fetch from "node-fetch";
 import websocket from "ws";
 
@@ -157,16 +157,13 @@ export const rfidSaveData = (json: RfidResponse[], lastData: Map<string, string>
  * @param scannedId - The scanned ID used to check if the app is in the correct state
  * @returns If the data is valid, true is returned. Otherwise, false is returned.
  */
-export const rfidCheckValidity = (
-  newJson: RfidResponse[],
-  qualifyingId: string | undefined,
-  raceIds: string[] | undefined
-): boolean => {
+export const rfidCheckValidity = (newJson: RfidResponse[], users: User[], toggling: boolean): boolean => {
   console.log("Checking validity");
 
   return (
     // wss.readyState === webSocket.OPEN &&
-    ((qualifyingId || raceIds?.length == 2) && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
+    ((users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean) &&
+    !toggling
   );
 };
 
