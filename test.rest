@@ -69,3 +69,6 @@ Content-Type: application/json
 
 ### PUT Lights
 POST http://localhost:13000/lights
+
+### POST fake lap
+POST http://localhost:13000/fakeLaps

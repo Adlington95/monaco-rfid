@@ -33,10 +33,15 @@ class RestState with ChangeNotifier {
     getStatus(retry: true);
   }
 
-  Future<void> postAverageLap(int averageLap, String carId) async {
+  Future<void> postLap(int fastestLap, int overallTime, String carId) async {
     await http.post(
       Uri.parse('${gameState.restUrl}/lap'),
-      body: jsonEncode({'lap_time': averageLap, 'car_id': carId}),
+      body: jsonEncode({
+        'lap_time': fastestLap,
+        'overall_time': overallTime,
+        'attempts': gameState.loggedInUser?.previousAttempts,
+        'car_id': carId,
+      }),
       headers: {'Content-Type': 'application/json'},
     );
   }

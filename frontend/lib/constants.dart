@@ -9,7 +9,7 @@ const defaultWebsocketPort = '18080';
 
 /// Circuit
 const defaultCircuitName = 'Monaco';
-const defaultCircuitLength = 3.337;
+const defaultCircuitLength = 11.68; // In metres
 
 // Game play
 const defaultPracticeLaps = 3;

@@ -133,6 +133,37 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 40),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.track_changes,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Track length',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: TextFormField(
+                      onSaved: (value) =>
+                          value != null ? state.circuitLength = double.tryParse(value) ?? state.circuitLength : null,
+                      initialValue: state.circuitLength.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     width: 200,

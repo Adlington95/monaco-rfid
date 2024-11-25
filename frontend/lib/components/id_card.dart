@@ -69,7 +69,8 @@ class IdCard extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
+                            if (data != null)
+                              Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
                             if (data != null && data?.previousBest != null && data?.previousAttempts != null)
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,19 +85,20 @@ class IdCard extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Attempts:',
-                                  style: TextStyle(color: Colors.white, fontSize: 24),
-                                ),
-                                Text(
-                                  '${data!.previousAttempts}',
-                                  style: const TextStyle(color: Colors.white, fontSize: 24),
-                                ),
-                              ],
-                            ),
+                            if (data != null && data?.previousBest != null && data?.previousAttempts != null)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Attempts:',
+                                    style: TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                  Text(
+                                    '${data!.previousAttempts}',
+                                    style: const TextStyle(color: Colors.white, fontSize: 24),
+                                  ),
+                                ],
+                              ),
                           ].gap(8),
                         ),
                       ].gap(20),

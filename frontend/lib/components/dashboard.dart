@@ -47,8 +47,11 @@ class Dashboard extends StatelessWidget {
                   ),
                   Circle(
                     children: [
-                      FittedBox(child: Text(state.averageSpeed.toInt().toString(), style: large)),
-                      const Text('m/h per lap', style: small),
+                      const Text('Speed'),
+                      FittedBox(
+                        child: Text(state.averageSpeed == 0 ? '' : state.averageSpeed.toStringAsFixed(3), style: large),
+                      ),
+                      const Text('m/s', style: small),
                     ],
                   ),
                 ],

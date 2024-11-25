@@ -160,6 +160,17 @@ app.get("/getOverallLeaderboard", async (req, res) => {
   }
 });
 
+app.post("/fakeLaps", async (req, res) => {
+  console.log("Setting fak laps");
+  lapTimes.set(carIds[0], [1800, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000]);
+  wss.clients.forEach((client) => {
+    if (client.readyState === websocket.OPEN) {
+      // const newMap = JSON.stringify(Object.fromEntries(lapTimes));
+      client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+    }
+  });
+});
+
 // Post RFID data
 app.post("/rfid", async (req, _) => {
   console.log("RFID data received.");
@@ -190,6 +201,7 @@ app.post("/rfid", async (req, _) => {
             );
             wss.clients.forEach((client) => {
               if (client.readyState === websocket.OPEN) {
+                // const newMap = JSON.stringify(Object.fromEntries(lapTimes));
                 client.send(JSON.stringify(Object.fromEntries(lapTimes)));
               }
             });
@@ -274,15 +286,15 @@ app.post("/lap", async (req, res) => {
   try {
     const { fastestLap, fastestOverall, mostAttempts } = await getTopValues();
 
-    if (lap_time < fastestLap.lap_time) {
+    if (lap_time < fastestLap?.lap_time) {
       newFastestLap = true;
     }
 
-    if (overall_time < fastestOverall.overall_time) {
+    if (overall_time < fastestOverall?.overall_time) {
       newFastestOverall = true;
     }
 
-    if (attempts > mostAttempts.attempts) {
+    if (attempts > mostAttempts?.attempts) {
       newMostAttempts = true;
     }
     if (status !== Status.RACE) {
@@ -294,7 +306,7 @@ app.post("/lap", async (req, res) => {
               SET
                   team_name=EXCLUDED.team_name,
                   lap_time=EXCLUDED.lap_time,
-                  attempts = monaco.attempts+1
+                  attempts = monaco.attempts+1,
                   overall_time=EXCLUDED.overall_time`,
         [users[0].name, lap_time, carIds, 0, users[0].id, overall_time]
       );
@@ -388,6 +400,7 @@ const resetQualifying = () => {
   users = [];
   rfidTimes = new Map();
   lapTimes = new Map();
+  carIds = [];
 };
 
 // Set whether the RFID reader is toggling

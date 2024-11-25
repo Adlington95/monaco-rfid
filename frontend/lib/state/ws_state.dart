@@ -45,10 +45,10 @@ class WebSocketState with ChangeNotifier {
       }
     }
 
-    if (lapTimes.length > 2) {
+    if (lapTimes.length == 3) {
       router.pushReplacement(QualifyingPage.name);
-    } else if (lapTimes.length == 13) {
-      sendLapTime(fastestLap);
+    } else if (lapTimes.length > 12) {
+      sendLapTime();
     }
 
     notifyListeners();
@@ -58,18 +58,24 @@ class WebSocketState with ChangeNotifier {
     if (lapTimes.isEmpty || lapTimes.length < 3) {
       return 0;
     }
-    return lapTimes.sublist(3).reduce((value, element) => value + element) ~/ lapTimes.length;
+    final x = lapTimes.sublist(3).reduce((value, element) => value + element) ~/ (lapTimes.length - 3);
+    return x;
   }
 
-  Future<void> sendLapTime(int lapTime) async {
-    await restState.postAverageLap(lapTime, carId);
+  Future<void> sendLapTime() async {
+    unawaited(router.pushReplacement(FinishPage.name));
+    await restState.postLap(fastestLap, overallTime, carId);
     await restState.fetchDriverStandings();
-    await router.pushReplacement(FinishPage.name);
   }
 
   int get practiceLapsRemaining => (3 - lapTimes.length).clamp(1, 3);
 
-  double get averageSpeed => 10;
+  double get averageSpeed {
+    if (lapTimes.isEmpty || lapTimes.length < 3) {
+      return 0;
+    }
+    return restState.gameState.circuitLength / lapTimes.last;
+  }
 
   DateTime? _startTime;
 
@@ -82,6 +88,8 @@ class WebSocketState with ChangeNotifier {
 
   int get fastestLap =>
       lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value < element ? value : element);
+
+  int get overallTime => lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value + element);
 
   String lapTime(int index) {
     if (lapTimes.length > 2 + index) {
