@@ -1,11 +1,12 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import websocket from "ws";
 import {
   lightToggle,
   rfidCheckValidity,
   rfidCompareToPrevious,
-  rfidLap,
+  rfidQualifyingLap,
+  rfidRaceLap,
   rfidSaveData,
   rfidScannedCar,
   rfidStart,
@@ -14,7 +15,7 @@ import {
 } from "./rfid";
 import { pool } from "./db";
 import { delay } from "./utils";
-import { Status } from "./models";
+import { RfidResponse, Status } from "./models";
 
 const port = 3000;
 
@@ -38,20 +39,24 @@ export let token: string | undefined | null;
 let scannedName: string | undefined;
 
 // id of the scanned in user
-export let scannedId: string | undefined;
+export let qualifyingUserId: string | undefined;
 
 // Whether the RFID reader is toggling
 export let toggling: boolean = false;
 
 //scanned car id
-let scannedCarId: string | undefined;
+let qualifyingCarId: string | undefined;
+
+let raceCarIds: string[] = [];
+let raceUserIds: string[] = [];
 
 //lap times of the scanned car
-let lapTimes: number[] = [];
-
-let rfidTimes: string[] = [];
+let lapTimes: Map<string, number[]> = new Map();
+let rfidTimes: Map<string, string[]> = new Map();
 
 let lastData: Map<string, string> = new Map();
+
+let status = Status.READY;
 
 // Create  WebSocket server
 export const wss = new websocket.Server({ port: 8080 }).on("connection", (ws) => {
@@ -62,7 +67,7 @@ export const wss = new websocket.Server({ port: 8080 }).on("connection", (ws) =>
 });
 
 // GET all entries
-app.get("/", async (req, res) => {
+app.get("/", async (req, res: Response) => {
   try {
     const data = await pool.query("SELECT * FROM monaco");
     res.status(200).send(data.rows);
@@ -73,7 +78,7 @@ app.get("/", async (req, res) => {
 });
 
 // Clear db table
-app.get("/removeAllEntries", async (req, res) => {
+app.get("/removeAllEntries", async (req, res: Response) => {
   try {
     await pool.query("DELETE FROM monaco");
 
@@ -85,7 +90,7 @@ app.get("/removeAllEntries", async (req, res) => {
 });
 
 // Remove table from db
-app.get("/removeTableFromDb", async (req, res) => {
+app.get("/removeTableFromDb", async (req, res: Response) => {
   try {
     await pool.query("DROP TABLE monaco");
 
@@ -97,7 +102,7 @@ app.get("/removeTableFromDb", async (req, res) => {
 });
 
 // CREATE TABLE
-app.get("/setup", async (req, res) => {
+app.get("/setup", async (_, res: Response) => {
   try {
     await pool.query(
       "CREATE TABLE monaco( id SERIAL, name VARCHAR(100), lap_time VARCHAR(100), team_name VARCHAR(100), attempts INT DEFAULT 0, employee_id VARCHAR(100) PRIMARY KEY )"
@@ -111,7 +116,7 @@ app.get("/setup", async (req, res) => {
 });
 
 // Start RFID Reader
-app.get("/start", async (req, res) => {
+app.get("/start", async (_, res: Response) => {
   try {
     await rfidStart();
     res.status(200);
@@ -122,7 +127,7 @@ app.get("/start", async (req, res) => {
 });
 
 // Stop RFID Reader
-app.get("/stop", async (req, res) => {
+app.get("/stop", async (_, res: Response) => {
   try {
     rfidStop();
     res.status(200);
@@ -133,34 +138,19 @@ app.get("/stop", async (req, res) => {
 });
 
 // Get status of the server
-app.get("/status", async (req, res) => {
-  let status = Status.UNKNOWN;
-
-  if (!scannedId) {
-    status = Status.READY;
-  } else if (scannedId && !scannedCarId) {
-    status = Status.USER_SCANNED;
-  } else if (scannedId && scannedCarId && lapTimes.length === 0) {
-    status = Status.CAR_SCANNED;
-  } else if (scannedId && scannedCarId && lapTimes.length > 0 && lapTimes.length <= 4) {
-    status = Status.PRACTICE;
-  } else if (scannedId && scannedCarId && lapTimes.length > 4) {
-    status = Status.QUALIFYING;
-  }
-  //TODO: Add check for qualifying complete
-
+app.get("/status", async (_, res: Response) => {
   res.status(200).send({ status: status });
 });
 
 // Get the current users data
-app.get("/getUser", async (req, res) => {
+app.get("/getUser", async (_, res: Response) => {
   console.log("sending user data to the frontend");
 
-  res.send({ scannedId, scannedName });
+  res.send({ scannedId: qualifyingUserId, scannedName });
 });
 
 // Get the leaderboard
-app.get("/getLeaderboard", async (req, res) => {
+app.get("/getLeaderboard", async (_, res: Response) => {
   try {
     const data = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10");
     res.status(200).send(data.rows);
@@ -174,21 +164,46 @@ app.get("/getLeaderboard", async (req, res) => {
 app.post("/rfid", async (req, _) => {
   console.log("RFID data received.");
   // Check if this is an RFID data response
-  if (rfidCheckValidity(req.body, scannedId) && !toggling) {
+  if (rfidCheckValidity(req.body, qualifyingUserId, raceUserIds) && !toggling) {
     console.log("Valid");
 
     // Parse the JSON data, only return new data
     const json = rfidCompareToPrevious(lastData, req.body);
     if (json) {
       rfidToggle();
-
-      if (!scannedCarId) {
-        scannedCarId = rfidScannedCar(json);
-      } else if (scannedCarId == json.data.idHex) {
-        console.log(rfidTimes);
-        rfidLap(json.timestamp, rfidTimes[rfidTimes.length - 1], lapTimes);
+      if (status !== Status.RACE) {
+        // Qualifying
+        if (!qualifyingCarId) {
+          qualifyingCarId = rfidScannedCar(json);
+          rfidTimes.set(json.data.idHex, [json.timestamp]);
+        } else if (qualifyingCarId == json.data.idHex) {
+          const userRfidTimes = rfidTimes.get(json.data.idHex);
+          const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
+          if (lastRFIDTime) {
+            console.log("Last RFID time: " + lastRFIDTime);
+            lapTimes.set(
+              json.data.idHex,
+              rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+            );
+            wss.clients.forEach((client) => {
+              if (client.readyState === websocket.OPEN) {
+                client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+              }
+            });
+          } else {
+            console.log("No previous RFID time");
+            rfidTimes.set(json.data.idHex, [json.timestamp]);
+          }
+        }
+      } else {
+        // Race
+        if (raceCarIds.length > 2) {
+          raceCarIds.push(json.data.idHex);
+        } else if (raceCarIds.includes(json.data.idHex)) {
+          // rfidRaceLap(json.timestamp, rfidTimes[rfidTimes.length - 1], lapTimes);
+        }
       }
-      rfidTimes.push(json.timestamp);
+      addToRFIDTimes(json);
     }
   } else {
     console.log("Data not valid");
@@ -196,8 +211,14 @@ app.post("/rfid", async (req, _) => {
   lastData = rfidSaveData(req.body, lastData);
 });
 
+const addToRFIDTimes = (json: RfidResponse) => {
+  const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
+  userRfidTimes.push(json.timestamp);
+  rfidTimes.set(json.data.idHex, userRfidTimes);
+};
+
 // Post new lap
-app.post("/lap", async (req, res) => {
+app.post("/lap", async (req: Request, res: Response) => {
   const { lap_time } = req.body;
   console.log("Finding the current player in the database..");
 
@@ -212,7 +233,7 @@ app.post("/lap", async (req, res) => {
                     team_name=EXCLUDED.team_name,
                     lap_time=EXCLUDED.lap_time,
                     attempts = monaco.attempts+1`,
-      [scannedName, lap_time, scannedCarId, 0, scannedId]
+      [scannedName, lap_time, qualifyingCarId, 0, qualifyingUserId]
     );
 
     res.status(200).send({ message: "Successfully inserted entry into monaco" });
@@ -224,17 +245,17 @@ app.post("/lap", async (req, res) => {
 });
 
 // Post in new user data
-app.post("/scanUser", async (req, res) => {
+app.post("/scanUser", async (req: Request, res: Response) => {
   try {
     const response = req.body;
     const { name, id } = response;
-    scannedId = id;
+    qualifyingUserId = id;
     scannedName = name;
 
-    console.log("Set scanned id to " + scannedId);
+    console.log("Set scanned id to " + qualifyingUserId);
     console.log("Set scanned name to " + scannedName);
 
-    const data = await pool.query("SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1", [scannedId]);
+    const data = await pool.query("SELECT * FROM monaco WHERE employee_id = $1 LIMIT 1", [qualifyingUserId]);
 
     //returns nothing if the user does not exist in the database
     //return [UserData] if the user does exist in the database
@@ -247,7 +268,7 @@ app.post("/scanUser", async (req, res) => {
 });
 
 // Post for lights to start
-app.post("/lights", async (req, res) => {
+app.post("/lights", async (_, res: Response) => {
   try {
     // All lights off
     lightToggle(1, false);
@@ -283,37 +304,13 @@ app.post("/lights", async (req, res) => {
 });
 
 // Post new status
-app.post("/status", async (req, res) => {
-  let status = req.body.status;
-  console.log(req.body);
-
-  switch (status) {
-    case Status.READY:
-      resetQualifying();
-      break;
-    case Status.USER_SCANNED:
-      scannedCarId = undefined;
-      const lastTime = rfidTimes.pop();
-      rfidTimes = [];
-      if (lastTime) rfidTimes.push(lastTime);
-      break;
-    case Status.CAR_SCANNED:
-      lapTimes = [];
-      break;
-    case Status.PRACTICE:
-      while (lapTimes.length > 3) lapTimes.shift();
-      break;
-    case Status.QUALIFYING:
-      while (lapTimes.length > 4) lapTimes.shift();
-      break;
-    case Status.QUALIFYING_COMPLETE:
-      // Handle qualifying complete status
-      break;
-    default:
-      console.log("Unknown status");
+app.post("/status", async (req: Request, res: Response) => {
+  let newStatus = req.body.status;
+  if (status === Status.READY) {
+    resetQualifying();
   }
-
-  console.log("Status updated to " + status);
+  status = newStatus;
+  console.log("Status updated to " + newStatus);
 
   res.status(200).send({ message: "Status updated" });
 });
@@ -324,10 +321,10 @@ app.listen(port, () => console.log(`Server has started on port: ${port}`));
 // Reset qualifying data
 const resetQualifying = () => {
   console.log("resetting qualifying local data");
-  scannedId = undefined;
+  qualifyingUserId = undefined;
   scannedName = undefined;
-  scannedCarId = undefined;
-  lapTimes = [];
+  qualifyingCarId = undefined;
+  lapTimes = new Map();
 };
 
 // Set whether the RFID reader is toggling

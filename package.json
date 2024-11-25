@@ -8,7 +8,7 @@
     "start": "",
     "dev": "tsx server/server.ts",
     "build": "tsc",
-    "start:prod": "node dist/server/server.js"
+    "prod": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
     "express": "^4.21.1",
     "node-fetch": "^2.7.0",
     "pg": "^8.13.1",
+    "typescript": "^5.7.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {

@@ -33,29 +33,17 @@ class WebSocketState with ChangeNotifier {
       }
       router.pushReplacement(PracticeCountdownPage.name);
 
-      // router.pushReplacement(PracticeInstructionsPage.name);
       return;
     } else {
       try {
-        final obj = jsonDecode(message);
-
-        // ignore: avoid_dynamic_calls
-        final lapTimesJson = obj['lapTimes'] as List<dynamic>;
-        final newLapTimes = <int>[];
-        for (final lapTime in lapTimesJson) {
-          newLapTimes.add(lapTime as int);
-        }
-        // ignore: avoid_dynamic_calls
-        lapTimes = newLapTimes;
+        final obj = jsonDecode(message) as Map<String, dynamic>;
+        lapTimes = (obj.entries.first.value as List).map((e) => e as int).toList();
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
     }
 
-    // if (lapTimes.length == 1) {
-    //   router.pushReplacement(PracticeCountdownPage.name);
-    // } else
-    if (lapTimes.length == 3) {
+    if (lapTimes.length > 2) {
       router.pushReplacement(QualifyingPage.name);
     } else if (lapTimes.length == 13) {
       sendLapTime(fastestLap);
@@ -81,7 +69,14 @@ class WebSocketState with ChangeNotifier {
 
   double get averageSpeed => 10;
 
-  DateTime startTime = DateTime(2024, 11, 8, 11, 42, 40);
+  DateTime? _startTime;
+
+  DateTime get startTime => _startTime ??= DateTime.now();
+
+  set startTime(DateTime? value) {
+    _startTime = value;
+    notifyListeners();
+  }
 
   int get fastestLap =>
       lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value < element ? value : element);

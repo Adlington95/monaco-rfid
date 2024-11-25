@@ -1,6 +1,7 @@
 import { RfidResponse } from "./models";
 import { debounceTime, wss, token, toggling, setToggling, setToken } from "./server";
 import fetch from "node-fetch";
+import websocket from "ws";
 
 const webUsername = process.env.WEB_USERNAME;
 const webPassword = process.env.WEB_PASSWORD;
@@ -87,14 +88,31 @@ export const rfidScannedCar = (json: RfidResponse): string => {
 
   let scannedCarId = json.data.idHex;
   wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
+    if (client.readyState === websocket.OPEN) {
       client.send(JSON.stringify({ message: "Car scanned", carId: scannedCarId }));
     }
   });
   return scannedCarId;
 };
 
-export const rfidLap = (timestamp: string, previousTimeStamp: string, lapTimes: number[]): number[] => {
+export const rfidQualifyingLap = (timestamp: string, previousTimeStamp: string, lapTimes: number[]): number[] => {
+  console.log("Adding new lap");
+
+  const newTime = Date.parse(timestamp);
+  const oldTime = Date.parse(previousTimeStamp);
+
+  const lapTime = newTime - oldTime;
+
+  if (lapTime > debounceTime) {
+    lapTimes.push(lapTime);
+    console.log(lapTimes);
+  } else {
+    console.log("Lap time too quick");
+  }
+  return lapTimes;
+};
+
+export const rfidRaceLap = (timestamp: string, previousTimeStamp: string, lapTimes: number[]): number[] => {
   console.log("Adding new lap");
 
   const newTime = Date.parse(timestamp);
@@ -106,7 +124,7 @@ export const rfidLap = (timestamp: string, previousTimeStamp: string, lapTimes: 
     console.log("Lap time: " + lapTime);
     lapTimes.push(lapTime);
     wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
+      if (client.readyState === websocket.OPEN) {
         client.send(JSON.stringify({ lapTimes: lapTimes }));
       }
     });
@@ -139,12 +157,16 @@ export const rfidSaveData = (json: RfidResponse[], lastData: Map<string, string>
  * @param scannedId - The scanned ID used to check if the app is in the correct state
  * @returns If the data is valid, true is returned. Otherwise, false is returned.
  */
-export const rfidCheckValidity = (newJson: RfidResponse[], scannedId: String | undefined): boolean => {
+export const rfidCheckValidity = (
+  newJson: RfidResponse[],
+  qualifyingId: string | undefined,
+  raceIds: string[] | undefined
+): boolean => {
   console.log("Checking validity");
 
   return (
-    // wss.readyState === WebSocket.OPEN &&
-    (scannedId && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
+    // wss.readyState === webSocket.OPEN &&
+    ((qualifyingId || raceIds?.length == 2) && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
   );
 };
 
