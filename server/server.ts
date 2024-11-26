@@ -321,7 +321,7 @@ app.post("/lap", async (req, res) => {
     res
       .status(200)
       .send({ message: "Successfully inserted entry into monaco", newFastestLap, newFastestOverall, newMostAttempts });
-    resetQualifying();
+    reset();
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
@@ -396,12 +396,9 @@ app.post("/lights", async (_, res: Response) => {
 // Post new status
 app.post("/status", async (req: Request, res: Response) => {
   let newStatus = req.body.status;
-  if (status === Status.READY) {
-    resetQualifying();
-  }
   status = newStatus;
   console.log("Status updated to " + newStatus);
-
+  reset();
   res.status(200).send({ message: "Status updated" });
 });
 
@@ -424,11 +421,12 @@ app.post("/fakeLaps", async (req, res) => {
 app.listen(port, () => console.log(`Server has started on port: ${port}`));
 
 // Reset qualifying data
-const resetQualifying = () => {
+const reset = () => {
   console.log("resetting qualifying local data");
   users = [];
   rfidTimes = new Map();
   lapTimes = new Map();
+
   carIds = [];
 };
 

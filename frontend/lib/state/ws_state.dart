@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
+import 'package:frontend/models/status.dart';
 import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/practice_coutdown_page.dart';
 import 'package:frontend/pages/practice_instructions_page.dart';
@@ -21,6 +22,8 @@ class WebSocketState with ChangeNotifier {
   List<int> lapTimes = [];
   String carId = '';
 
+  Map<String, String> raceCarIds = {};
+
   bool get connected => _channel != null;
 
   void addMessage(String message) {
@@ -28,15 +31,25 @@ class WebSocketState with ChangeNotifier {
       try {
         final obj = jsonDecode(message);
         // ignore: avoid_dynamic_calls
-        carId = obj['carId'] as String;
+        final scannedCarId = obj['carId'] as String;
+        if (restState.status != Status.RACE) {
+          carId = scannedCarId;
+        } else {
+          if (raceCarIds.isEmpty) {
+            raceCarIds[restState.gameState.racers.first.id] = scannedCarId;
+          } else {
+            raceCarIds[restState.gameState.racers.last.id] = scannedCarId;
+          }
+        }
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
-
-      if (restState.gameState.loggedInUser != null && restState.gameState.loggedInUser!.previousAttempts != 0) {
-        router.pushReplacement(PracticeInstructionsPage.name);
-      } else {
-        router.pushReplacement(PracticeCountdownPage.name);
+      if (restState.status != Status.RACE) {
+        if (restState.gameState.loggedInUser != null && restState.gameState.loggedInUser!.previousAttempts != 0) {
+          router.pushReplacement(PracticeInstructionsPage.name);
+        } else {
+          router.pushReplacement(PracticeCountdownPage.name);
+        }
       }
 
       //TODO: Here add redirect to other instruction page

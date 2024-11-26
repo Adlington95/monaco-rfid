@@ -10,6 +10,7 @@ import 'package:frontend/models/driver_standing_item.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/pages/race_start_page.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:http/http.dart' as http;
@@ -71,20 +72,6 @@ class RestState with ChangeNotifier {
     } catch (e) {
       debugPrint(e.toString());
     }
-    // await Future<void>.delayed(const Duration(milliseconds: 2));
-    // final random = Random();
-    // final newStandings = List.generate(80, (index) {
-    //   return DriverStandingItem(
-    //     'Driver $index',
-    //     index.toString(),
-    //     random.nextInt(50),
-    //     (100000 + (100000 * (0.1 + 0.9 * (random.nextInt(10000000)) / 1000))).toInt(),
-    //   );
-    // });
-
-    // driverStandings
-    //   ..clear()
-    //   ..addAll(newStandings);
 
     notifyListeners();
   }
@@ -135,22 +122,57 @@ class RestState with ChangeNotifier {
       );
       if (res.statusCode == 200) {
         if (res.body.isEmpty) {
-          gameState.loggedInUser = User(
+          final newUser = User(
             name: body.name,
             previousAttempts: 0,
             id: body.id,
           );
+          if (status == Status.RACE) {
+            gameState.addRacer(newUser);
+            notifyListeners();
+            if (gameState.racers.length == 2) {
+              unawaited(
+                Future<void>.delayed(const Duration(milliseconds: 1500)).then((value) {
+                  router.pushReplacement(RaceStartPage.name);
+                }),
+              );
+            }
+          } else {
+            gameState.loggedInUser = newUser;
+          }
           return;
         }
         final userObj = jsonDecode(res.body) as Map<String, dynamic>;
         final user = User.fromJson(userObj);
-
-        gameState.loggedInUser = user;
+        if (status == Status.RACE) {
+          gameState.addRacer(user);
+          if (gameState.racers.length == 2) {
+            unawaited(
+              Future<void>.delayed(const Duration(milliseconds: 1500)).then((value) {
+                router.pushReplacement(RaceStartPage.name);
+              }),
+            );
+          }
+        } else {
+          gameState.loggedInUser = user;
+        }
 
         if (MyApp.navigatorKey.currentContext != null &&
-            ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != ScanIdPage.name) {
+            ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != ScanIdPage.name &&
+            status != Status.RACE) {
           router.go(ScanIdPage.name);
         }
+      } else if (res.statusCode == 400 && res.body.contains('User already scanned')) {
+        unawaited(
+          Fluttertoast.showToast(
+            msg: 'User already scanned',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 32,
+          ),
+        );
       } else {
         throw Exception('Failed to scan user');
       }

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datawedge/flutter_datawedge.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/scan_user_body.dart';
+import 'package:frontend/models/status.dart';
+import 'package:frontend/pages/race_login_page.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -58,8 +60,12 @@ class DataWedgeState with ChangeNotifier {
 
       try {
         await restState.postUser(body);
-        if (redirect) {
+        if (redirect && restState.status != Status.RACE) {
           router.go(ScanIdPage.name);
+        } else {
+          router.go(RaceLoginPage.name);
+
+          unawaited(initScanner());
         }
       } catch (e) {
         unawaited(initScanner());
@@ -71,7 +77,7 @@ class DataWedgeState with ChangeNotifier {
   void clear() {
     fdw?.scannerControl(false);
     fdw?.enableScanner(false);
-    gameState.loggedInUser = null;
+    // gameState.loggedInUser = null;
     fdw = null;
     notifyListeners();
   }

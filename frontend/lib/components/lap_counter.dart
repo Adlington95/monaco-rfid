@@ -50,7 +50,13 @@ class RowItem extends StatelessWidget {
 
         return LeaderboardRow(
           index: index,
-          isPurple: double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap,
+          isPurple: double.tryParse(time) != null &&
+              double.parse(time).toInt() == state.fastestLap &&
+              (state.restState.gameState.loggedInUser == null ||
+                  (state.restState.gameState.loggedInUser != null &&
+                      state.restState.gameState.loggedInUser!.previousBest != null &&
+                      state.restState.gameState.loggedInUser!.previousBest! > state.fastestLap)),
+          isGreen: double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap,
           child: double.tryParse(time) != null
               ? FormattedDuration(
                   Duration(milliseconds: double.parse(time).toInt()),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/components/leaderboard.dart';
+import 'package:frontend/models/status.dart';
+import 'package:frontend/pages/race_login_page.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
@@ -37,42 +39,38 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push(ScanIdPage.name),
+      onTap: () => context.push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : ScanIdPage.name),
       child: PopScope(
         canPop: false,
         child: Padding(
           padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
           child: Column(
             children: [
-              const GameTitle(),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
-                  decoration: ShapeDecoration(
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.93, -0.36),
-                      end: const Alignment(-0.93, 0.36),
-                      colors: [
-                        Colors.black.withOpacity(0.3),
-                        Colors.black.withOpacity(0.1),
-                      ],
-                    ),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        bottomLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(child: GameTitle()),
+                  Row(
+                    children: [
+                      const Text('Qualifying'),
+                      ZetaSwitch(
+                        value: context.watch<RestState>().status == Status.RACE,
+                        onChanged: (x) {
+                          if (x != null) {
+                            context.read<RestState>().resetStatus(status: x ? Status.RACE : Status.QUALIFYING);
+                            context.read<DataWedgeState>().initScanner(
+                                  redirect: true,
+                                );
+                          }
+                        },
                       ),
-                    ),
-                    shadows: const [
-                      BoxShadow(
-                        color: Color(0x19000000),
-                        blurRadius: 120,
-                        offset: Offset(0, 61.34),
-                      ),
+                      const Text('Race'),
                     ],
                   ),
+                ],
+              ),
+              Expanded(
+                child: Box(
                   child: context.watch<RestState>().driverStandings == null
                       ? const Center(child: CircularProgressIndicator())
                       : const Leaderboard(),
@@ -91,6 +89,43 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class Box extends StatelessWidget {
+  const Box({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
+      decoration: ShapeDecoration(
+        gradient: LinearGradient(
+          begin: const Alignment(0.93, -0.36),
+          end: const Alignment(-0.93, 0.36),
+          colors: [
+            Colors.black.withOpacity(0.3),
+            Colors.black.withOpacity(0.1),
+          ],
+        ),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          ),
+        ),
+        shadows: const [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 120,
+            offset: Offset(0, 61.34),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

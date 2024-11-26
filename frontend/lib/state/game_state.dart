@@ -80,6 +80,13 @@ class GameState with ChangeNotifier {
     }
   }
 
+  List<User> racers = [];
+
+  void addRacer(User racer) {
+    racers.add(racer);
+    notifyListeners();
+  }
+
   Future<void> changePage() async {
     if (loggedInUser != null) {
       await Future<void>.delayed(const Duration(seconds: 5));

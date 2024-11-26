@@ -5,6 +5,7 @@ import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/pages/practice_coutdown_page.dart';
 import 'package:frontend/pages/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying_page.dart';
+import 'package:frontend/pages/race_login_page.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:go_router/go_router.dart';
@@ -283,15 +284,25 @@ class _SettingsPageState extends State<SettingsPage> {
             height: 60,
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ZetaButton(
-                  label: 'Save',
-                  onPressed: () async {
-                    _formKey.currentState?.save();
-                    await state.saveToSharedPreferences();
-                    await Restart.restartApp();
-                  },
+                ZetaButton(label: 'Race Mode', onPressed: () => context.pushReplacement(RaceLoginPage.name)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ZetaButton(
+                      label: 'Cancel',
+                      onPressed: () => context.pop(),
+                    ),
+                    ZetaButton(
+                      label: 'Save',
+                      onPressed: () async {
+                        _formKey.currentState?.save();
+                        await state.saveToSharedPreferences();
+                        await Restart.restartApp();
+                      },
+                    ),
+                  ].gap(40),
                 ),
               ],
             ),

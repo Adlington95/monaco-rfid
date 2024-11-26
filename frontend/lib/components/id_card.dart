@@ -6,11 +6,12 @@ import 'package:frontend/models/user.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class IdCard extends StatelessWidget {
-  const IdCard({super.key, this.data, required this.title, this.onTap});
+  const IdCard({super.key, this.data, this.title, this.onTap, this.heroId});
 
   final User? data;
-  final String title;
+  final String? title;
   final VoidCallback? onTap;
+  final String? heroId;
 
   @override
   Widget build(BuildContext context) {
@@ -19,18 +20,19 @@ class IdCard extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(
-          width: 600,
-          height: 250,
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 82, fontWeight: FontWeight.w800, color: Colors.white),
+        if (title != null)
+          SizedBox(
+            width: 600,
+            height: 250,
+            child: Text(
+              title!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 82, fontWeight: FontWeight.w800, color: Colors.white),
+            ),
           ),
-        ),
         const SizedBox(height: 20),
         Hero(
-          tag: 'id-card',
+          tag: heroId ?? 'id-card',
           child: InkWell(
             borderRadius: BorderRadius.circular(40),
             onTap: onTap,
@@ -66,40 +68,58 @@ class IdCard extends StatelessWidget {
                         const Row(
                           children: [Icon(ZetaIcons.barcode_qr_code, color: Colors.white, size: 62)],
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (data != null)
-                              Text(data!.name, style: const TextStyle(color: Colors.white, fontSize: 36)),
-                            if (data != null && data?.previousBest != null && data?.previousAttempts != null)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Previous best:',
-                                    style: TextStyle(color: Colors.white, fontSize: 24),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (data != null)
+                                SizedBox(
+                                  height: 126,
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      data!.name.trim(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 36,
+                                      ),
+                                    ),
                                   ),
-                                  FormattedDuration(
-                                    Duration(milliseconds: data!.previousBest!),
-                                    style: const TextStyle(color: Colors.white, fontSize: 24),
-                                  ),
-                                ],
-                              ),
-                            if (data != null && data?.previousBest != null && data?.previousAttempts != null)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Attempts:',
-                                    style: TextStyle(color: Colors.white, fontSize: 24),
-                                  ),
-                                  Text(
-                                    '${data!.previousAttempts}',
-                                    style: const TextStyle(color: Colors.white, fontSize: 24),
-                                  ),
-                                ],
-                              ),
-                          ].gap(8),
+                                ),
+                              if (data != null && data?.previousBest != null && data?.previousAttempts != null)
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Previous best:',
+                                          style: TextStyle(color: Colors.white, fontSize: 24),
+                                        ),
+                                        FormattedDuration(
+                                          Duration(milliseconds: data!.previousBest!),
+                                          style: const TextStyle(color: Colors.white, fontSize: 24),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Attempts:',
+                                          style: TextStyle(color: Colors.white, fontSize: 24),
+                                        ),
+                                        Text(
+                                          '${data!.previousAttempts}',
+                                          style: const TextStyle(color: Colors.white, fontSize: 24),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 8),
+                            ].gap(8),
+                          ),
                         ),
                       ].gap(20),
                     ),
