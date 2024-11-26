@@ -21,8 +21,8 @@ POST http://localhost:13000/scanUser
 Content-Type: application/json
   
   {
-    "name": "Marc Adlington 2",
-    "id": "453456123"
+    "name": "Marc Adlingtown",
+    "id": "45345312233w"
   }
 
 ### Get individual leaderboard
@@ -51,7 +51,7 @@ Content-Type: application/json
 
 [  
   {
-    "timestamp":"2024-11-15T19:58:40",
+    "timestamp":"2024-11-26T10:08:40",
     "data":{
       "idHex": "00000000000001"
     }

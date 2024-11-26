@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import websocket from "ws";
 import {
+  addToRFIDTimes,
   lightToggle,
   rfidCheckValidity,
   rfidCompareToPrevious,
@@ -171,7 +172,7 @@ app.post("/rfid", async (req, _) => {
     // Parse the JSON data, only return new data
     const json = rfidCompareToPrevious(lastData, req.body);
     if (json) {
-      rfidToggle();
+      // rfidToggle(); TODO: LUKE ADD THIS BACK
       if (status !== Status.RACE) {
         // Qualifying
 
@@ -229,33 +230,41 @@ app.post("/rfid", async (req, _) => {
 
         if (users.length === 0) {
           console.log("No user scanned");
-          return;
-        }
-        if (carIds.length < 2 && users.length === carIds.length + 1) {
-          carIds.push(json.data.idHex);
-        }
-        // TODO: Continue here
+        } else if (carIds.length < 2 && users.length > 0 && users.length < 3 && !carIds.includes(json.data.idHex)) {
+          console.log("Adding new car");
+          rfidScannedCar(json);
 
-        // if(carIds.length === 0 && users.length === 0) {
-        //   carIds.push(json.data.idHex);
-        // }
-        // If no cars and no users
-        // then add car
-        //
+          carIds.push(json.data.idHex);
+          rfidTimes.set(json.data.idHex, [json.timestamp]);
+        } else if (carIds.length === 2 && users.length === 2 && carIds.includes(json.data.idHex)) {
+          const userRfidTimes = rfidTimes.get(json.data.idHex);
+          const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
+
+          if (lastRFIDTime) {
+            console.log("Last RFID time: " + lastRFIDTime);
+            lapTimes.set(
+              json.data.idHex,
+              rfidRaceLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+            );
+            wss.clients.forEach((client) => {
+              if (client.readyState === websocket.OPEN) {
+                client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+              }
+            });
+          } else {
+            console.log("No previous RFID time");
+          }
+        } else {
+          console.log("Something is wrong?");
+        }
+        addToRFIDTimes(json, rfidTimes);
       }
-      addToRFIDTimes(json);
     }
   } else {
     console.log("Data not valid");
   }
   lastData = rfidSaveData(req.body, lastData);
 });
-
-const addToRFIDTimes = (json: RfidResponse) => {
-  const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
-  userRfidTimes.push(json.timestamp);
-  rfidTimes.set(json.data.idHex, userRfidTimes);
-};
 
 const getTopValues = async () => {
   const fastestLap = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 1");
@@ -322,8 +331,9 @@ app.post("/scanUser", async (req: Request, res: Response) => {
   try {
     const response = req.body;
     const { name, id } = response;
+    const maxUsers = status === Status.RACE ? 2 : 1;
     // TODO: I guess we should lock this to a single user when in qualifying mode just in case
-    if (!users.some((user) => user.id === id)) {
+    if (!users.some((user) => user.id === id) && users.length < maxUsers) {
       users.push({ name, id } as User);
 
       console.log("Set scanned id to " + id);
@@ -333,8 +343,10 @@ app.post("/scanUser", async (req: Request, res: Response) => {
       //returns nothing if the user does not exist in the database
       //return [UserData] if the user does exist in the database
       res.status(200).send(data.rows[0]);
-    } else {
-      res.sendStatus(400).send({ message: "User already scanned" });
+    } else if (users.some((user) => user.id === id)) {
+      res.status(400).send({ message: "User already scanned" });
+    } else if (users.length >= maxUsers) {
+      res.status(400).send({ message: "Maximum users scanned", status: status, maxUsers: maxUsers });
     }
   } catch (e) {
     console.error(e);

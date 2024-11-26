@@ -162,8 +162,8 @@ export const rfidCheckValidity = (newJson: RfidResponse[], users: User[], toggli
 
   return (
     // wss.readyState === webSocket.OPEN &&
-    ((users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean) &&
-    !toggling
+    (users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
+    // && !toggling //TODO:Luke Add this back
   );
 };
 
@@ -241,4 +241,14 @@ export const lightToggle = async (num: number, on: boolean): Promise<void> => {
     console.error("Light Toggle error", error);
     throw error;
   }
+};
+/**
+ * Adds the RFID time to the user's RFID times
+ * @param json - The new JSON data
+ * @param rfidTimes - The map of RFID times
+ */
+export const addToRFIDTimes = (json: RfidResponse, rfidTimes: Map<string, string[]>) => {
+  const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
+  userRfidTimes.push(json.timestamp);
+  rfidTimes.set(json.data.idHex, userRfidTimes);
 };
