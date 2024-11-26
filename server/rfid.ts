@@ -158,12 +158,12 @@ export const rfidSaveData = (json: RfidResponse[], lastData: Map<string, string>
  * @returns If the data is valid, true is returned. Otherwise, false is returned.
  */
 export const rfidCheckValidity = (newJson: RfidResponse[], users: User[], toggling: boolean): boolean => {
-  console.log("Checking validity");
+  // console.log("Checking validity'");
 
   return (
     // wss.readyState === webSocket.OPEN &&
-    (users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
-    // && !toggling //TODO:Luke Add this back
+    ((users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean) &&
+    !toggling
   );
 };
 
@@ -173,7 +173,7 @@ export const rfidCheckValidity = (newJson: RfidResponse[], users: User[], toggli
  * @param newJson - The new JSON data
  * @returns If new data is found, the first new entry is returned. Otherwise, null is returned.
  */
-export const rfidCompareToPrevious = (oldJson: Map<string, string>, newJson: RfidResponse[]): RfidResponse | null => {
+export const rfidCompareToPrevious = (oldJson: Map<string, string>, newJson: RfidResponse[]): RfidResponse[] | null => {
   const newEntries = newJson.filter((element) => {
     const elementId = element.data.idHex;
     return !oldJson.get(elementId) || oldJson.get(elementId)! < element.timestamp;
@@ -184,9 +184,8 @@ export const rfidCompareToPrevious = (oldJson: Map<string, string>, newJson: Rfi
     return null;
   }
 
-  const firstNewEntry = newEntries[0];
   console.log(`${newEntries.length} new entries found`);
-  return firstNewEntry;
+  return newEntries;
 };
 
 /**

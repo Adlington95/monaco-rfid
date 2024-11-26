@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/card.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/leaderboard_row.dart';
+import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
@@ -23,7 +24,9 @@ class LapCounter extends StatelessWidget {
               const Text('LAP TIMES', style: TextStyle(fontSize: 40, color: Colors.white)),
               Center(
                 child: Column(
-                  children: List.generate(10, (index) => RowItem(index: index + 1)).gap(12),
+                  children:
+                      List.generate(context.read<GameState>().qualifyingLaps, (index) => RowItem(index: index + 1))
+                          .gap(12),
                 ),
               ),
             ],

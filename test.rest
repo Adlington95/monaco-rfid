@@ -21,8 +21,16 @@ POST http://localhost:13000/scanUser
 Content-Type: application/json
   
   {
-    "name": "Marc Adlingtown",
-    "id": "45345312233w"
+    "name": "Marc Adlington",
+    "id": "45345312233"
+  }
+### Scan into system after storing this, required by websocket
+POST http://localhost:13000/scanUser
+Content-Type: application/json
+  
+  {
+    "name": "Luke Walton",
+    "id": "903858952"
   }
 
 ### Get individual leaderboard

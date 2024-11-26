@@ -6,4 +6,4 @@
 // TODO: Hero animations between pages
 // TODO: Have a way to delete lap times
 // TODO: Time out app from any screen after X seconds. Return to leaderboard page.
-
+// TODO: Confgurable game duration - try changing to 1 practice and 5 real laps for instance

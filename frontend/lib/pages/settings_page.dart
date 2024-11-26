@@ -164,6 +164,69 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 40),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.time_to_leave,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Practice laps',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: TextFormField(
+                      onSaved: (value) =>
+                          value != null ? state.practiceLaps = int.tryParse(value) ?? state.practiceLaps : null,
+                      initialValue: state.practiceLaps.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.timelapse,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Qualifying laps',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: TextFormField(
+                      onSaved: (value) =>
+                          value != null ? state.qualifyingLaps = int.tryParse(value) ?? state.qualifyingLaps : null,
+                      initialValue: state.qualifyingLaps.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     width: 200,

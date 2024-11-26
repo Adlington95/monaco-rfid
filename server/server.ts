@@ -164,104 +164,106 @@ app.get("/getOverallLeaderboard", async (req, res) => {
 
 // Post RFID data
 app.post("/rfid", async (req, _) => {
-  console.log("RFID data received.");
+  // console.log("RFID data received.");
   // Check if this is an RFID data response
   if (rfidCheckValidity(req.body, users, toggling)) {
     console.log("Valid");
 
     // Parse the JSON data, only return new data
-    const json = rfidCompareToPrevious(lastData, req.body);
-    if (json) {
-      // rfidToggle(); TODO: LUKE ADD THIS BACK
-      if (status !== Status.RACE) {
-        // Qualifying
+    const jsonList = rfidCompareToPrevious(lastData, req.body);
+    if (jsonList) {
+      rfidToggle();
+      jsonList.forEach((json) => {
+        if (status !== Status.RACE) {
+          // Qualifying
 
-        if (carIds.length > 0 && carIds[0] === json.data.idHex) {
-          const userRfidTimes = rfidTimes.get(json.data.idHex);
-          const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-
-          if (lastRFIDTime) {
-            console.log("Last RFID time: " + lastRFIDTime);
-            lapTimes.set(
-              json.data.idHex,
-              rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
-            );
-            wss.clients.forEach((client) => {
-              if (client.readyState === websocket.OPEN) {
-                client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-              }
-            });
+          if (carIds.length > 0 && carIds[0] === json.data.idHex) {
+            const userRfidTimes = rfidTimes.get(json.data.idHex);
+            const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
+            console.log(userRfidTimes);
+            if (lastRFIDTime) {
+              console.log("Last RFID time: " + lastRFIDTime);
+              lapTimes.set(
+                json.data.idHex,
+                rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+              );
+              wss.clients.forEach((client) => {
+                if (client.readyState === websocket.OPEN) {
+                  client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+                }
+              });
+            } else {
+              console.log("No previous RFID time");
+            }
+          } else if (carIds.length === 0) {
+            rfidScannedCar(json);
+            carIds.push(json.data.idHex);
+            rfidTimes.set(json.data.idHex, [json.timestamp]);
+            console.log(carIds, rfidTimes);
           } else {
-            console.log("No previous RFID time");
+            console.log("Wrong car scanned");
           }
-        } else if (carIds.length === 0) {
-          rfidScannedCar(json);
-          carIds.push(json.data.idHex);
-          rfidTimes.set(json.data.idHex, [json.timestamp]);
-          console.log(carIds, rfidTimes);
+
+          // if (!carIds.includes(json.data.idHex)) {
+          //   // qualifyingCarId = rfidScannedCar(json);
+
+          // } else if (carIds[0] === json.data.idHex) {
+          //   const userRfidTimes = rfidTimes.get(json.data.idHex);
+          //   const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
+          //   if (lastRFIDTime) {
+          //     console.log("Last RFID time: " + lastRFIDTime);
+          //     lapTimes.set(
+          //       json.data.idHex,
+          //       rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+          //     );
+          //     wss.clients.forEach((client) => {
+          //       if (client.readyState === websocket.OPEN) {
+          //         client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+          //       }
+          //     });
+          //   } else {
+          //     console.log("No previous RFID time");
+          //     rfidTimes.set(json.data.idHex, [json.timestamp]);
+          //   }
+          // }
         } else {
-          console.log("Wrong car scanned");
-        }
+          // Race
 
-        // if (!carIds.includes(json.data.idHex)) {
-        //   // qualifyingCarId = rfidScannedCar(json);
+          if (users.length === 0) {
+            console.log("No user scanned");
+          } else if (carIds.length < 2 && users.length > 0 && users.length < 3 && !carIds.includes(json.data.idHex)) {
+            console.log("Adding new car");
+            rfidScannedCar(json);
 
-        // } else if (carIds[0] === json.data.idHex) {
-        //   const userRfidTimes = rfidTimes.get(json.data.idHex);
-        //   const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-        //   if (lastRFIDTime) {
-        //     console.log("Last RFID time: " + lastRFIDTime);
-        //     lapTimes.set(
-        //       json.data.idHex,
-        //       rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
-        //     );
-        //     wss.clients.forEach((client) => {
-        //       if (client.readyState === websocket.OPEN) {
-        //         client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-        //       }
-        //     });
-        //   } else {
-        //     console.log("No previous RFID time");
-        //     rfidTimes.set(json.data.idHex, [json.timestamp]);
-        //   }
-        // }
-      } else {
-        // Race
+            carIds.push(json.data.idHex);
+            rfidTimes.set(json.data.idHex, [json.timestamp]);
+          } else if (carIds.length === 2 && users.length === 2 && carIds.includes(json.data.idHex)) {
+            const userRfidTimes = rfidTimes.get(json.data.idHex);
+            const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
 
-        if (users.length === 0) {
-          console.log("No user scanned");
-        } else if (carIds.length < 2 && users.length > 0 && users.length < 3 && !carIds.includes(json.data.idHex)) {
-          console.log("Adding new car");
-          rfidScannedCar(json);
-
-          carIds.push(json.data.idHex);
-          rfidTimes.set(json.data.idHex, [json.timestamp]);
-        } else if (carIds.length === 2 && users.length === 2 && carIds.includes(json.data.idHex)) {
-          const userRfidTimes = rfidTimes.get(json.data.idHex);
-          const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-
-          if (lastRFIDTime) {
-            console.log("Last RFID time: " + lastRFIDTime);
-            lapTimes.set(
-              json.data.idHex,
-              rfidRaceLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
-            );
-            wss.clients.forEach((client) => {
-              if (client.readyState === websocket.OPEN) {
-                client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-              }
-            });
+            if (lastRFIDTime) {
+              console.log("Last RFID time: " + lastRFIDTime);
+              lapTimes.set(
+                json.data.idHex,
+                rfidRaceLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+              );
+              wss.clients.forEach((client) => {
+                if (client.readyState === websocket.OPEN) {
+                  client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+                }
+              });
+            } else {
+              console.log("No previous RFID time");
+            }
           } else {
-            console.log("No previous RFID time");
+            console.log("Something is wrong?");
           }
-        } else {
-          console.log("Something is wrong?");
         }
         addToRFIDTimes(json, rfidTimes);
-      }
+      });
     }
   } else {
-    console.log("Data not valid");
+    // console.log("Data not valid");
   }
   lastData = rfidSaveData(req.body, lastData);
 });

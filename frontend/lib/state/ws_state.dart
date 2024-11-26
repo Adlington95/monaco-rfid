@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/practice_coutdown_page.dart';
+import 'package:frontend/pages/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying_page.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -32,8 +33,13 @@ class WebSocketState with ChangeNotifier {
         debugPrint('Error parsing message: $message');
       }
 
+      if (restState.gameState.loggedInUser != null && restState.gameState.loggedInUser!.previousAttempts != 0) {
+        router.pushReplacement(PracticeInstructionsPage.name);
+      } else {
+        router.pushReplacement(PracticeCountdownPage.name);
+      }
+
       //TODO: Here add redirect to other instruction page
-      router.pushReplacement(PracticeCountdownPage.name);
 
       return;
     } else {
@@ -44,10 +50,11 @@ class WebSocketState with ChangeNotifier {
         debugPrint('Error parsing message: $message');
       }
     }
-
-    if (lapTimes.length == 3) {
+    if (practiceLapsRemaining > 0) {
+      router.pushReplacement(PracticeCountdownPage.name);
+    } else if (lapTimes.length == restState.gameState.practiceLaps) {
       router.pushReplacement(QualifyingPage.name);
-    } else if (lapTimes.length > 12) {
+    } else if (lapTimes.length >= restState.gameState.practiceLaps + restState.gameState.qualifyingLaps) {
       sendLapTime();
     }
 
@@ -55,10 +62,11 @@ class WebSocketState with ChangeNotifier {
   }
 
   int get averageLapTime {
-    if (lapTimes.isEmpty || lapTimes.length < 3) {
+    if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps) {
       return 0;
     }
-    final x = lapTimes.sublist(3).reduce((value, element) => value + element) ~/ (lapTimes.length - 3);
+    final x = lapTimes.sublist(restState.gameState.practiceLaps).reduce((value, element) => value + element) ~/
+        (lapTimes.length - restState.gameState.practiceLaps);
     return x;
   }
 
@@ -68,10 +76,10 @@ class WebSocketState with ChangeNotifier {
     await restState.fetchDriverStandings();
   }
 
-  int get practiceLapsRemaining => (3 - lapTimes.length).clamp(1, 3);
+  int get practiceLapsRemaining => restState.gameState.practiceLaps - lapTimes.length;
 
   double get averageSpeed {
-    if (lapTimes.isEmpty || lapTimes.length < 3) {
+    if (lapTimes.isEmpty) {
       return 0;
     }
     return restState.gameState.circuitLength / lapTimes.last;
@@ -86,14 +94,19 @@ class WebSocketState with ChangeNotifier {
     notifyListeners();
   }
 
-  int get fastestLap =>
-      lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value < element ? value : element);
+  int get fastestLap => lapTimes.length <= restState.gameState.practiceLaps
+      ? 0
+      : lapTimes
+          .sublist(restState.gameState.practiceLaps)
+          .reduce((value, element) => value < element ? value : element);
 
-  int get overallTime => lapTimes.length < 4 ? 0 : lapTimes.sublist(3).reduce((value, element) => value + element);
+  int get overallTime => lapTimes.length <= restState.gameState.practiceLaps
+      ? 0
+      : lapTimes.sublist(restState.gameState.practiceLaps).reduce((value, element) => value + element);
 
   String lapTime(int index) {
-    if (lapTimes.length > 2 + index) {
-      return lapTimes[index + 2].toStringAsFixed(3);
+    if (lapTimes.length > (restState.gameState.practiceLaps - 1) + index) {
+      return lapTimes[index + restState.gameState.practiceLaps - 1].toStringAsFixed(3);
     } else {
       return '';
     }

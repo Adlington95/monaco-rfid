@@ -32,13 +32,13 @@ class PracticeInstructionsPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text('You get 3 practice laps', style: textStyle),
+            Text('You get ${context.read<GameState>().practiceLaps} practice laps', style: textStyle),
             Text(
               'After, you will go straight into',
               style: textStyle.copyWith(fontWeight: FontWeight.w400),
               textAlign: TextAlign.center,
             ),
-            Text('10 qualifying laps', style: textStyle),
+            Text('${context.read<GameState>().qualifyingLaps} qualifying laps', style: textStyle),
           ],
         ),
       ),
