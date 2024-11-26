@@ -131,49 +131,57 @@ class Box extends StatelessWidget {
 }
 
 class GameTitle extends StatelessWidget {
-  const GameTitle({super.key});
+  const GameTitle({super.key, this.isExpanded = true});
+  final bool isExpanded;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 6, left: 4),
-            decoration: const ShapeDecoration(
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  width: 8,
-                  strokeAlign: BorderSide.strokeAlignCenter,
-                  color: Colors.white,
-                ),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(34), topRight: Radius.circular(34)),
-              ),
+    final container = Hero(
+      tag: 'game-title',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6, left: 4),
+        decoration: const ShapeDecoration(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: 8,
+              strokeAlign: BorderSide.strokeAlignCenter,
+              color: Colors.white,
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(32, 16, 32, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SvgPicture.asset('lib/assets/zebra-word.svg', height: 60),
-                  Text(
-                    Provider.of<GameState>(context).eventName,
-                    style: const TextStyle(
-                      fontSize: 42,
-                      color: Colors.white,
-                      fontFamily: 'F1',
-                      fontWeight: FontWeight.w800,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(34), topRight: Radius.circular(34)),
           ),
         ),
-        const Expanded(child: Nothing()),
-      ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SvgPicture.asset('lib/assets/zebra-word.svg', height: 60),
+              Text(
+                Provider.of<GameState>(context).eventName,
+                style: const TextStyle(
+                  fontSize: 42,
+                  color: Colors.white,
+                  fontFamily: 'F1',
+                  fontWeight: FontWeight.w800,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+
+    return isExpanded
+        ? Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: container,
+              ),
+              const Expanded(child: Nothing()),
+            ],
+          )
+        : container;
   }
 }

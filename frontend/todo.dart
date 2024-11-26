@@ -14,3 +14,5 @@
 // TODO: Highlight current user on the finish page
 // TODO: Saving settings does not work correctly
 // TODO: 0 laps flashes on practice page
+// TODO: Add some shadows to names on race start screen
+// TODO: Get lights noise

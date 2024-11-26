@@ -21,6 +21,7 @@ class GameState with ChangeNotifier {
     required this.qualifyingLaps,
     required this.eventName,
     required this.finishPageDuration,
+    required this.raceLaps,
   }) : _serverUrl = serverUrl;
 
   GameState._({
@@ -34,6 +35,7 @@ class GameState with ChangeNotifier {
     int? qualifyingLaps,
     String? eventName,
     int? finishPageDuration,
+    int? raceLaps,
   })  : _serverUrl = serverUrl ?? defaultServerUrl,
         restPort = restPort ?? defaultRestPort,
         websocketPort = websocketPort ?? defaultWebsocketPort,
@@ -42,7 +44,8 @@ class GameState with ChangeNotifier {
         practiceLaps = practiceLaps ?? defaultPracticeLaps,
         qualifyingLaps = qualifyingLaps ?? defaultQualifyingLaps,
         eventName = eventName ?? defaultEventName,
-        finishPageDuration = finishPageDuration ?? defaultFinishPageDuration;
+        finishPageDuration = finishPageDuration ?? defaultFinishPageDuration,
+        raceLaps = raceLaps ?? defaultRaceLaps;
 
   String _serverUrl;
   String get serverUrl => _serverUrl;
@@ -61,6 +64,7 @@ class GameState with ChangeNotifier {
   int practiceLaps;
   int qualifyingLaps;
   int finishPageDuration;
+  int raceLaps;
 
   bool _isLoading = false;
 
@@ -108,6 +112,8 @@ class GameState with ChangeNotifier {
       practiceLaps: prefs.getInt(practiceLapsKey),
       qualifyingLaps: prefs.getInt(qualifyingLapsKey),
       finishPageDuration: prefs.getInt(finishPageDurationKey),
+      eventName: prefs.getString(eventNameKey),
+      raceLaps: prefs.getInt(raceLapsKey),
     );
   }
 
@@ -161,6 +167,8 @@ class GameState with ChangeNotifier {
     await prefs.setInt(practiceLapsKey, practiceLaps);
     await prefs.setInt(qualifyingLapsKey, qualifyingLaps);
     await prefs.setInt(finishPageDurationKey, finishPageDuration);
+    await prefs.setString(eventNameKey, eventName);
+    await prefs.setInt(raceLapsKey, raceLaps);
   }
 
   Future<void> saveToJson() async {

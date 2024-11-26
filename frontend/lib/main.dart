@@ -8,7 +8,9 @@ import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/pages/practice_coutdown_page.dart';
 import 'package:frontend/pages/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying_page.dart';
+import 'package:frontend/pages/race_countdown_page.dart';
 import 'package:frontend/pages/race_login_page.dart';
+import 'package:frontend/pages/race_page.dart';
 import 'package:frontend/pages/race_start_page.dart';
 import 'package:frontend/pages/scan_id_page.dart';
 import 'package:frontend/pages/settings_page.dart';
@@ -109,7 +111,8 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      redirect: (context, state) => LeaderBoardsPage.name,
+      // redirect: (context, state) => LeaderBoardsPage.name,
+      redirect: (context, state) => RacePage.name,
       // redirect: (context, state) => RaceLoginPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const LeaderBoardsPage()),
     ),
@@ -152,6 +155,14 @@ final router = GoRouter(
     GoRoute(
       path: RaceStartPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const RaceStartPage()),
+    ),
+    GoRoute(
+      path: RaceCountdownPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const RaceCountdownPage()),
+    ),
+    GoRoute(
+      path: RacePage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const RacePage()),
     ),
   ],
 );

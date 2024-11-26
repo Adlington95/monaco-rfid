@@ -8,7 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class Dashboard extends StatelessWidget {
-  const Dashboard({super.key});
+  const Dashboard({super.key, this.index});
+
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +44,18 @@ class Dashboard extends StatelessWidget {
                   Circle(
                     children: [
                       FittedBox(child: Stopwatch(initialDuration: state.startTime, style: large)),
-                      const Text('Total Time', style: small),
+                      const Text('TOTAL TIME', style: small),
                     ],
                   ),
                   Circle(
                     children: [
                       const Text('Speed'),
                       FittedBox(
-                        child: Text(state.averageSpeed == 0 ? '' : state.averageSpeed.toStringAsFixed(3), style: large),
+                        child: Text(
+                          (index != null ? state.getAverageSpeedFromIndex(index!) : state.averageSpeed)
+                              .toStringAsFixed(3),
+                          style: large,
+                        ),
                       ),
                       const Text('m/s', style: small),
                     ],

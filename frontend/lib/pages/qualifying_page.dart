@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:frontend/components/card.dart';
-import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
+import 'package:frontend/components/live_timing.dart';
 import 'package:frontend/pages/finish_page.dart';
+import 'package:frontend/pages/race_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
@@ -34,60 +33,9 @@ class QualifyingPage extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
+            const Expanded(
               flex: 7,
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TranslucentCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            SvgPicture.asset('lib/assets/monaco.svg', height: 180),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 30),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text(
-                                    'LAP ${state.lapTimes.length - 2}/${state.restState.gameState.qualifyingLaps}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w300,
-                                      fontSize: 48,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Column(
-                                    children: [
-                                      const Text(
-                                        'FASTEST LAP',
-                                        style:
-                                            TextStyle(fontSize: 32, fontWeight: FontWeight.w500, color: Colors.white),
-                                      ),
-                                      FormattedDuration(
-                                        Duration(milliseconds: state.fastestLap),
-                                        style: const TextStyle(
-                                          fontSize: 48,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Dashboard(),
-                  ],
-                ),
-              ),
+              child: LiveTiming(),
             ),
           ],
         );

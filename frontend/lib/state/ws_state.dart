@@ -20,6 +20,7 @@ class WebSocketState with ChangeNotifier {
   StreamSubscription<dynamic>? _subscription;
 
   List<int> lapTimes = [];
+  Map<String, List<int>> raceLapTimes = {};
   String carId = '';
 
   Map<String, String> raceCarIds = {};
@@ -40,6 +41,7 @@ class WebSocketState with ChangeNotifier {
           } else {
             raceCarIds[restState.gameState.racers.last.id] = scannedCarId;
           }
+          notifyListeners();
         }
       } catch (e) {
         debugPrint('Error parsing message: $message');
@@ -58,21 +60,54 @@ class WebSocketState with ChangeNotifier {
     } else {
       try {
         final obj = jsonDecode(message) as Map<String, dynamic>;
-        lapTimes = (obj.entries.first.value as List).map((e) => e as int).toList();
+        if (restState.status != Status.RACE) {
+          lapTimes = (obj.entries.first.value as List).map((e) => e as int).toList();
+        } else {
+          for (final element in obj.entries) {
+            final carId = element.key;
+            if (raceCarIds.entries.any((element) => element.value == carId)) {
+              final lapTimes = (element.value as List).map((element) => element as int);
+              raceLapTimes[carId] = lapTimes.toList();
+            }
+          }
+        }
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
     }
-    if (practiceLapsRemaining > 0) {
-      router.pushReplacement(PracticeCountdownPage.name);
-    } else if (lapTimes.length == restState.gameState.practiceLaps) {
-      router.pushReplacement(QualifyingPage.name);
-    } else if (lapTimes.length >= restState.gameState.practiceLaps + restState.gameState.qualifyingLaps) {
-      sendLapTime();
+
+    if (restState.status != Status.RACE) {
+      if (practiceLapsRemaining > 0) {
+        router.pushReplacement(PracticeCountdownPage.name);
+      } else if (lapTimes.length == restState.gameState.practiceLaps) {
+        router.pushReplacement(QualifyingPage.name);
+      } else if (lapTimes.length >= restState.gameState.practiceLaps + restState.gameState.qualifyingLaps) {
+        sendLapTime();
+      }
+    } else {
+      // TODO: Race page here?
     }
 
     notifyListeners();
   }
+
+  String? getUserIdFromIndex(int index) {
+    if (index >= restState.gameState.racers.length) {
+      return null;
+    }
+    return restState.gameState.racers[index].id;
+  }
+
+  List<int>? getLapTimesFromIndex(int index) {
+    final userId = getUserIdFromIndex(index);
+    if (userId == null) {
+      return null;
+    }
+    return getLapTimes(userId);
+  }
+
+  List<int>? getLapTimes(String userId) =>
+      raceLapTimes[raceCarIds.entries.firstWhere((element) => element.value == userId).key];
 
   int get averageLapTime {
     if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps) {
@@ -117,12 +152,60 @@ class WebSocketState with ChangeNotifier {
       ? 0
       : lapTimes.sublist(restState.gameState.practiceLaps).reduce((value, element) => value + element);
 
+  int get currentLap => restState.status == Status.RACE ? 0 : lapTimes.length - restState.gameState.practiceLaps;
+
+  int getCurrentLapFromIndex(int index) {
+    final userId = getUserIdFromIndex(index);
+    if (userId == null) {
+      return 0;
+    }
+    final lapTimes = getLapTimes(userId);
+    if (lapTimes == null || lapTimes.isEmpty) {
+      return 0;
+    }
+    return lapTimes.length;
+  }
+
+  double getAverageSpeedFromIndex(int index) {
+    final userId = getUserIdFromIndex(index);
+    if (userId == null) {
+      return 0;
+    }
+    final lapTimes = getLapTimes(userId);
+    if (lapTimes == null || lapTimes.isEmpty) {
+      return 0;
+    }
+    return restState.gameState.circuitLength / lapTimes.last;
+  }
+
+  int get currentLapTime {
+    if (lapTimes.isEmpty) {
+      return 0;
+    }
+    return lapTimes.last;
+  }
+
+  int get totalLaps =>
+      restState.status == Status.RACE ? restState.gameState.raceLaps : restState.gameState.qualifyingLaps;
+
   String lapTime(int index) {
     if (lapTimes.length > (restState.gameState.practiceLaps - 1) + index) {
       return lapTimes[index + restState.gameState.practiceLaps - 1].toStringAsFixed(3);
     } else {
       return '';
     }
+  }
+
+  int getFastestLapFromIndex(int index) {
+    final userId = getUserIdFromIndex(index);
+    if (userId == null) {
+      return 0;
+    }
+    final lapTimes = getLapTimes(userId);
+    if (lapTimes == null || lapTimes.isEmpty) {
+      return 0;
+    }
+    return lapTimes.reduce((value, element) => value < element ? value : element);
   }
 
   Future<void> connect() async {

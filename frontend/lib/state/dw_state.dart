@@ -64,8 +64,9 @@ class DataWedgeState with ChangeNotifier {
           router.go(ScanIdPage.name);
         } else {
           router.go(RaceLoginPage.name);
-
-          unawaited(initScanner());
+          if (gameState.racers.length < 2) {
+            unawaited(initScanner());
+          }
         }
       } catch (e) {
         unawaited(initScanner());
