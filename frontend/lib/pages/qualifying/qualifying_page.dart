@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
 import 'package:frontend/components/live_timing.dart';
-import 'package:frontend/pages/qualifying/finish_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_finish_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
