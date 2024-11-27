@@ -95,7 +95,7 @@ class GameState with ChangeNotifier {
     if (loggedInUser != null) {
       await Future<void>.delayed(const Duration(seconds: 5));
       // TODO: If the user scans the car too quickly, the page will revert back ot the wrong page here
-      if (loggedInUser != null) await router.pushReplacement(CarStartPage.name, extra: loggedInUser);
+      if (loggedInUser != null) await router.pushReplacement(CarStartPage.name);
     }
   }
 

@@ -126,6 +126,8 @@ class WebSocketState with ChangeNotifier {
 
   int get practiceLapsRemaining => restState.gameState.practiceLaps - lapTimes.length;
 
+  String get practiceLapsRemainingString => practiceLapsRemaining.clamp(1, restState.gameState.practiceLaps).toString();
+
   double get averageSpeed {
     if (lapTimes.isEmpty) {
       return 0;

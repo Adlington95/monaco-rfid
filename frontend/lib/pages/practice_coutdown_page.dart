@@ -18,7 +18,7 @@ class PracticeCountdownPage extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(60),
             child: Text(
-              '${state.practiceLapsRemaining} PRACTICE LAP${state.practiceLapsRemaining == 1 ? '' : 'S'} TO GO',
+              '${state.practiceLapsRemainingString} PRACTICE LAP${state.practiceLapsRemainingString == '1' ? '' : 'S'} TO GO',
               style: TextStyle(
                 fontSize: 150,
                 fontWeight: FontWeight.w500,

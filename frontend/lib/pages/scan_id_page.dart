@@ -47,7 +47,7 @@ class _ScanIdPageState extends State<ScanIdPage> {
             : IdCard(
                 title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your ID card below',
                 onTap: gameState.loggedInUser != null
-                    ? () => router.pushReplacement(CarStartPage.name, extra: gameState.loggedInUser)
+                    ? () => router.pushReplacement(CarStartPage.name)
                     : context.read<DataWedgeState>().scanBarcode,
                 data: gameState.loggedInUser,
               ),
