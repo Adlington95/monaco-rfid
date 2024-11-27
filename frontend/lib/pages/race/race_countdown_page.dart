@@ -57,6 +57,25 @@ class _RaceCountdownPageState extends State<RaceCountdownPage> {
       children: [
         const GameTitle(isExpanded: false),
         IntrinsicWidth(child: Row(children: lightState.map((e) => Light(on: e)).gap(40))),
+        const SizedBox(height: 100),
+        const SizedBox(
+          width: 400,
+          child: Hero(
+            tag: 'raceInstructions',
+            child: FittedBox(
+              child: Text(
+                "Don't go until all the lights are out",
+                style: TextStyle(
+                  fontSize: 80,
+                  fontFamily: 'f1',
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ),
       ].gap(100),
     );
   }

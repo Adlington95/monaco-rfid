@@ -282,6 +282,12 @@ app.post("/resetRFID", async (req, res) => {
   res.sendStatus(200);
 });
 
+app.post("/reset", async (req, res) => {
+  rfidToggle();
+  reset();
+  res.sendStatus(200);
+});
+
 const getTopValues = async () => {
   const fastestLap = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 1");
   const fastestOverall = await pool.query("SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 1");

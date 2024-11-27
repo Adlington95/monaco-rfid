@@ -37,7 +37,7 @@ class LiveTiming extends StatelessWidget {
                 child: Hero(
                   tag: 'name-$index',
                   child: Text(
-                    userName,
+                    userName.trim(),
                     style: const TextStyle(fontSize: 40),
                   ),
                 ),

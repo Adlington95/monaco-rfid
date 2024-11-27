@@ -12,6 +12,7 @@ import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying/qualifying_finish_page.dart';
 import 'package:frontend/pages/qualifying/qualifying_page.dart';
 import 'package:frontend/pages/race/race_finish_page.dart';
+import 'package:frontend/pages/race/race_instructions_page.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -50,6 +51,7 @@ class WebSocketState with ChangeNotifier {
             raceCarIds[restState.gameState.racers.first.employeeId] = scannedCarId;
           } else {
             raceCarIds[restState.gameState.racers.last.employeeId] = scannedCarId;
+            router.go(RaceInstructionsPage.name);
           }
           notifyListeners();
         }
@@ -123,6 +125,7 @@ class WebSocketState with ChangeNotifier {
         sendLapTime();
       }
     } else if (raceWinner != null) {
+      restState.reset();
       router.pushReplacement(RaceFinishPage.name);
       // TODO: Maybe send fastest lap time here?
     }
@@ -333,6 +336,11 @@ class WebSocketState with ChangeNotifier {
 
   void clearData() {
     lapTimes = [];
+    raceLapTimes = {};
+    carId = '';
+    raceWinner = null;
+    raceCarIds = {};
+    _startTime = null;
   }
 
   @override

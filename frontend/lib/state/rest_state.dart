@@ -215,8 +215,16 @@ class RestState with ChangeNotifier {
     );
   }
 
+  Future<void> reset() async {
+    await http.post(
+      Uri.parse('${gameState.restUrl}/reset'),
+      headers: {'Content-Type': 'application/json'},
+    );
+  }
+
   void clear() {
     resetStatus();
+
     notifyListeners();
   }
 }

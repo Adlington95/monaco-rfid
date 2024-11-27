@@ -79,8 +79,10 @@ class DataWedgeState with ChangeNotifier {
   void clear() {
     fdw?.scannerControl(false);
     fdw?.enableScanner(false);
-    // gameState.loggedInUser = null;
     fdw = null;
+    error = null;
+    isLoading = false;
+
     notifyListeners();
   }
 
