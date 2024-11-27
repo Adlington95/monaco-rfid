@@ -123,11 +123,11 @@ export const rfidRaceLap = (timestamp: string, previousTimeStamp: string, lapTim
   if (lapTime > debounceTime) {
     console.log("Lap time: " + lapTime);
     lapTimes.push(lapTime);
-    wss.clients.forEach((client) => {
-      if (client.readyState === websocket.OPEN) {
-        client.send(JSON.stringify({ lapTimes: lapTimes }));
-      }
-    });
+    // wss.clients.forEach((client) => {
+    //   if (client.readyState === websocket.OPEN) {
+    //     client.send(JSON.stringify({ lapTimes: lapTimes }));
+    //   }
+    // });
   } else {
     console.log("Lap time too quick");
   }

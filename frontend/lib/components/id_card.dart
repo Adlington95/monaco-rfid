@@ -86,7 +86,7 @@ class IdCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              if (data != null && data?.previousBest != null && data?.previousAttempts != null)
+                              if (data != null && data?.previousFastestLap != null && data?.previousAttempts != null)
                                 Column(
                                   children: [
                                     Row(
@@ -97,7 +97,7 @@ class IdCard extends StatelessWidget {
                                           style: TextStyle(color: Colors.white, fontSize: 24),
                                         ),
                                         FormattedDuration(
-                                          Duration(milliseconds: data!.previousBest!),
+                                          Duration(milliseconds: data!.previousFastestLap!),
                                           style: const TextStyle(color: Colors.white, fontSize: 24),
                                         ),
                                       ],

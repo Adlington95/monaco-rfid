@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/car_start_page.dart';
-import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
-import 'package:frontend/pages/practice_coutdown_page.dart';
-import 'package:frontend/pages/practice_instructions_page.dart';
-import 'package:frontend/pages/qualifying_page.dart';
-import 'package:frontend/pages/race_login_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
+import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_finish_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
 import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:restart_app/restart_app.dart';
@@ -227,6 +227,36 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 40),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.car_crash,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Race laps',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: TextFormField(
+                      onSaved: (value) => value != null ? state.raceLaps = int.tryParse(value) ?? state.raceLaps : null,
+                      initialValue: state.raceLaps.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
 
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -286,7 +316,13 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ZetaButton(label: 'Race Mode', onPressed: () => context.pushReplacement(RaceLoginPage.name)),
+                ZetaButton(
+                  label: 'RFID Reset',
+                  onPressed: () async {
+                    await context.read<RestState>().resetRFID();
+                    if (mounted && context.mounted) context.pop();
+                  },
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

@@ -51,12 +51,17 @@ let lastData: Map<string, string> = new Map();
 
 let status = Status.READY;
 
+let raceStart = false;
+
 // Create  WebSocket server
 export const wss = new websocket.Server({ port: 8080 }).on("connection", (ws) => {
   console.log("Client connected");
 
   // Handle client disconnection
-  ws.on("close", () => console.log("Client disconnected"));
+  ws.on("close", () => {
+    return console.log("Client disconnected");
+    reset();
+  });
 });
 
 // GET all entries
@@ -181,6 +186,7 @@ app.post("/rfid", async (req, _) => {
             const userRfidTimes = rfidTimes.get(json.data.idHex);
             const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
             console.log(userRfidTimes);
+
             if (lastRFIDTime) {
               console.log("Last RFID time: " + lastRFIDTime);
               lapTimes.set(
@@ -240,20 +246,23 @@ app.post("/rfid", async (req, _) => {
           } else if (carIds.length === 2 && users.length === 2 && carIds.includes(json.data.idHex)) {
             const userRfidTimes = rfidTimes.get(json.data.idHex);
             const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-
-            if (lastRFIDTime) {
-              console.log("Last RFID time: " + lastRFIDTime);
-              lapTimes.set(
-                json.data.idHex,
-                rfidRaceLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
-              );
-              wss.clients.forEach((client) => {
-                if (client.readyState === websocket.OPEN) {
-                  client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-                }
-              });
+            if (raceStart) {
+              if (lastRFIDTime) {
+                console.log("Last RFID time: " + lastRFIDTime);
+                lapTimes.set(
+                  json.data.idHex,
+                  rfidRaceLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
+                );
+                wss.clients.forEach((client) => {
+                  if (client.readyState === websocket.OPEN) {
+                    client.send(JSON.stringify(Object.fromEntries(lapTimes)));
+                  }
+                });
+              } else {
+                console.log("No previous RFID time");
+              }
             } else {
-              console.log("No previous RFID time");
+              console.log("Race not started");
             }
           } else {
             console.log("Something is wrong?");
@@ -266,6 +275,11 @@ app.post("/rfid", async (req, _) => {
     // console.log("Data not valid");
   }
   lastData = rfidSaveData(req.body, lastData);
+});
+
+app.post("/resetRFID", async (req, res) => {
+  rfidToggle();
+  res.sendStatus(200);
 });
 
 const getTopValues = async () => {
@@ -402,6 +416,20 @@ app.post("/status", async (req: Request, res: Response) => {
   res.status(200).send({ message: "Status updated" });
 });
 
+app.post("/startRace", async (req: Request, res: Response) => {
+  if (status === Status.RACE && users.length === 2 && carIds.length === 2) {
+    raceStart = true;
+    res.sendStatus(200);
+  } else {
+    res.status(400).send({
+      message: "Status not correct or not enough users or cars scanned",
+      users: users.length,
+      carIds: carIds.length,
+      status: status,
+    });
+  }
+});
+
 app.post("/fakeLaps", async (req, res) => {
   console.log("Setting fake laps");
   carIds[0] = "1";
@@ -426,7 +454,7 @@ const reset = () => {
   users = [];
   rfidTimes = new Map();
   lapTimes = new Map();
-
+  raceStart = false;
   carIds = [];
 };
 

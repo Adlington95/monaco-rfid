@@ -130,7 +130,7 @@ class _NewWidgetState extends State<NewWidget> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(element.name),
+                                  Text(element.name.toUpperCase()),
                                   Row(
                                     children: [
                                       SizedBox(

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/car_start_page.dart';
-import 'package:frontend/pages/finish_page.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
-import 'package:frontend/pages/practice_coutdown_page.dart';
-import 'package:frontend/pages/practice_instructions_page.dart';
-import 'package:frontend/pages/qualifying_page.dart';
-import 'package:frontend/pages/race_countdown_page.dart';
-import 'package:frontend/pages/race_login_page.dart';
-import 'package:frontend/pages/race_page.dart';
-import 'package:frontend/pages/race_start_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
+import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_finish_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
+import 'package:frontend/pages/race/race_countdown_page.dart';
+import 'package:frontend/pages/race/race_finish_page.dart';
+import 'package:frontend/pages/race/race_login_page.dart';
+import 'package:frontend/pages/race/race_page.dart';
+import 'package:frontend/pages/race/race_start_page.dart';
 import 'package:frontend/pages/settings_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
@@ -60,7 +61,7 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
           left: 0,
           top: -260,
           child: SvgPicture.asset(
-            'lib/assets/zebrahead.svg',
+            'assets/zebrahead.svg',
             height: 1460,
           ),
         ),
@@ -112,7 +113,7 @@ final router = GoRouter(
     GoRoute(
       path: '/',
       // redirect: (context, state) => LeaderBoardsPage.name,
-      redirect: (context, state) => RacePage.name,
+      // redirect: (context, state) => RacePage.name,
       // redirect: (context, state) => RaceLoginPage.name,
       pageBuilder: (context, state) => wrapper(context, state, const LeaderBoardsPage()),
     ),
@@ -163,6 +164,10 @@ final router = GoRouter(
     GoRoute(
       path: RacePage.name,
       pageBuilder: (context, state) => wrapper(context, state, const RacePage()),
+    ),
+    GoRoute(
+      path: RaceFinishPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const RaceFinishPage()),
     ),
   ],
 );

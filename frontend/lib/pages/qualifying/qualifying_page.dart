@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/lap_counter.dart';
 import 'package:frontend/components/live_timing.dart';
-import 'package:frontend/pages/finish_page.dart';
-import 'package:frontend/pages/race_page.dart';
+import 'package:frontend/pages/qualifying/finish_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +52,7 @@ class RowItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WebSocketState>(
       builder: (context, state, child) {
-        final time = state.lapTime(index);
+        final time = state.qualifyingLapTime(index);
         return Row(
           children: [
             Container(

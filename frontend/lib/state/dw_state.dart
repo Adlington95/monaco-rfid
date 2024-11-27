@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_datawedge/flutter_datawedge.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/race_login_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
+import 'package:frontend/pages/race/race_login_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
 

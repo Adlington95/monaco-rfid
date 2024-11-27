@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/lap_counter.dart';
 import 'package:frontend/components/leaderboard.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/scan_id_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';

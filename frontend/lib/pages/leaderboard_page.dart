@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/components/leaderboard.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/race_login_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
+import 'package:frontend/pages/race/race_login_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -155,7 +155,7 @@ class GameTitle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset('lib/assets/zebra-word.svg', height: 60),
+              SvgPicture.asset('assets/zebra-word.svg', height: 60),
               Text(
                 Provider.of<GameState>(context).eventName,
                 style: const TextStyle(

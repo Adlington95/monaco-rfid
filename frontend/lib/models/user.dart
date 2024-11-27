@@ -2,38 +2,47 @@ class User {
   const User({
     required this.name,
     required this.previousAttempts,
-    required this.id,
-    this.previousBest,
-    this.teamName,
-    this.employeeId,
+    required this.employeeId,
+    this.id,
+    this.previousBestOverall,
+    this.previousFastestLap,
   });
+
   factory User.fromJson(Map<String, dynamic> json) {
-    final int? previousBest;
+    final int? previousOverall;
     final int previousAttempts;
+    final int? previousFastestLap;
 
     if (json.containsKey('lap_time')) {
-      previousBest = int.parse(json['lap_time'] as String);
+      previousFastestLap = int.parse(json['lap_time'] as String);
     } else {
-      previousBest = null;
+      previousFastestLap = null;
     }
     if (json.containsKey('attempts')) {
       previousAttempts = (json['attempts'] as int) + 1;
     } else {
       previousAttempts = 0;
     }
+    if (json.containsKey('overall_time')) {
+      previousOverall = int.parse(json['overall_time'] as String);
+    } else {
+      previousOverall = null;
+    }
+
     return User(
       employeeId: json['employee_id'] as String,
       id: json['id'].toString(),
       name: json['name'] as String,
       previousAttempts: previousAttempts,
-      previousBest: previousBest,
-      teamName: json['team_name'] as String,
+      previousBestOverall: previousOverall,
+      previousFastestLap: previousFastestLap,
     );
   }
+
   final String name;
-  final int? previousBest;
-  final String? teamName;
-  final String? employeeId;
-  final int previousAttempts;
-  final String id;
+  final String employeeId;
+  final int? previousBestOverall;
+  final int? previousFastestLap;
+  final String? id;
+  final int? previousAttempts;
 }

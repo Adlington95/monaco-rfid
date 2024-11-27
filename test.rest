@@ -30,7 +30,7 @@ Content-Type: application/json
   
   {
     "name": "Luke Walton",
-    "id": "903858952"
+    "id": "Luke Walton"
   }
 
 ### Get individual leaderboard
@@ -72,7 +72,7 @@ POST http://localhost:13000/status
 Content-Type: application/json
 
   {
-    "status":3
+    "status": 1
   }
 
 ### PUT Lights

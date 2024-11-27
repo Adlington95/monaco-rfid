@@ -2,61 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/card.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/leaderboard_row.dart';
-import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class LapCounter extends StatelessWidget {
-  const LapCounter({super.key});
+  const LapCounter({super.key, this.index});
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'lap-counter',
-      child: TranslucentCard(
-        child: Padding(
-          padding: const EdgeInsets.all(24).copyWith(right: 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const Text('LAP TIMES', style: TextStyle(fontSize: 40, color: Colors.white)),
-              Center(
-                child: Column(
-                  children:
-                      List.generate(context.read<GameState>().qualifyingLaps, (index) => RowItem(index: index + 1))
-                          .gap(12),
-                ),
+    return Consumer<WebSocketState>(
+      builder: (context, state, _) {
+        return Hero(
+          tag: 'lap-counter-$index',
+          child: TranslucentCard(
+            child: Padding(
+              padding: const EdgeInsets.all(24).copyWith(right: 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    index != null ? state.restState.gameState.racers[index! - 1].name : 'LAP TIMES',
+                    style: const TextStyle(
+                      fontSize: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: Column(
+                          children: List.generate(
+                            index != null
+                                ? state.restState.gameState.raceLaps
+                                : state.restState.gameState.qualifyingLaps,
+                            (lap) => RowItem(lap: lap + 1, index: index),
+                          ).gap(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class RowItem extends StatelessWidget {
-  const RowItem({super.key, required this.index});
+  const RowItem({super.key, required this.lap, this.index});
 
-  final int index;
+  final int lap;
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<WebSocketState>(
       builder: (context, state, child) {
-        final time = state.lapTime(index);
+        final time = index != null ? state.raceLapTime(lap, index!) : state.qualifyingLapTime(lap);
+        final isPurple = index != null
+            ? time == state.fastestRaceLap.toStringAsFixed(3)
+            : double.tryParse(time) != null &&
+                double.parse(time).toInt() == state.fastestLap &&
+                (state.restState.gameState.loggedInUser == null ||
+                    (state.restState.gameState.loggedInUser != null &&
+                        state.restState.gameState.loggedInUser!.previousFastestLap != null &&
+                        state.restState.gameState.loggedInUser!.previousFastestLap! > state.fastestLap));
+
+        final isGreen =
+            index == null && double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap;
 
         return LeaderboardRow(
-          index: index,
-          isPurple: double.tryParse(time) != null &&
-              double.parse(time).toInt() == state.fastestLap &&
-              (state.restState.gameState.loggedInUser == null ||
-                  (state.restState.gameState.loggedInUser != null &&
-                      state.restState.gameState.loggedInUser!.previousBest != null &&
-                      state.restState.gameState.loggedInUser!.previousBest! > state.fastestLap)),
-          isGreen: double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap,
+          index: lap,
+          isPurple: isPurple,
+          isGreen: isGreen,
           child: double.tryParse(time) != null
               ? FormattedDuration(
                   Duration(milliseconds: double.parse(time).toInt()),

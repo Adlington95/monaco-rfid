@@ -4,15 +4,11 @@ import 'package:frontend/components/card.dart';
 import 'package:frontend/components/dashboard.dart';
 
 import 'package:frontend/components/formatted_duration.dart';
-import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
 class LiveTiming extends StatelessWidget {
-  const LiveTiming({
-    super.key,
-    this.index,
-  });
+  const LiveTiming({super.key, this.index});
 
   final int? index;
 
@@ -20,16 +16,29 @@ class LiveTiming extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WebSocketState>(
       builder: (context, state, _) {
+        final String userName;
+
+        if (state.restState.gameState.loggedInUser != null) {
+          userName = state.restState.gameState.loggedInUser!.name;
+        } else if (state.restState.gameState.racers.isNotEmpty &&
+            index != null &&
+            index! - 1 < state.restState.gameState.racers.length) {
+          userName = state.restState.gameState.racers[index! - 1].name;
+        } else {
+          userName = 'Player ${index == null ? '1' : index.toString()}';
+        }
+
         return Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               FittedBox(
-                child: Text(
-                  context.read<GameState>().loggedInUser?.name ?? 'Player ${index == null ? '1' : index.toString()}',
-                  style: const TextStyle(
-                    fontSize: 40,
+                child: Hero(
+                  tag: 'name-$index',
+                  child: Text(
+                    userName,
+                    style: const TextStyle(fontSize: 40),
                   ),
                 ),
               ),
@@ -38,14 +47,14 @@ class LiveTiming extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      SvgPicture.asset('lib/assets/monaco.svg', height: 180),
+                      SvgPicture.asset('assets/monaco.svg', height: 180),
                       Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'LAP ${index != null ? state.getCurrentLapFromIndex(index!) : state.currentLap}/${state.totalLaps}',
+                              'LAP ${(index != null ? state.getCurrentLapFromIndex(index!) : state.currentLap).clamp(1, state.maxLaps)}/${state.totalLaps}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w300,
                                 fontSize: 48,
@@ -78,7 +87,7 @@ class LiveTiming extends StatelessWidget {
                   ),
                 ),
               ),
-              const Dashboard(),
+              Dashboard(index: index),
             ],
           ),
         );

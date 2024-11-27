@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,8 +11,8 @@ import 'package:frontend/models/driver_standing_item.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/pages/race_start_page.dart';
-import 'package:frontend/pages/scan_id_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
+import 'package:frontend/pages/race/race_start_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:http/http.dart' as http;
 
@@ -125,7 +126,7 @@ class RestState with ChangeNotifier {
           final newUser = User(
             name: body.name,
             previousAttempts: 0,
-            id: body.id,
+            employeeId: body.id,
           );
           if (status == Status.RACE) {
             gameState.addRacer(newUser);
@@ -190,6 +191,28 @@ class RestState with ChangeNotifier {
       debugPrint(e.toString());
       rethrow;
     }
+  }
+
+  Future<void> startRace() async {
+    final res = await http.post(
+      Uri.parse('${gameState.restUrl}/startRace'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (res.statusCode == 200) {
+      return;
+    } else {
+      debugPrint(res.body);
+      unawaited(Fluttertoast.showToast(msg: 'Unable to start race. Please try again', toastLength: Toast.LENGTH_SHORT));
+      throw Exception('Failed to start race');
+    }
+  }
+
+  Future<void> resetRFID() async {
+    await http.post(
+      Uri.parse('${gameState.restUrl}/resetRFID'),
+      headers: {'Content-Type': 'application/json'},
+    );
   }
 
   void clear() {

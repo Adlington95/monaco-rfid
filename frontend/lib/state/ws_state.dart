@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/finish_page.dart';
-import 'package:frontend/pages/practice_coutdown_page.dart';
-import 'package:frontend/pages/practice_instructions_page.dart';
-import 'package:frontend/pages/qualifying_page.dart';
+import 'package:frontend/models/user.dart';
+import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
+import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_finish_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_page.dart';
+import 'package:frontend/pages/race/race_finish_page.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -22,8 +26,14 @@ class WebSocketState with ChangeNotifier {
   List<int> lapTimes = [];
   Map<String, List<int>> raceLapTimes = {};
   String carId = '';
+  User? raceWinner;
 
   Map<String, String> raceCarIds = {};
+
+  int get winningIndex => restState.gameState.racers.indexOf(raceWinner!);
+
+  int get maxLaps =>
+      restState.status == Status.RACE ? restState.gameState.raceLaps : restState.gameState.qualifyingLaps;
 
   bool get connected => _channel != null;
 
@@ -37,9 +47,9 @@ class WebSocketState with ChangeNotifier {
           carId = scannedCarId;
         } else {
           if (raceCarIds.isEmpty) {
-            raceCarIds[restState.gameState.racers.first.id] = scannedCarId;
+            raceCarIds[restState.gameState.racers.first.employeeId] = scannedCarId;
           } else {
-            raceCarIds[restState.gameState.racers.last.id] = scannedCarId;
+            raceCarIds[restState.gameState.racers.last.employeeId] = scannedCarId;
           }
           notifyListeners();
         }
@@ -70,6 +80,34 @@ class WebSocketState with ChangeNotifier {
               raceLapTimes[carId] = lapTimes.toList();
             }
           }
+          if (raceWinner == null) {
+            final finishers =
+                raceLapTimes.entries.where((element) => element.value.length > restState.gameState.raceLaps);
+
+            if (finishers.isNotEmpty) {
+              final String winingCarId;
+
+              if (finishers.length == 1) {
+                winingCarId = finishers.first.key;
+              } else {
+                // TODO: SHould this 0 be a 1?
+                final p1Times = finishers.first.value
+                    .getRange(1, restState.gameState.raceLaps)
+                    .reduce((combined, element) => combined + element);
+                final p2Times = finishers.last.value
+                    .getRange(1, restState.gameState.raceLaps)
+                    .reduce((combined, element) => combined + element);
+                if (p1Times < p2Times) {
+                  winingCarId = finishers.first.key;
+                } else {
+                  winingCarId = finishers.last.key;
+                }
+              }
+              // TODO: Get user id from car id - replace the winnigncarid in the next line with this.
+              final userId = getUserIdFromCarId(winingCarId);
+              raceWinner = restState.gameState.racers.firstWhereOrNull((element) => element.employeeId == userId);
+            }
+          }
         }
       } catch (e) {
         debugPrint('Error parsing message: $message');
@@ -84,18 +122,27 @@ class WebSocketState with ChangeNotifier {
       } else if (lapTimes.length >= restState.gameState.practiceLaps + restState.gameState.qualifyingLaps) {
         sendLapTime();
       }
-    } else {
-      // TODO: Race page here?
+    } else if (raceWinner != null) {
+      router.pushReplacement(RaceFinishPage.name);
+      // TODO: Maybe send fastest lap time here?
     }
 
     notifyListeners();
   }
 
+  String getUserIdFromCarId(String carId) {
+    return raceCarIds.entries.firstWhere((element) => element.value == carId).key;
+  }
+
   String? getUserIdFromIndex(int index) {
-    if (index >= restState.gameState.racers.length) {
+    if (index - 1 >= restState.gameState.racers.length) {
       return null;
     }
-    return restState.gameState.racers[index].id;
+    return restState.gameState.racers[index - 1].id;
+  }
+
+  String getCarIdFromIndex(int index) {
+    return raceCarIds.entries.toList()[index - 1].value;
   }
 
   List<int>? getLapTimesFromIndex(int index) {
@@ -106,8 +153,9 @@ class WebSocketState with ChangeNotifier {
     return getLapTimes(userId);
   }
 
-  List<int>? getLapTimes(String userId) =>
-      raceLapTimes[raceCarIds.entries.firstWhere((element) => element.value == userId).key];
+  List<int>? getLapTimes(String carId) {
+    return raceLapTimes[carId];
+  }
 
   int get averageLapTime {
     if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps) {
@@ -119,8 +167,22 @@ class WebSocketState with ChangeNotifier {
   }
 
   Future<void> sendLapTime() async {
+    final newFastestLap =
+        restState.gameState.loggedInUser != null && restState.gameState.loggedInUser?.previousFastestLap != null
+            ? (restState.gameState.loggedInUser!.previousFastestLap! < fastestLap
+                ? restState.gameState.loggedInUser!.previousFastestLap!
+                : fastestLap)
+            : fastestLap;
+
+    final newOverallTime =
+        restState.gameState.loggedInUser != null && restState.gameState.loggedInUser?.previousBestOverall != null
+            ? (restState.gameState.loggedInUser!.previousBestOverall! < overallTime
+                ? restState.gameState.loggedInUser!.previousBestOverall!
+                : overallTime)
+            : overallTime;
+
     unawaited(router.pushReplacement(FinishPage.name));
-    await restState.postLap(fastestLap, overallTime, carId);
+    await restState.postLap(newFastestLap, newOverallTime, carId);
     await restState.fetchDriverStandings();
   }
 
@@ -157,11 +219,8 @@ class WebSocketState with ChangeNotifier {
   int get currentLap => restState.status == Status.RACE ? 0 : lapTimes.length - restState.gameState.practiceLaps;
 
   int getCurrentLapFromIndex(int index) {
-    final userId = getUserIdFromIndex(index);
-    if (userId == null) {
-      return 0;
-    }
-    final lapTimes = getLapTimes(userId);
+    final carId = getCarIdFromIndex(index);
+    final lapTimes = getLapTimes(carId);
     if (lapTimes == null || lapTimes.isEmpty) {
       return 0;
     }
@@ -169,12 +228,9 @@ class WebSocketState with ChangeNotifier {
   }
 
   double getAverageSpeedFromIndex(int index) {
-    final userId = getUserIdFromIndex(index);
-    if (userId == null) {
-      return 0;
-    }
-    final lapTimes = getLapTimes(userId);
-    if (lapTimes == null || lapTimes.isEmpty) {
+    final carId = getCarIdFromIndex(index);
+    final lapTimes = getLapTimes(carId);
+    if (lapTimes == null || lapTimes.isEmpty || lapTimes.length == 1) {
       return 0;
     }
     return restState.gameState.circuitLength / lapTimes.last;
@@ -190,21 +246,32 @@ class WebSocketState with ChangeNotifier {
   int get totalLaps =>
       restState.status == Status.RACE ? restState.gameState.raceLaps : restState.gameState.qualifyingLaps;
 
-  String lapTime(int index) {
-    if (lapTimes.length > (restState.gameState.practiceLaps - 1) + index) {
-      return lapTimes[index + restState.gameState.practiceLaps - 1].toStringAsFixed(3);
+  String qualifyingLapTime(int lap) {
+    if (lapTimes.length > (restState.gameState.practiceLaps - 1) + lap) {
+      return lapTimes[lap + restState.gameState.practiceLaps - 1].toStringAsFixed(3);
     } else {
       return '';
     }
   }
 
-  int getFastestLapFromIndex(int index) {
-    final userId = getUserIdFromIndex(index);
-    if (userId == null) {
-      return 0;
+  String raceLapTime(int lap, int index) {
+    final carId = getCarIdFromIndex(index);
+    final lapTimes = getLapTimes(carId);
+    if (lapTimes == null || lapTimes.length <= lap) {
+      return '';
     }
-    final lapTimes = getLapTimes(userId);
-    if (lapTimes == null || lapTimes.isEmpty) {
+    return lapTimes[lap].toStringAsFixed(3);
+  }
+
+  int get fastestRaceLap {
+    final lapTimes = raceLapTimes.values.map((e) => e.reduce((value, element) => value < element ? value : element));
+    return lapTimes.reduce((value, element) => value < element ? value : element);
+  }
+
+  int getFastestLapFromIndex(int index) {
+    final carId = getCarIdFromIndex(index);
+    final lapTimes = getLapTimes(carId);
+    if (lapTimes == null || lapTimes.isEmpty || lapTimes.length == 1) {
       return 0;
     }
     return lapTimes.reduce((value, element) => value < element ? value : element);
@@ -248,6 +315,7 @@ class WebSocketState with ChangeNotifier {
 
   void sendMessage(String message) {
     if (_channel != null) {
+      debugPrint('Sending message: $message');
       _channel!.sink.add(message);
     }
   }

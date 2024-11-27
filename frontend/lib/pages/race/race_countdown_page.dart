@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
-import 'package:frontend/pages/race_page.dart';
+import 'package:frontend/pages/race/race_page.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 class RaceCountdownPage extends StatefulWidget {
@@ -15,6 +19,8 @@ class RaceCountdownPage extends StatefulWidget {
 }
 
 class _RaceCountdownPageState extends State<RaceCountdownPage> {
+  final player = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +35,7 @@ class _RaceCountdownPageState extends State<RaceCountdownPage> {
     await Future<void>.delayed(Duration(milliseconds: delay1));
     for (var i = 0; i < lightState.length; i++) {
       await Future<void>.delayed(const Duration(seconds: 1));
-
+      unawaited(player.play(AssetSource('light_out.mp3')));
       setState(() => lightState[i] = true);
     }
     final delay2 = random.nextInt(1500) + 1000;
@@ -37,6 +43,7 @@ class _RaceCountdownPageState extends State<RaceCountdownPage> {
     setState(() {
       lightState.fillRange(0, lightState.length, false);
     });
+    if (mounted) await context.read<RestState>().startRace();
     await Future<void>.delayed(const Duration(seconds: 3));
     if (mounted) context.go(RacePage.name);
   }

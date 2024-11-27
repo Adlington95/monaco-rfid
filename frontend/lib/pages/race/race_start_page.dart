@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/components/card.dart';
-import 'package:frontend/pages/leaderboard_page.dart';
+import 'package:frontend/pages/race/race_countdown_page.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
@@ -25,7 +26,7 @@ class RaceStartPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              if (state.raceCarIds.length > 2)
+              if (state.raceCarIds.length < 2)
                 Column(
                   children: [
                     Text(
@@ -49,23 +50,24 @@ class RaceStartPage extends StatelessWidget {
                 )
               else
                 TranslucentCard(
-                  child: InkWell(
-                    onTap: () {
-                      // wsState.startRace();
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(40),
-                      child: Text(
-                        'READY',
-                        style: TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.w500,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: InkWell(
+                      onTap: () => context.go(RaceCountdownPage.name),
+                      child: const Padding(
+                        padding: EdgeInsets.all(40),
+                        child: Text(
+                          'READY',
+                          style: TextStyle(
+                            fontSize: 100,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              SvgPicture.asset('lib/assets/car.svg', width: 200, height: 200),
+              SvgPicture.asset('assets/car.svg', width: 200, height: 200),
             ].gap(40),
           ),
         );

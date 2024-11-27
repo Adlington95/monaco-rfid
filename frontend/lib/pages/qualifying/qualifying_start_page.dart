@@ -52,7 +52,7 @@ class _CarStartPageState extends State<CarStartPage> {
               const SizedBox(height: 20),
               GestureDetector(
                 onTap: Provider.of<GameState>(context).isEmulator ? () => state.addMessage('{"connected":true}') : null,
-                child: SvgPicture.asset('lib/assets/car.svg', width: 200, height: 200),
+                child: SvgPicture.asset('assets/car.svg', width: 200, height: 200),
               ),
             ],
           ),
