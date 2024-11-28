@@ -3,6 +3,8 @@
 // TODO: TEST: Laptimes are not purple for new users
 // TODO: TEST: If user is new, show the car start page
 
+// TODO: 2 leaderbaords - fastest lap and overall time
+
 // TODO: Highlight current user on the finish page leaderboard
 // TODO: Time out app from any screen after X seconds. Return to leaderboard page.
 // TODO: Have a way to delete lap times

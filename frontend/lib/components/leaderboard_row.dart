@@ -10,7 +10,7 @@ class LeaderboardRow extends StatelessWidget {
     this.highlighted = false,
     this.isPurple = false,
     this.isGreen = false,
-    this.isRed = false;
+    this.isRed = false,
   });
 
   final int index;
@@ -55,7 +55,7 @@ class _RowContents extends StatelessWidget {
     required this.child,
     required this.isPurple,
     required this.isGreen,
-    required this.isRed
+    required this.isRed,
   });
 
   final bool highlighted;
@@ -78,10 +78,10 @@ class _RowContents extends StatelessWidget {
               : isRed
                   ? Zeta.of(context).colors.red
                   : isPurple
-                  ? Zeta.of(context).colors.purple
-                  : isGreen
-                      ? Zeta.of(context).colors.green
-                      : Zeta.of(context).colors.textDefault,
+                      ? Zeta.of(context).colors.purple
+                      : isGreen
+                          ? Zeta.of(context).colors.green
+                          : Zeta.of(context).colors.textDefault,
           child: Center(
             child: Text(
               index.toString(),

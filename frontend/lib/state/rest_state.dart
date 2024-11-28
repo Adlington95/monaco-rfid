@@ -222,6 +222,8 @@ class RestState with ChangeNotifier {
     );
   }
 
+  Future<void> raceReady() async => http.get(Uri.parse('${gameState.restUrl}/raceReady'));
+
   void clear() {
     resetStatus();
 

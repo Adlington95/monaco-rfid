@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/card.dart';
 import 'package:frontend/pages/race/race_countdown_page.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class RaceInstructionsPage extends StatelessWidget {
   const RaceInstructionsPage({super.key});
@@ -42,7 +44,10 @@ class RaceInstructionsPage extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: InkWell(
-                onTap: () => context.go(RaceCountdownPage.name),
+                onTap: () {
+                  context.read<RestState>().raceReady();
+                  context.go(RaceCountdownPage.name);
+                },
                 child: const Padding(
                   padding: EdgeInsets.all(40),
                   child: Text(

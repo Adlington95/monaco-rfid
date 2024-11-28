@@ -41,10 +41,12 @@ class WebSocketState with ChangeNotifier {
   bool get connected => _channel != null;
 
   void addMessage(String message) {
-    if (message.contains('jump')) { //jump start
+    if (message.contains('jump')) {
+      //jump start
       final obj = jsonDecode(message);
+      // ignore: avoid_dynamic_calls
       final carId = obj['carId'] as String;
-      invalidatedLaps.push(carId);
+      invalidatedLaps.add(carId);
     }
     if (message.contains('Car scanned')) {
       try {
