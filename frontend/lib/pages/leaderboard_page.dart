@@ -4,6 +4,7 @@ import 'package:frontend/components/leaderboard.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
 import 'package:frontend/pages/race/race_login_page.dart';
+import 'package:frontend/pages/settings_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -38,57 +39,77 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : ScanIdPage.name),
-      child: PopScope(
-        canPop: false,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: GestureDetector(
+            onLongPress: () {
+              Provider.of<DataWedgeState>(context, listen: false).clear();
+              context.push(SettingsPage.name);
+            },
+            child: Icon(
+              ZetaIcons.settings,
+              color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
+              size: 60,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () =>
+              context.push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : ScanIdPage.name),
+          child: PopScope(
+            canPop: false,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
+              child: Column(
                 children: [
-                  const Expanded(child: GameTitle()),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Qualifying'),
-                      ZetaSwitch(
-                        value: context.watch<RestState>().status == Status.RACE,
-                        onChanged: (x) {
-                          if (x != null) {
-                            context.read<RestState>().resetStatus(status: x ? Status.RACE : Status.QUALIFYING);
-                            context.read<DataWedgeState>().initScanner(
-                                  redirect: true,
-                                );
-                          }
-                        },
+                      const Expanded(child: GameTitle()),
+                      Row(
+                        children: [
+                          const Text('Qualifying'),
+                          ZetaSwitch(
+                            value: context.watch<RestState>().status == Status.RACE,
+                            onChanged: (x) {
+                              if (x != null) {
+                                context.read<RestState>().resetStatus(status: x ? Status.RACE : Status.QUALIFYING);
+                                context.read<DataWedgeState>().initScanner(
+                                      redirect: true,
+                                    );
+                              }
+                            },
+                          ),
+                          const Text('Race'),
+                        ],
                       ),
-                      const Text('Race'),
                     ],
+                  ),
+                  Expanded(
+                    child: Box(
+                      child: context.watch<RestState>().driverStandings == null
+                          ? const Center(child: CircularProgressIndicator())
+                          : const Leaderboard(),
+                    ),
+                  ),
+                  Shimmer.fromColors(
+                    baseColor: Colors.white,
+                    highlightColor: Colors.grey,
+                    period: const Duration(milliseconds: 2500),
+                    child: const Text(
+                      'To start a new game, scan your SKO pass below or tap the screen',
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ).paddingTop(40),
                   ),
                 ],
               ),
-              Expanded(
-                child: Box(
-                  child: context.watch<RestState>().driverStandings == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : const Leaderboard(),
-                ),
-              ),
-              Shimmer.fromColors(
-                baseColor: Colors.white,
-                highlightColor: Colors.grey,
-                period: const Duration(milliseconds: 2500),
-                child: const Text(
-                  'To start a new game, scan your SKO pass below or tap the screen',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ).paddingTop(40),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

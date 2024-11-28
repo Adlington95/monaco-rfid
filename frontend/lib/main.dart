@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -24,21 +27,19 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
-//TODO: Add a timer that returns to the main leaderboard screen if nothing happens for a minute
-
+Key key = UniqueKey();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   final GameState state;
-  // if (Platform.isAndroid) {
-  //   final deviceInfo = await DeviceInfoPlugin().androidInfo;
-  //   state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
-  // } else {
-  //   state = await GameState.loadFromPreferences(isEmulator: true);
-  // }
-  state = await GameState.loadFromPreferences(isEmulator: true);
+  if (Platform.isAndroid) {
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
+  } else {
+    state = await GameState.loadFromPreferences(isEmulator: true);
+  }
 
-  runApp(MyApp(state: state));
+  runApp(MyApp(state: state, key: key));
 }
 
 CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Widget child) {
@@ -91,24 +92,11 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
         Positioned(
           right: 40,
           top: 40,
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: () => context.pushReplacement(LeaderBoardsPage.name),
-                icon: const Icon(ZetaIcons.restart_alt),
-              ),
-              GestureDetector(
-                onLongPress: () {
-                  Provider.of<DataWedgeState>(context, listen: false).clear();
-                  router.push(SettingsPage.name);
-                },
-                child: Icon(
-                  ZetaIcons.settings,
-                  color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
-                  size: 60,
-                ),
-              ),
-            ],
+          child: IconButton(
+            onPressed: () => context.pushReplacement(LeaderBoardsPage.name),
+            icon: const Icon(ZetaIcons.restart_alt),
+            color: Colors.white.withOpacity(0.8),
+            iconSize: 60,
           ),
         ),
       ],
