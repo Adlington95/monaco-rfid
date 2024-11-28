@@ -273,16 +273,16 @@ app.post("/rfid", async (req, _) => {
                 console.log("No previous RFID time");
               }
             } else {
-            //jump start - send notification to frontend
-            if (isRaceReady) {
-            wss.clients.forEach((client) => {
-              if (client.readyState === websocket.OPEN) {
-                client.send(JSON.stringify({ message: 'jump start detected', carId: json.data.idHex })); //send message to frontend
+              //jump start - send notification to frontend
+              if (isRaceReady) {
+                wss.clients.forEach((client) => {
+                  if (client.readyState === websocket.OPEN) {
+                    client.send(JSON.stringify({ message: "jump start detected", carId: json.data.idHex })); //send message to frontend
+                  }
+                });
+                console.log("Race not started");
               }
-            });
-              console.log("Race not started");
             }
-          }
           } else {
             console.log("Something is wrong?");
           }
