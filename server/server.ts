@@ -39,6 +39,8 @@ export let token: string | undefined | null;
 // Whether the RFID reader is toggling
 export let toggling: boolean = false;
 
+let isRaceReady = false;
+
 let carIds: string[] = [];
 let users: User[] = [];
 
@@ -128,6 +130,16 @@ app.get("/stop", async (_, res: Response) => {
   try {
     rfidStop();
     res.status(200);
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/raceReady", async (_, res: Response) => {
+  try {
+    res.status(200);
+    isRaceReady = true;
   } catch (e) {
     console.error(e);
     res.sendStatus(500);
@@ -262,6 +274,7 @@ app.post("/rfid", async (req, _) => {
               }
             } else {
             //jump start - send notification to frontend
+            if (isRaceReady) {
             wss.clients.forEach((client) => {
               if (client.readyState === websocket.OPEN) {
                 client.send(JSON.stringify({ message: 'jump start detected', carId: json.data.idHex })); //send message to frontend
@@ -269,6 +282,7 @@ app.post("/rfid", async (req, _) => {
             });
               console.log("Race not started");
             }
+          }
           } else {
             console.log("Something is wrong?");
           }
@@ -467,6 +481,7 @@ const reset = () => {
   lapTimes = new Map();
   raceStart = false;
   carIds = [];
+  isRaceReady = false;
 };
 
 // Set whether the RFID reader is toggling
