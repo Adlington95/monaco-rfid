@@ -183,22 +183,11 @@ class WebSocketState with ChangeNotifier {
   }
 
   Future<void> sendLapTime() async {
-    final newFastestLap =
-        restState.gameState.loggedInUser != null && restState.gameState.loggedInUser?.previousFastestLap != null
-            ? (restState.gameState.loggedInUser!.previousFastestLap! < fastestLap
-                ? restState.gameState.loggedInUser!.previousFastestLap!
-                : fastestLap)
-            : fastestLap;
-
-    final newOverallTime =
-        restState.gameState.loggedInUser != null && restState.gameState.loggedInUser?.previousBestOverall != null
-            ? (restState.gameState.loggedInUser!.previousBestOverall! < overallTime
-                ? restState.gameState.loggedInUser!.previousBestOverall!
-                : overallTime)
-            : overallTime;
-
-    unawaited(router.pushReplacement(FinishPage.name));
-    await restState.postLap(newFastestLap, newOverallTime, carId);
+    unawaited(router.pushReplacement(QualifyingFinishPage.name));
+    if (fastestLap == null) {
+      return;
+    }
+    await restState.postLap(fastestLap!, overallTime, carId);
     await restState.fetchDriverStandings();
   }
 
@@ -222,8 +211,8 @@ class WebSocketState with ChangeNotifier {
     notifyListeners();
   }
 
-  int get fastestLap => lapTimes.length <= restState.gameState.practiceLaps
-      ? double.infinity.toInt()
+  int? get fastestLap => lapTimes.length <= restState.gameState.practiceLaps
+      ? null
       : lapTimes
           .sublist(restState.gameState.practiceLaps)
           .reduce((value, element) => value < element ? value : element);

@@ -72,7 +72,7 @@ class RowItem extends StatelessWidget {
                 (state.restState.gameState.loggedInUser == null ||
                     (state.restState.gameState.loggedInUser != null &&
                         state.restState.gameState.loggedInUser!.previousFastestLap != null &&
-                        state.restState.gameState.loggedInUser!.previousFastestLap! > state.fastestLap));
+                        state.restState.gameState.loggedInUser!.previousFastestLap! > (state.fastestLap ?? 0)));
 
         final isGreen =
             index == null && double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap;

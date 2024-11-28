@@ -8,6 +8,7 @@
 // TODO: Have a way to delete lap times
 // TODO: Add some shadows to names on race start screen
 // TODO: Get Lights out sound byte 
+// TODO: Configure what it is that the user scans - name badge / SKO pass etc.
 
 // TODO: Saving settings does not work correctly.
 // TODO: Animate the average speed before it is populated

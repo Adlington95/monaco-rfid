@@ -5,7 +5,7 @@ GET http://localhost:13000/start
 ### Stop RFID
 GET http://localhost:13000/stop
 ### Get all rows from the database
-GET http://localhost:13000
+GET http://169.254.39.254:13000
 
 ### POST fastest lap time
 POST http://localhost:13000/lap
@@ -54,7 +54,7 @@ GET http://localhost:13000/removeTableFromDb
 
 
 ### POST RFID data
-POST http://localhost:13000/rfid
+POST http://169.254.39.254:13000/rfid
 Content-Type: application/json
 
 [  

@@ -168,7 +168,7 @@ app.get("/getOverallLeaderboard", async (req, res) => {
 
 // Post RFID data
 app.post("/rfid", async (req, _) => {
-  // console.log("RFID data received.");
+  console.log("RFID data received.");
   // Check if this is an RFID data response
   if (rfidCheckValidity(req.body, users, toggling)) {
     console.log("Valid");

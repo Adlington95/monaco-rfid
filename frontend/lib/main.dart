@@ -91,16 +91,24 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
         Positioned(
           right: 40,
           top: 40,
-          child: GestureDetector(
-            onLongPress: () {
-              Provider.of<DataWedgeState>(context, listen: false).clear();
-              router.push(SettingsPage.name);
-            },
-            child: Icon(
-              ZetaIcons.settings,
-              color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
-              size: 60,
-            ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => context.pushReplacement(LeaderBoardsPage.name),
+                icon: const Icon(ZetaIcons.restart_alt),
+              ),
+              GestureDetector(
+                onLongPress: () {
+                  Provider.of<DataWedgeState>(context, listen: false).clear();
+                  router.push(SettingsPage.name);
+                },
+                child: Icon(
+                  ZetaIcons.settings,
+                  color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
+                  size: 60,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -143,8 +151,8 @@ final router = GoRouter(
       pageBuilder: (context, state) => wrapper(context, state, const QualifyingPage()),
     ),
     GoRoute(
-      path: FinishPage.name,
-      pageBuilder: (context, state) => wrapper(context, state, const FinishPage()),
+      path: QualifyingFinishPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const QualifyingFinishPage()),
     ),
     GoRoute(
       path: SettingsPage.name,
