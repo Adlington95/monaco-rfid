@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 class PracticeInstructionsPage extends StatelessWidget {
   const PracticeInstructionsPage({super.key});
-  static const name = '/practice';
+  static const name = '/practiceInstructionsPage';
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +47,4 @@ class PracticeInstructionsPage extends StatelessWidget {
       ),
     );
   }
-}
-
-void main() {
-  runApp(
-    const MaterialApp(
-      home: PracticeInstructionsPage(),
-    ),
-  );
 }

@@ -210,7 +210,7 @@ class WebSocketState with ChangeNotifier {
   }
 
   int get fastestLap => lapTimes.length <= restState.gameState.practiceLaps
-      ? 0
+      ? double.infinity.toInt()
       : lapTimes
           .sublist(restState.gameState.practiceLaps)
           .reduce((value, element) => value < element ? value : element);

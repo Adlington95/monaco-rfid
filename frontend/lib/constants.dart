@@ -15,6 +15,7 @@ const defaultQualifyingLaps = 10;
 const defaultRaceLaps = 7;
 
 const defaultEventName = '2025 Monaco Grand Prix';
+const defaultRaceLights = 4;
 
 /// How long to show the finish screen
 const defaultFinishPageDuration = 60000; // In milliseconds
@@ -30,3 +31,4 @@ const qualifyingLapsKey = 'qualifyingLaps';
 const finishPageDurationKey = 'finishPageDuration';
 const eventNameKey = 'eventName';
 const raceLapsKey = 'raceLaps';
+const raceLightsKey = 'raceLights';

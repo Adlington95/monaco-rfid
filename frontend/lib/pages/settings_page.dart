@@ -237,8 +237,40 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: TextFormField(
-                      onSaved: (value) => value != null ? state.raceLaps = int.tryParse(value) ?? state.raceLaps : null,
+                      onSaved: (value) =>
+                          value != null ? state.raceLights = int.tryParse(value) ?? state.raceLaps : null,
                       initialValue: state.raceLaps.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                      cursorColor: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.light,
+                      color: Colors.white,
+                    ),
+                    title: const Text(
+                      'Race lights',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: TextFormField(
+                      onSaved: (value) =>
+                          value != null ? state.raceLights = int.tryParse(value) ?? state.raceLights : null,
+                      initialValue: state.raceLights.toString(),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -288,7 +320,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 context.go(PracticeInstructionsPage.name);
                                 break;
                               case 'cs':
-                                context.go(CarStartPage.name);
+                                context.go(QualifyingStartPage.name);
                               case 'pc':
                                 context.go(PracticeCountdownPage.name);
                                 break;

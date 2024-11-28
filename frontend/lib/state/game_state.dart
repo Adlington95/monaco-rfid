@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
 import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,6 +23,7 @@ class GameState with ChangeNotifier {
     required this.eventName,
     required this.finishPageDuration,
     required this.raceLaps,
+    required this.raceLights,
   }) : _serverUrl = serverUrl;
 
   GameState._({
@@ -36,6 +38,7 @@ class GameState with ChangeNotifier {
     String? eventName,
     int? finishPageDuration,
     int? raceLaps,
+    int? raceLights,
   })  : _serverUrl = serverUrl ?? defaultServerUrl,
         restPort = restPort ?? defaultRestPort,
         websocketPort = websocketPort ?? defaultWebsocketPort,
@@ -45,7 +48,8 @@ class GameState with ChangeNotifier {
         qualifyingLaps = qualifyingLaps ?? defaultQualifyingLaps,
         eventName = eventName ?? defaultEventName,
         finishPageDuration = finishPageDuration ?? defaultFinishPageDuration,
-        raceLaps = raceLaps ?? defaultRaceLaps;
+        raceLaps = raceLaps ?? defaultRaceLaps,
+        raceLights = raceLights ?? defaultRaceLights;
 
   String _serverUrl;
   String get serverUrl => _serverUrl;
@@ -65,6 +69,7 @@ class GameState with ChangeNotifier {
   int qualifyingLaps;
   int finishPageDuration;
   int raceLaps;
+  int raceLights;
 
   bool _isLoading = false;
 
@@ -94,8 +99,11 @@ class GameState with ChangeNotifier {
   Future<void> changePage() async {
     if (loggedInUser != null) {
       await Future<void>.delayed(const Duration(seconds: 5));
-      // TODO: If the user scans the car too quickly, the page will revert back ot the wrong page here
-      if (loggedInUser != null) await router.pushReplacement(CarStartPage.name);
+      if (loggedInUser != null &&
+          MyApp.navigatorKey.currentContext != null &&
+          ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != PracticeInstructionsPage.name) {
+        await router.pushReplacement(QualifyingStartPage.name);
+      }
     }
   }
 

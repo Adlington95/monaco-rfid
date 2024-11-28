@@ -46,9 +46,7 @@ class _ScanIdPageState extends State<ScanIdPage> {
             ? const Text('Unable to connect to server')
             : IdCard(
                 title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your ID card below',
-                onTap: gameState.loggedInUser != null
-                    ? () => router.pushReplacement(CarStartPage.name)
-                    : context.read<DataWedgeState>().scanBarcode,
+                onTap: gameState.loggedInUser == null ? context.read<DataWedgeState>().scanBarcode : null,
                 data: gameState.loggedInUser,
               ),
       ),

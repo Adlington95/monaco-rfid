@@ -5,15 +5,15 @@ import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
-class CarStartPage extends StatefulWidget {
-  const CarStartPage({super.key});
-  static const String name = '/car_start';
+class QualifyingStartPage extends StatefulWidget {
+  const QualifyingStartPage({super.key});
+  static const String name = '/qualifyingStartPage';
 
   @override
-  State<CarStartPage> createState() => _CarStartPageState();
+  State<QualifyingStartPage> createState() => _QualifyingStartPageState();
 }
 
-class _CarStartPageState extends State<CarStartPage> {
+class _QualifyingStartPageState extends State<QualifyingStartPage> {
   @override
   void initState() {
     super.initState();

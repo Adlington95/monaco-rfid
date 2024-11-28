@@ -131,8 +131,8 @@ final router = GoRouter(
       pageBuilder: (context, state) => wrapper(context, state, const PracticeInstructionsPage()),
     ),
     GoRoute(
-      path: CarStartPage.name,
-      pageBuilder: (context, state) => wrapper(context, state, const CarStartPage()),
+      path: QualifyingStartPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const QualifyingStartPage()),
     ),
     GoRoute(
       path: PracticeCountdownPage.name,

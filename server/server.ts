@@ -29,7 +29,6 @@ app.use(express.json());
 app.use(cors());
 
 // TODO: Test logic for the lights to go on
-// TODO: Can we even do head to head?
 
 // Naughty line needed as I can't be bothered with SSL
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
