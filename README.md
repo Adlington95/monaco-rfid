@@ -41,3 +41,19 @@ Once the connection is ready, you can connect the server side to it. If you ever
 <i>
 docker volume create db
 <i>
+
+
+# TODO
+Sound track play with mute option
+
+Fix qualifying lap one screen (error before first lap)
+
+Finish screen hangs 
+
+When finished your qualifying, the finish screen should scroll to that specific user
+
+Jump starts should have lap time indicated in red 
+
+Reset Button for each page
+
+
