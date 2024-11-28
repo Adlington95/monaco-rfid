@@ -70,7 +70,7 @@ class LiveTiming extends StatelessWidget {
                                 FormattedDuration(
                                   Duration(
                                     milliseconds:
-                                        index != null ? state.getFastestLapFromIndex(index!) : state.fastestLap,
+                                        index != null ? state.getFastestLapFromIndex(index!) : state.fastestLap ?? 0,
                                   ),
                                   style: const TextStyle(
                                     fontSize: 48,

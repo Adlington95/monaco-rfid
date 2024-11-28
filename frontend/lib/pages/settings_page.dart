@@ -237,8 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: TextFormField(
-                      onSaved: (value) =>
-                          value != null ? state.raceLights = int.tryParse(value) ?? state.raceLaps : null,
+                      onSaved: (value) => value != null ? state.raceLaps = int.tryParse(value) ?? state.raceLaps : null,
                       initialValue: state.raceLaps.toString(),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: const TextStyle(color: Colors.black),
@@ -328,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 context.go(QualifyingPage.name);
                                 break;
                               case 'f':
-                                context.go(FinishPage.name);
+                                context.go(QualifyingFinishPage.name);
                                 break;
                               default:
                                 break;

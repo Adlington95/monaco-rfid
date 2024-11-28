@@ -81,7 +81,7 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
                 highlightColor: Colors.grey,
                 period: const Duration(milliseconds: 2500),
                 child: const Text(
-                  'To start a new game, scan your ID card below or tap the screen',
+                  'To start a new game, scan your SKO pass below or tap the screen',
                   style: TextStyle(color: Colors.white, fontSize: 24),
                 ).paddingTop(40),
               ),

@@ -25,7 +25,9 @@ class QualifyingPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(FinishPage.name) : null,
+                      onTap: Provider.of<GameState>(context).isEmulator
+                          ? () => context.go(QualifyingFinishPage.name)
+                          : null,
                       child: const LapCounter(),
                     ),
                   ),

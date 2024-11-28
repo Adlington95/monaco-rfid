@@ -8,9 +8,9 @@ import 'package:frontend/state/ws_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class FinishPage extends StatelessWidget {
-  const FinishPage({super.key});
-  static const name = '/finish';
+class QualifyingFinishPage extends StatelessWidget {
+  const QualifyingFinishPage({super.key});
+  static const name = '/qualifyingFinish';
   @override
   Widget build(BuildContext context) {
     final resetTimerKey = GlobalKey<ResetTimerState>();

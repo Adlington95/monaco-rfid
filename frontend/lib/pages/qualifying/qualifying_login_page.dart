@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
-import 'package:frontend/main.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
-import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
@@ -45,7 +43,7 @@ class _ScanIdPageState extends State<ScanIdPage> {
         child: context.watch<RestState>().status == Status.UNKNOWN && !Provider.of<GameState>(context).isEmulator
             ? const Text('Unable to connect to server')
             : IdCard(
-                title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your ID card below',
+                title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your SKO pass below',
                 onTap: gameState.loggedInUser == null ? context.read<DataWedgeState>().scanBarcode : null,
                 data: gameState.loggedInUser,
               ),
