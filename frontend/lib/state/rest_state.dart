@@ -222,6 +222,15 @@ class RestState with ChangeNotifier {
     );
   }
 
+  Future<void> removeUser(String id) async {
+    await http.post(
+      Uri.parse('${gameState.restUrl}/removeEntry'),
+      body: jsonEncode({'id': id}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    await fetchDriverStandings();
+  }
+
   Future<void> raceReady() async => http.get(Uri.parse('${gameState.restUrl}/raceReady'));
 
   void clear() {

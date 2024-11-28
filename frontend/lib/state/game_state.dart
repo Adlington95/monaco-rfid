@@ -24,6 +24,7 @@ class GameState with ChangeNotifier {
     required this.finishPageDuration,
     required this.raceLaps,
     required this.raceLights,
+    required this.scannedThingName,
   }) : _serverUrl = serverUrl;
 
   GameState._({
@@ -39,6 +40,7 @@ class GameState with ChangeNotifier {
     int? finishPageDuration,
     int? raceLaps,
     int? raceLights,
+    String? scannedThingName,
   })  : _serverUrl = serverUrl ?? defaultServerUrl,
         restPort = restPort ?? defaultRestPort,
         websocketPort = websocketPort ?? defaultWebsocketPort,
@@ -49,7 +51,8 @@ class GameState with ChangeNotifier {
         eventName = eventName ?? defaultEventName,
         finishPageDuration = finishPageDuration ?? defaultFinishPageDuration,
         raceLaps = raceLaps ?? defaultRaceLaps,
-        raceLights = raceLights ?? defaultRaceLights;
+        raceLights = raceLights ?? defaultRaceLights,
+        scannedThingName = scannedThingName ?? defaultScannedThingName;
 
   String _serverUrl;
   String get serverUrl => _serverUrl;
@@ -64,6 +67,7 @@ class GameState with ChangeNotifier {
   String websocketPort;
   String circuitName;
   String eventName;
+  String scannedThingName;
   double circuitLength;
   int practiceLaps;
   int qualifyingLaps;

@@ -99,9 +99,9 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
                     baseColor: Colors.white,
                     highlightColor: Colors.grey,
                     period: const Duration(milliseconds: 2500),
-                    child: const Text(
-                      'To start a new game, scan your SKO pass below or tap the screen',
-                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    child: Text(
+                      'To start a new game, scan your ${context.watch<GameState>().scannedThingName} below or tap the screen',
+                      style: const TextStyle(color: Colors.white, fontSize: 24),
                     ).paddingTop(40),
                   ),
                 ],

@@ -94,6 +94,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                 initialValue: state.raceLights.toString(),
                                 numeric: true,
                               ),
+                              SettingRow(
+                                icon: Icons.lightbulb,
+                                title: 'Scanned thing name',
+                                onSaved: (value) => value != null ? state.scannedThingName = value : null,
+                                initialValue: state.scannedThingName,
+                                numeric: true,
+                              ),
                             ].gap(20),
                           ),
                         ),

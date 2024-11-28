@@ -455,6 +455,18 @@ app.post("/startRace", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/removeEntry", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.body;
+    console.log("Removing entry with id: " + id);
+    await pool.query("DELETE FROM monaco WHERE employee_id = $1", [id]);
+    res.status(200).send({ message: "Successfully removed entry" });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
 app.post("/fakeLaps", async (req, res) => {
   console.log("Setting fake laps");
   carIds[0] = "1";

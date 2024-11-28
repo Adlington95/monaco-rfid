@@ -124,60 +124,75 @@ class _NewWidgetState extends State<NewWidget> {
                       return Row(
                         children: [
                           Expanded(
-                            child: LeaderboardRow(
-                              index: index + 1,
-                              highlighted: index == 0,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(element.name.toUpperCase()),
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 40,
-                                        child: element.change != null && element.change != PlaceChange.none
-                                            ? RotatedBox(
-                                                quarterTurns: element.change == PlaceChange.up ? 3 : 1,
-                                                child: Icon(
-                                                  ZetaIcons.chevron_right,
-                                                  size: 38,
-                                                  color: element.change == PlaceChange.up ? Colors.green : Colors.red,
-                                                ),
-                                              )
-                                            : const Nothing(),
-                                      ),
-                                      SizedBox(
-                                        width: 80,
-                                        child: Center(
-                                          child: Text(
-                                            '${element.tries}',
-                                            style: widget.textStyle.copyWith(
-                                              color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                            child: GestureDetector(
+                              onLongPress: () {
+                                showZetaDialog(
+                                  context,
+                                  message: 'Delete user?',
+                                  primaryButtonLabel: 'Confirm',
+                                  secondaryButtonLabel: 'Cancel',
+                                  onPrimaryButtonPressed: () async {
+                                    await context.read<RestState>().removeUser(element.id);
+                                    if (context.mounted) Navigator.of(context).pop();
+                                  },
+                                  onSecondaryButtonPressed: () => Navigator.of(context).pop(),
+                                );
+                              },
+                              child: LeaderboardRow(
+                                index: index + 1,
+                                highlighted: index == 0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(element.name.toUpperCase()),
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 40,
+                                          child: element.change != null && element.change != PlaceChange.none
+                                              ? RotatedBox(
+                                                  quarterTurns: element.change == PlaceChange.up ? 3 : 1,
+                                                  child: Icon(
+                                                    ZetaIcons.chevron_right,
+                                                    size: 38,
+                                                    color: element.change == PlaceChange.up ? Colors.green : Colors.red,
+                                                  ),
+                                                )
+                                              : const Nothing(),
+                                        ),
+                                        SizedBox(
+                                          width: 80,
+                                          child: Center(
+                                            child: Text(
+                                              '${element.tries}',
+                                              style: widget.textStyle.copyWith(
+                                                color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        width: 160,
-                                        child: Center(
-                                          child: (index == 0)
-                                              ? FormattedDuration(
-                                                  Duration(milliseconds: fastestLap),
-                                                  style: widget.textStyle.copyWith(
-                                                    color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                        SizedBox(
+                                          width: 160,
+                                          child: Center(
+                                            child: (index == 0)
+                                                ? FormattedDuration(
+                                                    Duration(milliseconds: fastestLap),
+                                                    style: widget.textStyle.copyWith(
+                                                      color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                    ),
+                                                  )
+                                                : FormattedGap(
+                                                    Duration(milliseconds: element.time - fastestLap),
+                                                    style: widget.textStyle.copyWith(
+                                                      color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                    ),
                                                   ),
-                                                )
-                                              : FormattedGap(
-                                                  Duration(milliseconds: element.time - fastestLap),
-                                                  style: widget.textStyle.copyWith(
-                                                    color: index == 0 ? Zeta.of(context).colors.textDefault : null,
-                                                  ),
-                                                ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

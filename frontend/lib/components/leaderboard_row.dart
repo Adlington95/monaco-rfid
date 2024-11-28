@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/state/rest_state.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 

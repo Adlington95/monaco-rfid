@@ -43,7 +43,9 @@ class _ScanIdPageState extends State<ScanIdPage> {
         child: context.watch<RestState>().status == Status.UNKNOWN && !Provider.of<GameState>(context).isEmulator
             ? const Text('Unable to connect to server')
             : IdCard(
-                title: gameState.loggedInUser != null ? 'Welcome' : 'Scan your SKO pass below',
+                title: gameState.loggedInUser != null
+                    ? 'Welcome'
+                    : 'Scan your ${context.read<GameState>().scannedThingName} below',
                 onTap: gameState.loggedInUser == null ? context.read<DataWedgeState>().scanBarcode : null,
                 data: gameState.loggedInUser,
               ),

@@ -7,12 +7,6 @@
 // TODO: 2 leaderbaords - fastest lap and overall time
 
 // TODO: Highlight current user on the finish page leaderboard
-// TODO: Have a way to delete lap times
-// TODO: Configure what it is that the user scans - name badge / SKO pass etc.
-
-// TODO: Animate the average speed before it is populated
-// TODO: Car colors? or some unique identifier
-// TODO: User colors? Or some unique identifier
 // TODO: Sound / mute option
 // TODO: Parse correct data from the QR code
 // TODO: Change background image
