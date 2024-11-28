@@ -77,9 +77,12 @@ class RowItem extends StatelessWidget {
         final isGreen =
             index == null && double.tryParse(time) != null && double.parse(time).toInt() == state.fastestLap;
 
+        final isRed = index != null && state.invalidatedLap(lap, index!); // TODO: get this from the server
+
         return LeaderboardRow(
           index: lap,
           isPurple: isPurple,
+          isRed: isRed,
           isGreen: isGreen,
           child: double.tryParse(time) != null
               ? FormattedDuration(

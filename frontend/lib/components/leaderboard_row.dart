@@ -10,6 +10,7 @@ class LeaderboardRow extends StatelessWidget {
     this.highlighted = false,
     this.isPurple = false,
     this.isGreen = false,
+    this.isRed = false;
   });
 
   final int index;
@@ -17,6 +18,7 @@ class LeaderboardRow extends StatelessWidget {
   final bool highlighted;
   final bool isPurple;
   final bool isGreen;
+  final bool isRed;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class LeaderboardRow extends StatelessWidget {
             highlighted: highlighted,
             index: index,
             isPurple: isPurple,
+            isRed: isRed,
             isGreen: isGreen,
             child: child,
           ),
@@ -52,6 +55,7 @@ class _RowContents extends StatelessWidget {
     required this.child,
     required this.isPurple,
     required this.isGreen,
+    required this.isRed
   });
 
   final bool highlighted;
@@ -59,6 +63,7 @@ class _RowContents extends StatelessWidget {
   final Widget? child;
   final bool isPurple;
   final bool isGreen;
+  final bool isRed;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +75,9 @@ class _RowContents extends StatelessWidget {
           width: 70,
           color: highlighted
               ? null
-              : isPurple
+              : isRed
+                  ? Zeta.of(context).colors.red
+                  : isPurple
                   ? Zeta.of(context).colors.purple
                   : isGreen
                       ? Zeta.of(context).colors.green

@@ -31,6 +31,8 @@ class WebSocketState with ChangeNotifier {
 
   Map<String, String> raceCarIds = {};
 
+  List<String> invalidatedLaps = [];
+
   int get winningIndex => restState.gameState.racers.indexOf(raceWinner!);
 
   int get maxLaps =>
@@ -39,6 +41,11 @@ class WebSocketState with ChangeNotifier {
   bool get connected => _channel != null;
 
   void addMessage(String message) {
+    if (message.contains('jump')) { //jump start
+      final obj = jsonDecode(message);
+      final carId = obj['carId'] as String;
+      invalidatedLaps.push(carId);
+    }
     if (message.contains('Car scanned')) {
       try {
         final obj = jsonDecode(message);
@@ -158,6 +165,12 @@ class WebSocketState with ChangeNotifier {
 
   List<int>? getLapTimes(String carId) {
     return raceLapTimes[carId];
+  }
+
+  bool isInvalidated(int index) {
+    final carId = getCarIdFromIndex(index);
+
+    return invalidatedLaps.contains(carId);
   }
 
   int get averageLapTime {
