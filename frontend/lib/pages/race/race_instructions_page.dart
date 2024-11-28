@@ -29,7 +29,7 @@ class RaceInstructionsPage extends StatelessWidget {
             tag: 'raceInstructions',
             child: FittedBox(
               child: Text(
-                "Don't go until all the lights are out",
+                'Go when the light turns green!',
                 style: TextStyle(
                   fontSize: 80,
                   fontFamily: 'f1',

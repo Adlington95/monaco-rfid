@@ -28,7 +28,7 @@ class RaceCountdownPage extends StatelessWidget {
             tag: 'raceInstructions',
             child: FittedBox(
               child: Text(
-                "Don't go until all the lights are out",
+                'Go when the light turns green!',
                 style: TextStyle(
                   fontSize: 80,
                   fontFamily: 'f1',
@@ -54,14 +54,28 @@ class Lights extends StatefulWidget {
   State<Lights> createState() => _LightsState();
 }
 
+enum LightColor {
+  off,
+  red,
+  green,
+}
+
+extension on LightColor {
+  Color get color => this == LightColor.red
+      ? Colors.red
+      : this == LightColor.green
+          ? Colors.green
+          : Colors.grey[900]!;
+}
+
 class _LightsState extends State<Lights> {
   final player = AudioPlayer();
-  late final List<bool> lightState;
+  late final List<LightColor> lightState;
 
   @override
   void initState() {
     super.initState();
-    lightState = List.filled(widget.lightAmount, false);
+    lightState = List.filled(widget.lightAmount, LightColor.off);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => lights());
   }
@@ -73,12 +87,12 @@ class _LightsState extends State<Lights> {
     for (var i = 0; i < lightState.length; i++) {
       await Future<void>.delayed(const Duration(seconds: 1));
       unawaited(player.play(AssetSource('light_out.mp3')));
-      setState(() => lightState[i] = true);
+      setState(() => lightState[i] = LightColor.red);
     }
     final delay2 = random.nextInt(1500) + 1000;
     await Future<void>.delayed(Duration(milliseconds: delay2));
     setState(() {
-      lightState.fillRange(0, lightState.length, false);
+      lightState.fillRange(0, lightState.length, LightColor.green);
     });
     if (mounted) await context.read<RestState>().startRace();
     await Future<void>.delayed(const Duration(seconds: 3));
@@ -87,13 +101,13 @@ class _LightsState extends State<Lights> {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicWidth(child: Row(children: lightState.map((e) => Light(on: e)).gap(40)));
+    return IntrinsicWidth(child: Row(children: lightState.map((e) => Light(color: e)).gap(40)));
   }
 }
 
 class Light extends StatelessWidget {
-  const Light({super.key, required this.on});
-  final bool on;
+  const Light({super.key, required this.color});
+  final LightColor color;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +116,7 @@ class Light extends StatelessWidget {
       height: 140,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: on ? Colors.red : Colors.grey[900],
+        color: color.color,
       ),
     );
   }
