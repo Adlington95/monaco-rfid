@@ -3,11 +3,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
-import 'package:frontend/models/driver_standing_item.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/models/user.dart';
@@ -20,9 +18,12 @@ class RestState with ChangeNotifier {
   RestState({required this.gameState}) {
     initState();
   }
+  static const fakeCarId1 = '1234567890';
+  static const fakeCarId2 = '0987654321';
 
   final GameState gameState;
-  List<DriverStandingItem>? driverStandings;
+  List<User>? lapLeaderboard;
+  List<User>? overallLeaderboard;
 
   Status _status = Status.UNKNOWN;
   Status get status => _status;
@@ -49,32 +50,44 @@ class RestState with ChangeNotifier {
   }
 
   Future<void> fetchDriverStandings() async {
+    final futures = [
+      getLapLeaderboard,
+      getOverallLeaderboard,
+    ];
+
     try {
-      final response = await http.get(Uri.parse('${gameState.restUrl}/getLeaderboard'));
-      final newStandings = <DriverStandingItem>[];
-      if (response.statusCode == 200) {
-        var foundNewRecord = false;
-        (jsonDecode(response.body) as List<dynamic>).forEachIndexed((index, standing) {
-          var newItem = DriverStandingItem.fromJson(standing as Map<String, dynamic>);
-          if (driverStandings != null && driverStandings!.isNotEmpty) {
-            if (!foundNewRecord) {
-              if (newItem.id != driverStandings?[index].id) {
-                foundNewRecord = true;
-                newItem = newItem.copyWith(change: PlaceChange.up, newRecord: true);
-              }
-            } else {
-              newItem = newItem.copyWith(change: PlaceChange.down);
-            }
-          }
-          newStandings.add(newItem);
-        });
-        driverStandings = [...newStandings];
-      }
+      await Future.wait(futures.map((e) => e()));
     } catch (e) {
       debugPrint(e.toString());
     }
 
     notifyListeners();
+  }
+
+  Future<List<User>> getLapLeaderboard() {
+    return http.get(Uri.parse('${gameState.restUrl}/getLeaderboard')).then((response) {
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List<dynamic>;
+        final users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+        lapLeaderboard = users;
+        return users;
+      } else {
+        throw Exception('Failed to get lap leaderboard');
+      }
+    });
+  }
+
+  Future<List<User>> getOverallLeaderboard() {
+    return http.get(Uri.parse('${gameState.restUrl}/getOverallLeaderboard')).then((response) {
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List<dynamic>;
+        final users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+        overallLeaderboard = users;
+        return users;
+      } else {
+        throw Exception('Failed to get overall leaderboard');
+      }
+    });
   }
 
   Future<Status> getStatus({bool retry = false}) async {
@@ -232,6 +245,23 @@ class RestState with ChangeNotifier {
   }
 
   Future<void> raceReady() async => http.get(Uri.parse('${gameState.restUrl}/raceReady'));
+
+  void fakeRFID(String fakeCarId, [DateTime? time]) {
+    final timeString = ((time ?? DateTime.now()).toIso8601String().split('.')..removeLast()).join('.');
+
+    http.post(
+      Uri.parse('${gameState.restUrl}/rfid'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode([
+        {
+          'timestamp': timeString,
+          'data': {
+            'idHex': fakeCarId,
+          },
+        }
+      ]),
+    );
+  }
 
   void clear() {
     resetStatus();

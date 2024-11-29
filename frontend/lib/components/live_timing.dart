@@ -6,6 +6,7 @@ import 'package:frontend/components/dashboard.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
+import 'package:zeta_flutter/zeta_flutter.dart';
 
 class LiveTiming extends StatelessWidget {
   const LiveTiming({super.key, this.index});
@@ -47,7 +48,14 @@ class LiveTiming extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      SvgPicture.asset('assets/monaco.svg', height: 180),
+                      SvgPicture.asset('assets/monaco.svg', height: state.restState.gameState.isEmulator ? 160 : 180),
+                      if (state.restState.gameState.isEmulator)
+                        ZetaButton(
+                          label: 'Fake lap',
+                          onPressed: () {
+                            if (index != null) state.fakeLapTime(index!);
+                          },
+                        ),
                       Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: Row(

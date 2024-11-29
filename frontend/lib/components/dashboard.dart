@@ -38,27 +38,59 @@ class Dashboard extends StatelessWidget {
             painter: CurvePainter(isChild: false),
             child: CustomPaint(
               painter: CurvePainter(isChild: true),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: Stack(
                 children: [
-                  Circle(
-                    children: [
-                      FittedBox(child: Stopwatch(initialDuration: state.startTime, style: large)),
-                      const Text('TOTAL TIME', style: small),
-                    ],
+                  Positioned(
+                    top: 20,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Circle(
+                          children: [
+                            FittedBox(child: Stopwatch(initialDuration: state.startTime, style: large)),
+                            const Text('TOTAL TIME', style: small),
+                          ],
+                        ),
+                        if (state.restState.gameState.isEmulator && index != null)
+                          ZetaButton(
+                            label: 'Fake jump start',
+                            onPressed: () => state.fakeToggleJumpStart(index!),
+                          ),
+                        Circle(
+                          children: [
+                            const Text('Speed'),
+                            FittedBox(
+                              child: Text(
+                                (index != null ? state.getAverageSpeedFromIndex(index!) : state.averageSpeed)
+                                    .toStringAsFixed(3),
+                                style: large,
+                              ),
+                            ),
+                            const Text('m/s', style: small),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  Circle(
-                    children: [
-                      const Text('Speed'),
-                      FittedBox(
+                  AnimatedPositioned(
+                    duration: Durations.short3,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: index != null && state.invalidatedLaps.contains(state.getCarIdFromIndex(index!)) ? 70 : 0,
+                    child: Container(
+                      color: Colors.red,
+                      height: 70,
+                      child: const Center(
                         child: Text(
-                          (index != null ? state.getAverageSpeedFromIndex(index!) : state.averageSpeed)
-                              .toStringAsFixed(3),
-                          style: large,
+                          'Jump Start detected - first lap removed',
+                          style: TextStyle(color: Colors.white, fontSize: 30),
                         ),
                       ),
-                      const Text('m/s', style: small),
-                    ],
+                    ),
                   ),
                 ],
               ),

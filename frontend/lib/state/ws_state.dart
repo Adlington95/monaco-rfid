@@ -47,8 +47,7 @@ class WebSocketState with ChangeNotifier {
       // ignore: avoid_dynamic_calls
       final carId = obj['carId'] as String;
       invalidatedLaps.add(carId);
-    }
-    if (message.contains('Car scanned')) {
+    } else if (message.contains('Car scanned')) {
       try {
         final obj = jsonDecode(message);
         // ignore: avoid_dynamic_calls
@@ -270,10 +269,9 @@ class WebSocketState with ChangeNotifier {
     return lapTimes[lap].toStringAsFixed(3);
   }
 
-  int get fastestRaceLap {
-    final lapTimes = raceLapTimes.values.map((e) => e.reduce((value, element) => value < element ? value : element));
-    return lapTimes.reduce((value, element) => value < element ? value : element);
-  }
+  int get fastestRaceLap => raceLapTimes.entries
+      .expand((element) => element.value)
+      .reduce((value, element) => value < element ? value : element);
 
   int getFastestLapFromIndex(int index) {
     final carId = getCarIdFromIndex(index);
@@ -318,6 +316,34 @@ class WebSocketState with ChangeNotifier {
     } catch (e) {
       debugPrint('Error connecting to: $restState.gameState.wsUrl');
     }
+  }
+
+  void fakeToggleJumpStart(int index) {
+    final carId = getCarIdFromIndex(index);
+    if (invalidatedLaps.contains(carId)) {
+      invalidatedLaps.remove(carId);
+    } else {
+      invalidatedLaps.add(carId);
+    }
+
+    notifyListeners();
+  }
+
+  void fakeLapTime(int index) {
+    if (restState.status == Status.RACE) {
+      final carId = getCarIdFromIndex(index);
+      if (raceLapTimes[carId] == null) {
+        raceLapTimes[carId] = [];
+      } else {
+        raceLapTimes[carId]!.add(5000 + (4000 * (DateTime.now().millisecondsSinceEpoch % 1000) ~/ 1000));
+        addMessage(jsonEncode(raceLapTimes));
+      }
+    } else {
+      lapTimes.add(5000 + (4000 * (DateTime.now().millisecondsSinceEpoch % 1000) ~/ 1000));
+      addMessage(jsonEncode({lapTimes: lapTimes}));
+    }
+
+    // notifyListeners();
   }
 
   void sendMessage(String message) {

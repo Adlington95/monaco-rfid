@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
+import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/state/dw_state.dart';
@@ -48,10 +49,20 @@ class _RaceLoginPageState extends State<RaceLoginPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     IdCard(
+                      onTap: state.isEmulator
+                          ? () {
+                              context.read<RestState>().postUser(ScanUserBody('Luke Walton', 'Luke Walton'));
+                            }
+                          : null,
                       data: state.racers.isNotEmpty ? state.racers[0] : null,
                       heroId: 'racer1',
                     ),
                     IdCard(
+                      onTap: state.isEmulator
+                          ? () {
+                              context.read<RestState>().postUser(ScanUserBody('Marcilton', 'Marcilton'));
+                            }
+                          : null,
                       data: state.racers.length > 1 ? state.racers[1] : null,
                       heroId: 'racer2',
                     ),

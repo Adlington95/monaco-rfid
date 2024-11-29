@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
@@ -44,7 +45,19 @@ class RaceStartPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SvgPicture.asset('assets/car.svg', width: 200, height: 200),
+              GestureDetector(
+                onTap: state.restState.gameState.isEmulator
+                    ? () async {
+                        state.restState.fakeRFID(
+                          state.raceCarIds.isEmpty ? RestState.fakeCarId1 : RestState.fakeCarId2,
+                          DateTime.now().subtract(const Duration(minutes: 10)),
+                        );
+                        state.restState
+                            .fakeRFID(state.raceCarIds.isEmpty ? RestState.fakeCarId1 : RestState.fakeCarId2);
+                      }
+                    : null,
+                child: SvgPicture.asset('assets/car.svg', width: 200, height: 200),
+              ),
             ].gap(40),
           ),
         );

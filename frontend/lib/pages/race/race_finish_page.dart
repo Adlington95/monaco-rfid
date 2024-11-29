@@ -18,50 +18,57 @@ class RaceFinishPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resetTimerKey = GlobalKey<ResetTimerState>();
-    return Stack(
-      children: [
-        Consumer<WebSocketState>(
-          builder: (context, state, _) {
-            return Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Text(
-                        'WINNER',
-                        style: TextStyle(fontWeight: FontWeight.w500, fontSize: 100),
-                      ),
-                      ConfettiName(name: state.raceWinner!.name, index: state.winningIndex),
-                      SvgPicture.asset('assets/car.svg', width: 200, height: 200),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
+    return GestureDetector(
+      onTap: () => context.go(LeaderBoardsPage.name),
+      child: Stack(
+        children: [
+          Consumer<WebSocketState>(
+            builder: (context, state, _) {
+              return Row(
+                children: [
+                  Expanded(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        const Expanded(child: LapCounter(index: 1)),
-                        const Expanded(child: LapCounter(index: 2)),
-                      ].gap(40),
+                        const Text(
+                          'WINNER',
+                          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 100),
+                        ),
+                        ConfettiName(name: state.raceWinner!.name, index: state.winningIndex),
+                        SvgPicture.asset('assets/car.svg', width: 200, height: 200),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: ResetTimer(
-            key: resetTimerKey,
-            onFinish: () => context.go(LeaderBoardsPage.name),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40),
+                      child: GestureDetector(
+                        onTap: () => resetTimerKey.currentState!.resetTimer(),
+                        child: Column(
+                          children: [
+                            const Expanded(child: LapCounter(index: 1)),
+                            const Expanded(child: LapCounter(index: 2)),
+                          ].gap(40),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 80),
+                ],
+              );
+            },
           ),
-        ),
-      ],
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ResetTimer(
+              key: resetTimerKey,
+              onFinish: () => context.go(LeaderBoardsPage.name),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
