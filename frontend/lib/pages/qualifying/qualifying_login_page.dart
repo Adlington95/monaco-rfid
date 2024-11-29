@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
+import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
 import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
 import 'package:frontend/state/dw_state.dart';
@@ -36,20 +37,22 @@ class _ScanIdPageState extends State<ScanIdPage> {
       wsState.connect();
     }
 
-    return GestureDetector(
-      onTap: Provider.of<GameState>(context).isEmulator ? () => context.go(PracticeCountdownPage.name) : null,
-      child: PopScope(
-        onPopInvokedWithResult: (didPop, result) => context.read<DataWedgeState>().clear(),
-        child: context.watch<RestState>().status == Status.UNKNOWN && !Provider.of<GameState>(context).isEmulator
-            ? const Text('Unable to connect to server')
-            : IdCard(
-                title: gameState.loggedInUser != null
-                    ? 'Welcome'
-                    : 'Scan your ${context.read<GameState>().scannedThingName} below',
-                onTap: gameState.loggedInUser == null ? context.read<DataWedgeState>().scanBarcode : null,
-                data: gameState.loggedInUser,
-              ),
-      ),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) => context.read<DataWedgeState>().clear(),
+      child: context.watch<RestState>().status == Status.UNKNOWN && !Provider.of<GameState>(context).isEmulator
+          ? const Text('Unable to connect to server')
+          : IdCard(
+              title: gameState.loggedInUser != null
+                  ? 'Welcome'
+                  : 'Scan your ${context.read<GameState>().scannedThingName} below',
+              onTap: Provider.of<GameState>(context).isEmulator
+                  ? () => context.read<RestState>().postUser(ScanUserBody('marciltdon', 'marcildon'))
+                  // ? () => context.read<RestState>().postUser(ScanUserBody('marcilton', 'marcilton'))
+                  : gameState.loggedInUser == null
+                      ? context.read<DataWedgeState>().scanBarcode
+                      : null,
+              data: gameState.loggedInUser,
+            ),
     );
   }
 }

@@ -33,4 +33,4 @@ const finishPageDurationKey = 'finishPageDuration';
 const eventNameKey = 'eventName';
 const raceLapsKey = 'raceLaps';
 const raceLightsKey = 'raceLights';
-const cannedThingNameKey = 'scannedThingName';
+const scannedThingNameKey = 'scannedThingName';

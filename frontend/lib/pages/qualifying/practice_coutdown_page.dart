@@ -11,9 +11,7 @@ class PracticeCountdownPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WebSocketState>(
       builder: (context, state, child) => GestureDetector(
-        onTap: Provider.of<GameState>(context).isEmulator
-            ? () => state.addMessage('{"lapTimes" : [100000,20000${state.lapTimes.length == 2 ? ',200000' : ''}]}')
-            : null,
+        onTap: Provider.of<GameState>(context).isEmulator ? () => state.fakeLapTime() : null,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(60),

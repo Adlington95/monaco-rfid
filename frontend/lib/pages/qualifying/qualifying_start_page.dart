@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
+import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
 import 'package:provider/provider.dart';
 
@@ -51,7 +52,9 @@ class _QualifyingStartPageState extends State<QualifyingStartPage> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: Provider.of<GameState>(context).isEmulator ? () => state.addMessage('{"connected":true}') : null,
+                onTap: Provider.of<GameState>(context).isEmulator
+                    ? () => state.addMessage('{"message":"Car scanned","carId":${RestState.fakeCarId1}}')
+                    : null,
                 child: SvgPicture.asset('assets/car.svg', width: 200, height: 200),
               ),
             ],

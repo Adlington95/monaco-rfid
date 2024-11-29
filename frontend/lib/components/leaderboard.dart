@@ -7,7 +7,6 @@ import 'package:frontend/components/leaderboard_row.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_text/scrollable_text.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 enum LapType { lap, overall }
@@ -154,9 +153,12 @@ class _LeaderboardState extends State<Leaderboard> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: ScrollableText(
-                                          element.name.trim().toUpperCase(),
-                                          mode: ScrollableTextMode.bouncing,
+                                        child: FittedBox(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            element.name.trim().toUpperCase(),
+                                            textAlign: TextAlign.left,
+                                          ),
                                         ),
                                       ),
                                       Row(

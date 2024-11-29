@@ -162,8 +162,8 @@ export const rfidCheckValidity = (newJson: RfidResponse[], users: User[], toggli
 
   return (
     // wss.readyState === webSocket.OPEN &&
-    ((users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean) &&
-    !toggling
+    (users && users.length >= 1 && newJson.length > 0 && newJson[0]?.data?.idHex !== undefined) as boolean
+    // &&    !toggling // TODO: Luke put this back
   );
 };
 

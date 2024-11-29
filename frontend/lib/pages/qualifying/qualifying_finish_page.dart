@@ -25,12 +25,12 @@ class QualifyingFinishPage extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 5,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: resetTimerKey.currentState?.resetTimer,
-                            child: const Column(
+                    child: GestureDetector(
+                      onTap: () => resetTimerKey.currentState?.resetTimer(),
+                      child: const Row(
+                        children: [
+                          Expanded(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -42,12 +42,12 @@ class QualifyingFinishPage extends StatelessWidget {
                                     color: Colors.white,
                                   ),
                                 ),
-                                LapCounter(),
+                                Expanded(child: LapCounter()),
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
@@ -55,8 +55,7 @@ class QualifyingFinishPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(48, 0, 68, 0),
                       child: GestureDetector(
-                        onTap:
-                            Provider.of<GameState>(context).isEmulator ? () => context.go(LeaderBoardsPage.name) : null,
+                        onTap: () => context.go(LeaderBoardsPage.name),
                         child: const Leaderboard(),
                       ),
                     ),

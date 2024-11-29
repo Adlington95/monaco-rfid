@@ -52,9 +52,7 @@ class LiveTiming extends StatelessWidget {
                       if (state.restState.gameState.isEmulator)
                         ZetaButton(
                           label: 'Fake lap',
-                          onPressed: () {
-                            if (index != null) state.fakeLapTime(index!);
-                          },
+                          onPressed: () => state.fakeLapTime(index),
                         ),
                       Padding(
                         padding: const EdgeInsets.only(top: 30),

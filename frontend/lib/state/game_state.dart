@@ -126,6 +126,8 @@ class GameState with ChangeNotifier {
       finishPageDuration: prefs.getInt(finishPageDurationKey),
       eventName: prefs.getString(eventNameKey),
       raceLaps: prefs.getInt(raceLapsKey),
+      raceLights: prefs.getInt(raceLightsKey),
+      scannedThingName: prefs.getString(scannedThingNameKey),
     );
   }
 
@@ -181,6 +183,8 @@ class GameState with ChangeNotifier {
     await prefs.setInt(finishPageDurationKey, finishPageDuration);
     await prefs.setString(eventNameKey, eventName);
     await prefs.setInt(raceLapsKey, raceLaps);
+    await prefs.setInt(raceLightsKey, raceLights);
+    await prefs.setString(scannedThingNameKey, scannedThingName);
   }
 
   Future<void> saveToJson() async {

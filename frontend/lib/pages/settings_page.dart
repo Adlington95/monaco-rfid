@@ -99,7 +99,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 title: 'Scanned thing name',
                                 onSaved: (value) => value != null ? state.scannedThingName = value : null,
                                 initialValue: state.scannedThingName,
-                                numeric: true,
                               ),
                             ].gap(20),
                           ),

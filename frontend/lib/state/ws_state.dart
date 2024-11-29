@@ -66,15 +66,13 @@ class WebSocketState with ChangeNotifier {
       } catch (e) {
         debugPrint('Error parsing message: $message');
       }
-      if (restState.status != Status.RACE) {
-        if (restState.gameState.loggedInUser != null && restState.gameState.loggedInUser!.previousAttempts != 0) {
+      if (restState.status != Status.RACE && restState.gameState.loggedInUser != null) {
+        if (restState.gameState.loggedInUser!.previousAttempts == 0) {
           router.pushReplacement(PracticeInstructionsPage.name);
         } else {
           router.pushReplacement(PracticeCountdownPage.name);
         }
       }
-
-      //TODO: Here add redirect to other instruction page
 
       return;
     } else {
@@ -329,8 +327,8 @@ class WebSocketState with ChangeNotifier {
     notifyListeners();
   }
 
-  void fakeLapTime(int index) {
-    if (restState.status == Status.RACE) {
+  void fakeLapTime([int? index]) {
+    if (index != null) {
       final carId = getCarIdFromIndex(index);
       if (raceLapTimes[carId] == null) {
         raceLapTimes[carId] = [];
@@ -339,11 +337,11 @@ class WebSocketState with ChangeNotifier {
         addMessage(jsonEncode(raceLapTimes));
       }
     } else {
-      lapTimes.add(5000 + (4000 * (DateTime.now().millisecondsSinceEpoch % 1000) ~/ 1000));
-      addMessage(jsonEncode({lapTimes: lapTimes}));
-    }
+      final newLaptimes = lapTimes
+        ..add((5000 + (10000 - 5000) * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000).toInt());
 
-    // notifyListeners();
+      addMessage('{"lapTimes" : ${jsonEncode(newLaptimes)}}');
+    }
   }
 
   void sendMessage(String message) {
