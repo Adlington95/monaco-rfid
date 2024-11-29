@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/state/rest_state.dart';
-import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
@@ -9,7 +7,8 @@ class LeaderboardRow extends StatelessWidget {
     super.key,
     required this.index,
     this.child,
-    this.highlighted = false,
+    this.highlightColor,
+    this.leadingColor,
     this.isPurple = false,
     this.isGreen = false,
     this.isRed = false,
@@ -17,7 +16,9 @@ class LeaderboardRow extends StatelessWidget {
 
   final int index;
   final Widget? child;
-  final bool highlighted;
+  final Color? highlightColor;
+  final Color? leadingColor;
+
   final bool isPurple;
   final bool isGreen;
   final bool isRed;
@@ -28,16 +29,16 @@ class LeaderboardRow extends StatelessWidget {
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: Stack(
         children: [
-          if (highlighted)
+          if (highlightColor != null)
             Positioned.fill(
               child: Shimmer.fromColors(
-                baseColor: Colors.white,
-                highlightColor: Colors.grey.shade500,
-                child: const ColoredBox(color: Colors.white),
+                baseColor: highlightColor!,
+                highlightColor: Colors.grey.shade500.blend(highlightColor!, 50),
+                child: ColoredBox(color: highlightColor!),
               ),
             ),
           _RowContents(
-            highlighted: highlighted,
+            highlightColor: highlightColor,
             index: index,
             isPurple: isPurple,
             isRed: isRed,
@@ -52,7 +53,7 @@ class LeaderboardRow extends StatelessWidget {
 
 class _RowContents extends StatelessWidget {
   const _RowContents({
-    required this.highlighted,
+    required this.highlightColor,
     required this.index,
     required this.child,
     required this.isPurple,
@@ -60,7 +61,7 @@ class _RowContents extends StatelessWidget {
     required this.isRed,
   });
 
-  final bool highlighted;
+  final Color? highlightColor;
   final int index;
   final Widget? child;
   final bool isPurple;
@@ -75,7 +76,7 @@ class _RowContents extends StatelessWidget {
           duration: Durations.medium2,
           height: 42,
           width: 70,
-          color: highlighted
+          color: highlightColor != null
               ? null
               : isRed
                   ? Zeta.of(context).colors.red
@@ -88,7 +89,7 @@ class _RowContents extends StatelessWidget {
             child: Text(
               index.toString(),
               style: TextStyle(
-                color: highlighted ? Zeta.of(context).colors.textDefault : Colors.white,
+                color: highlightColor != null ? highlightColor!.onColor : Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Titillium',
@@ -100,7 +101,7 @@ class _RowContents extends StatelessWidget {
         Expanded(
           child: Container(
             height: 42,
-            color: highlighted ? null : Zeta.of(context).colors.textSubtle.withOpacity(0.5),
+            color: highlightColor != null ? null : Zeta.of(context).colors.textSubtle.withOpacity(0.5),
             child: child == null
                 ? const Nothing()
                 : Container(
@@ -108,9 +109,9 @@ class _RowContents extends StatelessWidget {
                     child: DefaultTextStyle(
                       style: TextStyle(
                         fontSize: 28,
-                        fontWeight: highlighted ? FontWeight.w600 : FontWeight.w300,
+                        fontWeight: highlightColor != null ? FontWeight.w600 : FontWeight.w300,
                         fontFamily: 'Titillium',
-                        color: highlighted ? Zeta.of(context).colors.textDefault : Colors.white,
+                        color: highlightColor != null ? highlightColor!.onColor : Colors.white,
                       ),
                       child: child!,
                     ),

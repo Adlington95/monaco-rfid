@@ -6,6 +6,9 @@ class User {
     this.id,
     this.previousBestOverall,
     this.previousFastestLap,
+    this.change,
+    this.diff,
+    this.newRecord,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -45,4 +48,33 @@ class User {
   final int? previousFastestLap;
   final String? id;
   final int? previousAttempts;
+  final PlaceChange? change;
+  final bool? newRecord;
+  final int? diff;
+
+  User copyWith({
+    String? name,
+    String? employeeId,
+    int? previousBestOverall,
+    int? previousFastestLap,
+    String? id,
+    int? previousAttempts,
+    PlaceChange? change,
+    bool? newRecord,
+    int? diff,
+  }) {
+    return User(
+      name: name ?? this.name,
+      employeeId: employeeId ?? this.employeeId,
+      previousBestOverall: previousBestOverall ?? this.previousBestOverall,
+      previousFastestLap: previousFastestLap ?? this.previousFastestLap,
+      id: id ?? this.id,
+      previousAttempts: previousAttempts ?? this.previousAttempts,
+      change: change ?? this.change,
+      newRecord: newRecord ?? this.newRecord,
+      diff: diff ?? this.diff,
+    );
+  }
 }
+
+enum PlaceChange { up, down, none }

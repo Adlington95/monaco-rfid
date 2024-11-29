@@ -4,11 +4,7 @@
 // TODO: Laptimes are not purple for new users
 // TODO: TEST: If user is new, show the car start page
 
-// TODO: 2 leaderbaords - fastest lap and overall time
-
 // TODO: Highlight current user on the finish page leaderboard
 // TODO: Sound / mute option
 // TODO: Parse correct data from the QR code
 // TODO: Change background image
-// TODO: Jump start on the race page
-// Finish screen hangs

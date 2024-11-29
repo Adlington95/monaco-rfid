@@ -90,9 +90,22 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
                   ),
                   Expanded(
                     child: Box(
-                      child: context.watch<RestState>().driverStandings == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : const Leaderboard(),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: context.watch<RestState>().overallLeaderboard == null
+                                ? const Center(child: CircularProgressIndicator())
+                                : const Leaderboard(),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: context.watch<RestState>().lapLeaderboard == null
+                                ? const Center(child: CircularProgressIndicator())
+                                : const Leaderboard(lapType: LapType.lap),
+                          ),
+                        ].gap(40),
+                      ),
                     ),
                   ),
                   Shimmer.fromColors(

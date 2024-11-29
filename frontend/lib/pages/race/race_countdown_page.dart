@@ -23,7 +23,7 @@ class RaceCountdownPage extends StatelessWidget {
         Lights(lightAmount: context.read<GameState>().raceLights),
         const SizedBox(height: 100),
         const SizedBox(
-          width: 400,
+          width: 600,
           child: Hero(
             tag: 'raceInstructions',
             child: FittedBox(
