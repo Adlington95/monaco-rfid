@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
-import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class ScanIdPage extends StatefulWidget {

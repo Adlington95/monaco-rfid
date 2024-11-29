@@ -267,9 +267,36 @@ class WebSocketState with ChangeNotifier {
     return lapTimes[lap].toStringAsFixed(3);
   }
 
-  int get fastestRaceLap => raceLapTimes.entries
-      .expand((element) => element.value)
-      .reduce((value, element) => value < element ? value : element);
+  int getFastestCurrantLap([int? index]) {
+    if (index != null) {
+      final carId = getCarIdFromIndex(index);
+      final lapTimes = getLapTimes(carId);
+      if (lapTimes == null || lapTimes.isEmpty) {
+        return 0;
+      }
+      return lapTimes.reduce((value, element) => value < element ? value : element);
+    } else if (restState.status == Status.RACE) {
+      return raceLapTimes.entries
+          .expand((element) => element.value)
+          .reduce((value, element) => value < element ? value : element);
+    } else {
+      if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps) {
+        return 100000;
+      }
+      return lapTimes
+          .slice(restState.gameState.practiceLaps)
+          .reduce((value, element) => value < element ? value : element);
+    }
+  }
+
+  int getFastestUserLap() {
+    final baseLine = getFastestCurrantLap();
+    final userLap = restState.gameState.loggedInUser?.previousFastestLap ?? 0;
+    if (userLap != 0 && userLap < baseLine) {
+      return userLap;
+    }
+    return baseLine;
+  }
 
   int getFastestLapFromIndex(int index) {
     final carId = getCarIdFromIndex(index);
@@ -278,6 +305,18 @@ class WebSocketState with ChangeNotifier {
       return 0;
     }
     return lapTimes.reduce((value, element) => value < element ? value : element);
+  }
+
+  Color? getLapColor(String time, int lap, [int? index]) {
+    if (time == getFastestCurrantLap(index).toStringAsFixed(3) && index != null ||
+        time == getFastestUserLap().toStringAsFixed(3) && index == null) {
+      return Colors.purple;
+    } else if (index == null && double.tryParse(time) != null && double.parse(time).toInt() == fastestLap) {
+      return Colors.green;
+    } else if (index != null && isInvalidated(index) && lap == 1) {
+      return Colors.red;
+    }
+    return null;
   }
 
   Future<void> connect() async {
