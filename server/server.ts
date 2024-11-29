@@ -160,7 +160,7 @@ app.get("/status", async (_, res: Response) => {
 
 app.get("/getLeaderboard", async (req, res) => {
   try {
-    const data = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC LIMIT 10");
+    const data = await pool.query("SELECT * FROM monaco ORDER BY lap_time ASC");
     res.status(200).send(data.rows);
   } catch (err) {
     console.log(err);
@@ -170,7 +170,7 @@ app.get("/getLeaderboard", async (req, res) => {
 
 app.get("/getOverallLeaderboard", async (req, res) => {
   try {
-    const data = await pool.query("SELECT * FROM monaco ORDER BY overall_time ASC LIMIT 10");
+    const data = await pool.query("SELECT * FROM monaco ORDER BY overall_time ASC");
     res.status(200).send(data.rows);
   } catch (err) {
     console.log(err);
@@ -291,7 +291,7 @@ app.post("/rfid", async (req, _) => {
       });
     }
   } else {
-    // console.log("Data not valid");
+    console.log("Data not valid");
   }
   lastData = rfidSaveData(req.body, lastData);
 });
