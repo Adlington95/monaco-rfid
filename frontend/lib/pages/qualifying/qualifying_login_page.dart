@@ -2,21 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/id_card.dart';
 import 'package:frontend/models/scan_user_body.dart';
 import 'package:frontend/models/status.dart';
+import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
 import 'package:frontend/state/dw_state.dart';
 import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:frontend/state/ws_state.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class ScanIdPage extends StatefulWidget {
-  const ScanIdPage({super.key});
-  static const name = '/scan-id';
+class QualifyingLoginPage extends StatefulWidget {
+  const QualifyingLoginPage({super.key});
+  static const name = '/qualifyingLogin';
 
   @override
-  State<ScanIdPage> createState() => _ScanIdPageState();
+  State<QualifyingLoginPage> createState() => _QualifyingLoginPageState();
 }
 
-class _ScanIdPageState extends State<ScanIdPage> {
+class _QualifyingLoginPageState extends State<QualifyingLoginPage> {
+  final isChangingPage = false;
+
+  Future<void> changePage() async {
+    if (isChangingPage) return;
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (context.mounted && mounted) context.pushReplacement(QualifyingStartPage.name);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +44,9 @@ class _ScanIdPageState extends State<ScanIdPage> {
     if (gameState.loggedInUser != null && !wsState.connected) {
       wsState.connect();
     }
+    if (gameState.loggedInUser != null && wsState.connected && !isChangingPage) {
+      changePage();
+    }
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) => context.read<DataWedgeState>().clear(),
@@ -43,12 +56,11 @@ class _ScanIdPageState extends State<ScanIdPage> {
               title: gameState.loggedInUser != null
                   ? 'Welcome'
                   : 'Scan your ${context.read<GameState>().scannedThingName} below',
-              onTap: Provider.of<GameState>(context).isEmulator
-                  ? () => context.read<RestState>().postUser(ScanUserBody('marciltdon', 'marcildon'))
-                  // ? () => context.read<RestState>().postUser(ScanUserBody('marcilton', 'marcilton'))
-                  : gameState.loggedInUser == null
-                      ? context.read<DataWedgeState>().scanBarcode
-                      : null,
+              onTap: gameState.loggedInUser != null
+                  ? () => context.go(QualifyingStartPage.name)
+                  : Provider.of<GameState>(context).isEmulator
+                      ? () => context.read<RestState>().postUser(ScanUserBody('marciltdon', 'marcildon'))
+                      : context.read<DataWedgeState>().scanBarcode,
               data: gameState.loggedInUser,
             ),
     );

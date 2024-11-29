@@ -119,8 +119,8 @@ final router = GoRouter(
       pageBuilder: (context, state) => wrapper(context, state, const LeaderBoardsPage()),
     ),
     GoRoute(
-      path: ScanIdPage.name,
-      pageBuilder: (context, state) => wrapper(context, state, const ScanIdPage()),
+      path: QualifyingLoginPage.name,
+      pageBuilder: (context, state) => wrapper(context, state, const QualifyingLoginPage()),
     ),
     GoRoute(
       path: PracticeInstructionsPage.name,

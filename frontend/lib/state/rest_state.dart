@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/main.dart';
@@ -42,7 +43,7 @@ class RestState with ChangeNotifier {
       body: jsonEncode({
         'lap_time': fastestLap,
         'overall_time': overallTime,
-        'attempts': gameState.loggedInUser?.previousAttempts,
+        'attempts': (gameState.loggedInUser?.previousAttempts ?? 0) + 1,
         'car_id': carId,
       }),
       headers: {'Content-Type': 'application/json'},
@@ -81,7 +82,49 @@ class RestState with ChangeNotifier {
     return http.get(Uri.parse('${gameState.restUrl}/getOverallLeaderboard')).then((response) {
       if (response.statusCode == 200) {
         final list = jsonDecode(response.body) as List<dynamic>;
-        final users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+        var users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+        final newIndex = users.indexWhere((element) => element.employeeId == gameState.loggedInUser?.employeeId);
+
+        if (gameState.loggedInUser != null &&
+            overallLeaderboard != null &&
+            overallLeaderboard!.any((element) => element.employeeId == gameState.loggedInUser!.employeeId)) {
+          final formerIndex =
+              overallLeaderboard!.indexWhere((element) => element.employeeId == gameState.loggedInUser!.employeeId);
+
+          if (newIndex != formerIndex) {
+            users = users.mapIndexed((index, e) {
+              if (newIndex < formerIndex) {
+                // User moved up
+                if (index == newIndex) {
+                  return e.copyWith(change: PlaceChange.up);
+                } else if (index > newIndex && index <= formerIndex) {
+                  return e.copyWith(change: PlaceChange.down);
+                } else {
+                  return e;
+                }
+              } else {
+                // User moved down
+                if (index == newIndex) {
+                  return e.copyWith(change: PlaceChange.down);
+                } else if (index < newIndex && index >= formerIndex) {
+                  return e.copyWith(change: PlaceChange.up);
+                } else {
+                  return e;
+                }
+              }
+            }).toList();
+          }
+        } else if (gameState.loggedInUser != null && overallLeaderboard != null) {
+          users = users.mapIndexed((index, e) {
+            if (index == newIndex) {
+              return e.copyWith(change: PlaceChange.up);
+            } else if (index > newIndex) {
+              return e.copyWith(change: PlaceChange.down);
+            } else {
+              return e;
+            }
+          }).toList();
+        }
         overallLeaderboard = users;
         return users;
       } else {
@@ -172,9 +215,9 @@ class RestState with ChangeNotifier {
         }
 
         if (MyApp.navigatorKey.currentContext != null &&
-            ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != ScanIdPage.name &&
+            ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != QualifyingLoginPage.name &&
             status != Status.RACE) {
-          router.go(ScanIdPage.name);
+          router.go(QualifyingLoginPage.name);
         }
       } else if (res.statusCode == 400 && res.body.contains('User already scanned')) {
         unawaited(

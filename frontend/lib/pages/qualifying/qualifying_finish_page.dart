@@ -62,14 +62,14 @@ class QualifyingFinishPage extends StatelessWidget {
                 ],
               ),
             ),
-            Positioned(
-              bottom: 0,
-              width: MediaQuery.of(context).size.width,
-              child: ResetTimer(
-                key: resetTimerKey,
-                onFinish: () => context.go(LeaderBoardsPage.name),
-              ),
-            ),
+            // Positioned(
+            //   bottom: 0,
+            //   width: MediaQuery.of(context).size.width,
+            //   child: ResetTimer(
+            //     key: resetTimerKey,
+            //     onFinish: () => context.go(LeaderBoardsPage.name),
+            //   ),
+            // ),
           ],
         );
       },

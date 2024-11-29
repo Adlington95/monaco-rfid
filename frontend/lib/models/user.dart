@@ -47,7 +47,7 @@ class User {
   final int? previousBestOverall;
   final int? previousFastestLap;
   final String? id;
-  final int? previousAttempts;
+  final int previousAttempts;
   final PlaceChange? change;
   final bool? newRecord;
   final int? diff;

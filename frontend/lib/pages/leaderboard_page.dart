@@ -57,8 +57,8 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
           ),
         ),
         GestureDetector(
-          onTap: () =>
-              context.push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : ScanIdPage.name),
+          onTap: () => context
+              .push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : QualifyingLoginPage.name),
           child: PopScope(
             canPop: false,
             child: Padding(

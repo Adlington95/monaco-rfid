@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
+import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
 import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -89,7 +89,6 @@ class GameState with ChangeNotifier {
     _loggedInUser = value;
     if (value != null) {
       notifyListeners();
-      changePage();
     }
   }
 
@@ -98,17 +97,6 @@ class GameState with ChangeNotifier {
   void addRacer(User racer) {
     racers.add(racer);
     notifyListeners();
-  }
-
-  Future<void> changePage() async {
-    if (loggedInUser != null) {
-      await Future<void>.delayed(const Duration(seconds: 5));
-      if (loggedInUser != null &&
-          MyApp.navigatorKey.currentContext != null &&
-          ModalRoute.of(MyApp.navigatorKey.currentContext!)?.settings.name != PracticeInstructionsPage.name) {
-        await router.pushReplacement(QualifyingStartPage.name);
-      }
-    }
   }
 
   static Future<GameState> loadFromPreferences({required bool isEmulator}) async {

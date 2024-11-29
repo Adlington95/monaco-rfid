@@ -5,11 +5,20 @@ import 'package:frontend/components/card.dart';
 import 'package:frontend/components/formatted_duration.dart';
 import 'package:frontend/components/leaderboard_row.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/state/game_state.dart';
 import 'package:frontend/state/rest_state.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
 enum LapType { lap, overall }
+
+extension on PlaceChange {
+  Color get color => this == PlaceChange.up
+      ? Colors.green
+      : this == PlaceChange.down
+          ? Colors.red
+          : Colors.black;
+}
 
 extension on LapType {
   Color get color => this == LapType.lap ? Colors.purple : Colors.white;
@@ -124,10 +133,17 @@ class _LeaderboardState extends State<Leaderboard> {
                             ? element.previousBestOverall
                             : element.previousFastestLap;
 
+                        final isCurrentUser = element.employeeId == context.read<GameState>().loggedInUser?.employeeId;
+
                         if (showGap && dataToShow != null && fastestLap != null && index != 0) {
                           dataToShow -= fastestLap;
                         }
 
+                        final highlightColor = isCurrentUser
+                            ? (element.change ?? PlaceChange.none).color
+                            : index == 0
+                                ? widget.lapType.color
+                                : null;
                         return Row(
                           children: [
                             Expanded(
@@ -148,7 +164,7 @@ class _LeaderboardState extends State<Leaderboard> {
                                 },
                                 child: LeaderboardRow(
                                   index: index + 1,
-                                  highlightColor: index == 0 ? widget.lapType.color : null,
+                                  highlightColor: highlightColor,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -171,8 +187,7 @@ class _LeaderboardState extends State<Leaderboard> {
                                                     child: Icon(
                                                       ZetaIcons.chevron_right,
                                                       size: 38,
-                                                      color:
-                                                          element.change == PlaceChange.up ? Colors.green : Colors.red,
+                                                      color: element.change?.color,
                                                     ),
                                                   )
                                                 : const Nothing(),
@@ -184,7 +199,7 @@ class _LeaderboardState extends State<Leaderboard> {
                                                 child: Text(
                                                   '${element.previousAttempts}',
                                                   style: textStyle.copyWith(
-                                                    color: index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                    color: highlightColor?.onColor,
                                                   ),
                                                 ),
                                               ),
@@ -197,15 +212,14 @@ class _LeaderboardState extends State<Leaderboard> {
                                                   ? FormattedDuration(
                                                       Duration(milliseconds: dataToShow),
                                                       style: textStyle.copyWith(
-                                                        color: index == 0 ? widget.lapType.color.onColor : null,
+                                                        color: highlightColor?.onColor,
                                                       ),
                                                     )
                                                   : dataToShow != null && index != 0
                                                       ? FormattedGap(
                                                           Duration(milliseconds: dataToShow),
                                                           style: textStyle.copyWith(
-                                                            color:
-                                                                index == 0 ? Zeta.of(context).colors.textDefault : null,
+                                                            color: highlightColor?.onColor,
                                                           ),
                                                         )
                                                       : const Nothing(),

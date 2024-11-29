@@ -280,7 +280,7 @@ class WebSocketState with ChangeNotifier {
           .expand((element) => element.value)
           .reduce((value, element) => value < element ? value : element);
     } else {
-      if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps) {
+      if (lapTimes.isEmpty || lapTimes.length < restState.gameState.practiceLaps + 1) {
         return 100000;
       }
       return lapTimes
@@ -367,17 +367,18 @@ class WebSocketState with ChangeNotifier {
   }
 
   void fakeLapTime([int? index]) {
+    final fakeLapTime = (5000 + (10000 - 5000) * (DateTime.now().millisecondsSinceEpoch % 1000) ~/ 1000) + 20000;
+    // final fakeLapTime = 20;
     if (index != null) {
       final carId = getCarIdFromIndex(index);
       if (raceLapTimes[carId] == null) {
         raceLapTimes[carId] = [];
       } else {
-        raceLapTimes[carId]!.add(5000 + (4000 * (DateTime.now().millisecondsSinceEpoch % 1000) ~/ 1000));
+        raceLapTimes[carId]!.add(fakeLapTime);
         addMessage(jsonEncode(raceLapTimes));
       }
     } else {
-      final newLaptimes = lapTimes
-        ..add((5000 + (10000 - 5000) * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000).toInt());
+      final newLaptimes = lapTimes..add(fakeLapTime);
 
       addMessage('{"lapTimes" : ${jsonEncode(newLaptimes)}}');
     }

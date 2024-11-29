@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 class PracticeCountdownPage extends StatelessWidget {
   const PracticeCountdownPage({super.key});
-  static const name = '/practice-countdown';
+  static const name = '/practiceCountdown';
 
   @override
   Widget build(BuildContext context) {

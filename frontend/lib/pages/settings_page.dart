@@ -183,7 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                             context.go(LeaderBoardsPage.name);
                                             break;
                                           case 'si':
-                                            context.go(ScanIdPage.name);
+                                            context.go(QualifyingLoginPage.name);
                                             break;
                                           case 'pi':
                                             context.go(PracticeInstructionsPage.name);
