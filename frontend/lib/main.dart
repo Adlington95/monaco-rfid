@@ -30,7 +30,7 @@ import 'package:zeta_flutter/zeta_flutter.dart';
 Key key = UniqueKey();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   final GameState state;
   if (Platform.isAndroid) {
     final deviceInfo = await DeviceInfoPlugin().androidInfo;
@@ -80,13 +80,18 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
         Positioned(
           left: 40,
           top: 40,
-          child: Container(
-            width: 4,
-            height: 4,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.watch<RestState>().status == Status.UNKNOWN ? Colors.red : Colors.green,
-            ),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 4,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.watch<RestState>().status == Status.UNKNOWN ? Colors.red : Colors.green,
+                ),
+              ),
+              Text(context.watch<RestState>().status.toString()),
+            ],
           ),
         ),
         Positioned(

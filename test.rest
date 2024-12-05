@@ -5,7 +5,7 @@ GET http://localhost:13000/start
 ### Stop RFID
 GET http://localhost:13000/stop
 ### Get all rows from the database
-GET http://169.254.39.254:13000
+GET http://192.168.1.12:13000
 
 ### POST fastest lap time
 POST http://localhost:13000/lap
@@ -72,7 +72,7 @@ POST http://localhost:13000/status
 Content-Type: application/json
 
   {
-    "status": 1
+    "status": 2
   }
 
 ### PUT Lights

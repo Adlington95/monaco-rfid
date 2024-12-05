@@ -42,18 +42,26 @@ Once the connection is ready, you can connect the server side to it. If you ever
 docker volume create db
 <i>
 
-
 # TODO
+
 Sound track play with mute option
 
 Fix qualifying lap one screen (error before first lap)
 
-Finish screen hangs 
+Finish screen hangs
 
 When finished your qualifying, the finish screen should scroll to that specific user
 
-Jump starts should have lap time indicated in red 
+Jump starts should have lap time indicated in red
 
 Reset Button for each page
 
+Setup
 
+KC50
+
+Connect with ethernet to router, USB to laptop for debugging and for installing app.
+Will need developer mode on to use adb to install the apk - adb install app.apk
+Do not connect wifi
+Set display scaling to minimum
+turn off vibration and alarm sounds

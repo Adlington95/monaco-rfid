@@ -2,6 +2,7 @@
 
 // Server connection
 const defaultServerUrl = '169.254.39.254';
+const defaultRFIDReaderUrl = '169.254.39.234';
 const defaultRestPort = '13000';
 const defaultWebsocketPort = '18080';
 
@@ -17,6 +18,7 @@ const defaultRaceLaps = 7;
 const defaultEventName = '2025 Monaco Grand Prix';
 const defaultRaceLights = 4;
 const defaultScannedThingName = 'badge';
+const defaultRaceMode = 'QUALIFYING';
 
 /// How long to show the finish screen
 const defaultFinishPageDuration = 60000; // In milliseconds
@@ -34,3 +36,5 @@ const eventNameKey = 'eventName';
 const raceLapsKey = 'raceLaps';
 const raceLightsKey = 'raceLights';
 const scannedThingNameKey = 'scannedThingName';
+const rfidReaderUrlKey = 'rfidReaderUrl';
+const raceModeKey = 'raceMode';

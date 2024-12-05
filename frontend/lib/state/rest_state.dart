@@ -140,7 +140,7 @@ class RestState with ChangeNotifier {
       if (response.statusCode == 200) {
         unawaited(fetchDriverStandings());
 
-        status = Status.values[((await json.decode(response.body))['status'] as int) - 1];
+        status = Status.values[((await json.decode(response.body))['status'] as int)];
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -154,12 +154,12 @@ class RestState with ChangeNotifier {
     return status;
   }
 
-  Future<void> resetStatus({Status status = Status.READY}) async {
+  Future<void> resetStatus({Status status = Status.QUALIFYING}) async {
     debugPrint('Resetting status');
     try {
       final response = await http.post(
         Uri.parse('${gameState.restUrl}/status'),
-        body: jsonEncode({'status': status.index + 1}),
+        body: jsonEncode({'status': status.index}),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {

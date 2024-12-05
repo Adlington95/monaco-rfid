@@ -138,7 +138,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               //   // onTap: state.saveToJson,
                               //   enabled: false,
                               // ),
-
+                              SettingRow(
+                                icon: ZetaIcons.uhf_rfid,
+                                initialValue: state.rfidReaderUrl,
+                                onSaved: (newValue) => newValue != null ? state.rfidReaderUrl = newValue : null,
+                                title: 'RFID Reader IP address',
+                              ),
                               SettingRow(
                                 icon: Icons.https,
                                 title: 'Server IP address',
@@ -157,6 +162,17 @@ class _SettingsPageState extends State<SettingsPage> {
                                 onSaved: (value) => value != null ? state.websocketPort = value : null,
                                 title: 'WebSocket port',
                                 icon: Icons.web_asset,
+                              ),
+
+                              ZetaSelectInput(
+                                label: 'Default Race mode',
+                                items: RaceMode.values
+                                    .map((e) => ZetaDropdownItem(label: e.name, value: e.toString()))
+                                    .toList(),
+                                onFieldSubmitted: (value) => value != null
+                                    ? state.raceMode =
+                                        (value == 'RaceMode.QUALIFYING' ? RaceMode.QUALIFYING : RaceMode.RACE)
+                                    : null,
                               ),
 
                               Container(

@@ -1,9 +1,9 @@
-export const Status = {
-  UNKNOWN: 0,
-  READY: 1,
-  QUALIFYING: 2,
-  RACE: 3,
-};
+export enum Status {
+  UNKNOWN,
+  ERROR,
+  QUALIFYING,
+  RACE,
+}
 
 export type RfidResponse = {
   data: {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/components/leaderboard.dart';
 import 'package:frontend/models/status.dart';
@@ -28,6 +29,7 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       Provider.of<DataWedgeState>(context, listen: false).clear();
       Provider.of<RestState>(context, listen: false).clear();
       Provider.of<WebSocketState>(context, listen: false).clear();

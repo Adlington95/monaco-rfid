@@ -1,8 +1,8 @@
 // ignore_for_file: constant_identifier_names
 
 enum Status {
-  READY,
+  UNKNOWN,
+  ERROR,
   QUALIFYING,
   RACE,
-  UNKNOWN,
 }

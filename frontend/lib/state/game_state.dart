@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/constants.dart';
-import 'package:frontend/main.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/pages/qualifying/qualifying_login_page.dart';
-import 'package:frontend/pages/qualifying/qualifying_start_page.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+// ignore: constant_identifier_names
+enum RaceMode { QUALIFYING, RACE }
 
 class GameState with ChangeNotifier {
   GameState({
@@ -25,7 +24,10 @@ class GameState with ChangeNotifier {
     required this.raceLaps,
     required this.raceLights,
     required this.scannedThingName,
-  }) : _serverUrl = serverUrl;
+    required String rfidReaderUrl,
+    required this.raceMode,
+  })  : _rfidReaderUrl = rfidReaderUrl,
+        _serverUrl = serverUrl;
 
   GameState._({
     required this.isEmulator,
@@ -41,6 +43,8 @@ class GameState with ChangeNotifier {
     int? raceLaps,
     int? raceLights,
     String? scannedThingName,
+    String? rfidReaderUrl,
+    RaceMode? raceMode,
   })  : _serverUrl = serverUrl ?? defaultServerUrl,
         restPort = restPort ?? defaultRestPort,
         websocketPort = websocketPort ?? defaultWebsocketPort,
@@ -52,7 +56,9 @@ class GameState with ChangeNotifier {
         finishPageDuration = finishPageDuration ?? defaultFinishPageDuration,
         raceLaps = raceLaps ?? defaultRaceLaps,
         raceLights = raceLights ?? defaultRaceLights,
-        scannedThingName = scannedThingName ?? defaultScannedThingName;
+        scannedThingName = scannedThingName ?? defaultScannedThingName,
+        _rfidReaderUrl = rfidReaderUrl ?? defaultRFIDReaderUrl,
+        raceMode = raceMode ?? (defaultRaceMode == 'QUALIFYING' ? RaceMode.QUALIFYING : RaceMode.RACE);
 
   String _serverUrl;
   String get serverUrl => _serverUrl;
@@ -74,6 +80,19 @@ class GameState with ChangeNotifier {
   int finishPageDuration;
   int raceLaps;
   int raceLights;
+  String _rfidReaderUrl;
+  String get rfidReaderUrl => _rfidReaderUrl;
+  set rfidReaderUrl(String value) {
+    _rfidReaderUrl = value;
+    http
+        .post(
+          Uri.parse('$restUrl/setRfidUrl'),
+          body: jsonEncode({'ip': value}),
+        )
+        .timeout(const Duration(seconds: 2));
+  }
+
+  RaceMode raceMode;
 
   bool _isLoading = false;
 
@@ -116,6 +135,8 @@ class GameState with ChangeNotifier {
       raceLaps: prefs.getInt(raceLapsKey),
       raceLights: prefs.getInt(raceLightsKey),
       scannedThingName: prefs.getString(scannedThingNameKey),
+      rfidReaderUrl: prefs.getString(rfidReaderUrlKey),
+      raceMode: prefs.getString(raceModeKey) == 'QUALIFYING' ? RaceMode.QUALIFYING : RaceMode.RACE,
     );
   }
 
@@ -173,30 +194,32 @@ class GameState with ChangeNotifier {
     await prefs.setInt(raceLapsKey, raceLaps);
     await prefs.setInt(raceLightsKey, raceLights);
     await prefs.setString(scannedThingNameKey, scannedThingName);
+    await prefs.setString(rfidReaderUrlKey, rfidReaderUrl);
+    await prefs.setString(raceModeKey, raceMode == RaceMode.QUALIFYING ? 'QUALIFYING' : 'RACE');
   }
 
-  Future<void> saveToJson() async {
-    final json = {
-      serverUrlKey: serverUrl,
-      restPortKey: restPort,
-      websocketPortKey: websocketPort,
-      circuitNameKey: circuitName,
-      circuitLengthKey: circuitLength,
-      practiceLapsKey: practiceLaps,
-      qualifyingLapsKey: qualifyingLaps,
-    };
+  // Future<void> saveToJson() async {
+  //   final json = {
+  //     serverUrlKey: serverUrl,
+  //     restPortKey: restPort,
+  //     websocketPortKey: websocketPort,
+  //     circuitNameKey: circuitName,
+  //     circuitLengthKey: circuitLength,
+  //     practiceLapsKey: practiceLaps,
+  //     qualifyingLapsKey: qualifyingLaps,
+  //   };
 
-    final result = await FilePicker.platform.saveFile(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-      fileName: 'game_settings.json',
-      initialDirectory: '/storage/emulated/0/Download',
-      dialogTitle: 'Save game settings',
-    );
-    if (result == null) return;
-    final file = File(result);
-    await file.writeAsString(jsonEncode(json));
-  }
+  //   final result = await FilePicker.platform.saveFile(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['json'],
+  //     fileName: 'game_settings.json',
+  //     initialDirectory: '/storage/emulated/0/Download',
+  //     dialogTitle: 'Save game settings',
+  //   );
+  //   if (result == null) return;
+  //   final file = File(result);
+  //   await file.writeAsString(jsonEncode(json));
+  // }
 
   Uri get restUrl => Uri.parse('http://$serverUrl:$restPort');
   Uri get wsUrl => Uri.parse('ws://$serverUrl:$websocketPort');

@@ -5,81 +5,93 @@ import websocket from "ws";
 
 const webUsername = process.env.WEB_USERNAME;
 const webPassword = process.env.WEB_PASSWORD;
-const rfidAddress = process.env.RFID_ADDRESS;
 
 /**
  * Logs into RFID Reader with secure credentials and returns a token to be
  * used for all future communications.
  */
-export const rfidGetToken = async (): Promise<string> => {
-  const loginResponse = await fetch(`https://${rfidAddress}/cloud/localRestLogin`, {
-    headers: { Authorization: `Basic ${Buffer.from(`${webUsername}:${webPassword}`).toString("base64")}` },
-  });
+export const rfidGetToken = async (rfidAddress: string): Promise<string> => {
+  try {
+    const loginResponse = await fetch(`https://${rfidAddress}/cloud/localRestLogin`, {
+      headers: { Authorization: `Basic ${Buffer.from(`${webUsername}:${webPassword}`).toString("base64")}` },
+    });
 
-  if (!loginResponse.ok) {
-    console.error("RFID Login error");
-    throw new Error(loginResponse.statusText);
+    if (!loginResponse.ok) {
+      console.error("RFID Login error");
+      throw new Error(loginResponse.statusText);
+    }
+
+    const { message: token } = await loginResponse.json();
+    console.log("Token retrieved: " + token);
+    return token;
+  } catch (e) {
+    console.log(e);
+    return "";
   }
-
-  const { message: token } = await loginResponse.json();
-  console.log("Token retrieved: " + token);
-  return token;
 };
 
 /**
  * Starts the RFID Reader sending HTTP POST requests.
  */
-export const rfidStart = async (): Promise<void> => {
+export const rfidStart = async (rfidAddress: string): Promise<void> => {
   if (token === undefined || token === null) {
-    setToken(await rfidGetToken());
+    setToken(await rfidGetToken(rfidAddress));
   }
-  const startResponse = await fetch(`https://${rfidAddress}/cloud/start`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    const startResponse = await fetch(`https://${rfidAddress}/cloud/start`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  if (startResponse.ok) {
-    console.log("RFID Started");
-    return;
-  }
-  const json = await startResponse.json();
+    if (startResponse.ok) {
+      console.log("RFID Started");
+      return;
+    }
+    const json = await startResponse.json();
 
-  if (startResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
-    setToken(null);
-    return rfidStart();
-  } else if (startResponse.status === 422 && json && json.message.includes("Start currently ongoing")) {
-    await rfidStop();
-    await rfidStart();
-  } else {
-    console.error("RFID Start error");
-    throw startResponse.statusText;
+    if (startResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
+      setToken(null);
+      return rfidStart(rfidAddress);
+    } else if (startResponse.status === 422 && json && json.message.includes("Start currently ongoing")) {
+      await rfidStop(rfidAddress);
+      await rfidStart(rfidAddress);
+    } else {
+      console.error("RFID Start error");
+      throw startResponse.statusText;
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
 /**
  * Stops the RFID reader from sending HTTP POST requests
  */
-export const rfidStop = async (): Promise<void> => {
+export const rfidStop = async (rfidAddress: string): Promise<void> => {
   if (token === undefined || token === null) {
-    setToken(await rfidGetToken());
+    setToken(await rfidGetToken(rfidAddress));
   }
-  const stopResponse = await fetch(`https://${rfidAddress}/cloud/stop`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    const stopResponse = await fetch(`https://${rfidAddress}/cloud/stop`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  if (stopResponse.ok) {
-    console.log("RFID Stopped");
-    return;
-  }
-  const json = await stopResponse.json();
+    if (stopResponse.ok) {
+      console.log("RFID Stopped");
+      return;
+    }
+    const json = await stopResponse.json();
 
-  if (stopResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
-    setToken(null);
-    return rfidStart();
-  } else {
-    console.error("RFID Start error");
-    throw stopResponse.statusText;
+    if (stopResponse.status === 500 && json && json.message.includes("token signature verification failed")) {
+      setToken(null);
+      return rfidStart(rfidAddress);
+    } else {
+      console.error("RFID Start error");
+      throw stopResponse.statusText;
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -193,12 +205,12 @@ export const rfidCompareToPrevious = (oldJson: Map<string, string>, newJson: Rfi
  * @param token - The token to use for the request
  * @param toggling - Whether or not the RFID reader is currently toggling
  */
-export const rfidToggle = async () => {
+export const rfidToggle = async (rfidAddress: string) => {
   if (toggling) return;
   setToggling(true);
   try {
-    await rfidStop();
-    await rfidStart();
+    await rfidStop(rfidAddress);
+    await rfidStart(rfidAddress);
   } catch (e) {
     console.log(e);
   } finally {
@@ -206,41 +218,6 @@ export const rfidToggle = async () => {
   }
 };
 
-/**
- * Toggles a light on or off
- * @param num - The port number of the light
- * @param on - The desired state of the light
- * @param token - The token to use for the request
- */
-export const lightToggle = async (num: number, on: boolean): Promise<void> => {
-  if (token === undefined || token === null) {
-    setToken(await rfidGetToken());
-  }
-
-  try {
-    const response = await fetch(`https://${rfidAddress}/cloud/gpo`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ port: num, state: !on }),
-    });
-
-    if (response.ok) {
-      return;
-    }
-
-    const json = await response.json();
-
-    if (response.status === 500 && json.message.includes("token signature verification failed")) {
-      return lightToggle(num, on);
-    } else {
-      console.error("Light Toggle error");
-      throw new Error(response.statusText);
-    }
-  } catch (error) {
-    console.error("Light Toggle error", error);
-    throw error;
-  }
-};
 /**
  * Adds the RFID time to the user's RFID times
  * @param json - The new JSON data
@@ -250,4 +227,27 @@ export const addToRFIDTimes = (json: RfidResponse, rfidTimes: Map<string, string
   const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
   userRfidTimes.push(json.timestamp);
   rfidTimes.set(json.data.idHex, userRfidTimes);
+};
+
+export const rfidReaderSetup = async (rfidAddress: string) => {
+  try {
+    if (token === undefined || token === null) {
+      setToken(await rfidGetToken(rfidAddress));
+    }
+
+    await fetch(`https://${rfidAddress}/cloud/mode`, {
+      method: "PUT",
+      body: JSON.stringify({
+        type: "SIMPLE",
+        transmitPower: "20",
+        reportFilter: {
+          duration: "3",
+          type: "RADIO_WIDE",
+        },
+      }),
+    });
+  } catch (e) {
+    console.log("Unable to setup RFID reader");
+    console.error(e);
+  }
 };
