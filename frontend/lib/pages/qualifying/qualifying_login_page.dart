@@ -59,7 +59,9 @@ class _QualifyingLoginPageState extends State<QualifyingLoginPage> {
               onTap: gameState.loggedInUser != null
                   ? () => context.go(QualifyingStartPage.name)
                   : Provider.of<GameState>(context).isEmulator
-                      ? () => context.read<RestState>().postUser(ScanUserBody('marciltdon', 'marcildon'))
+                      ? () => context
+                          .read<RestState>()
+                          .postUser(ScanUserBody('marc', 'ilton', 'ingerland', 'marc@linton.com'))
                       : context.read<DataWedgeState>().scanBarcode,
               data: gameState.loggedInUser,
             ),

@@ -174,15 +174,15 @@ class RestState with ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${gameState.restUrl}/scanUser'),
-        body: jsonEncode({'id': body.id, 'name': body.name}),
+        body: jsonEncode(body.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
       if (res.statusCode == 200) {
         if (res.body.isEmpty) {
           final newUser = User(
-            name: body.name,
+            name: '${body.firstName} ${body.surname}',
             previousAttempts: 0,
-            employeeId: body.id,
+            employeeId: body.email,
           );
           if (status == Status.RACE) {
             gameState.addRacer(newUser);

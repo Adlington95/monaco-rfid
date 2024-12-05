@@ -68,6 +68,13 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
           ),
         ),
         Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: Image.asset('assets/bg.png'),
+        ),
+        Positioned(
           left: 20,
           right: 20,
           top: 20,
@@ -80,18 +87,13 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
         Positioned(
           left: 40,
           top: 40,
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.watch<RestState>().status == Status.UNKNOWN ? Colors.red : Colors.green,
-                ),
-              ),
-              Text(context.watch<RestState>().status.toString()),
-            ],
+          child: Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.watch<RestState>().status == Status.UNKNOWN ? Colors.red : Colors.green,
+            ),
           ),
         ),
         Positioned(

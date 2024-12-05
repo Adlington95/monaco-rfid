@@ -51,6 +51,27 @@ class DataWedgeState with ChangeNotifier {
     }
   }
 
+  ScanUserBody parseScanResult(ScanResult result) {
+    String firstName;
+    String surname;
+    String country;
+    String email;
+
+    final regex = RegExp(r'^(.*?)\^(.*?)\^(.*?)\^(.*?)$');
+    final match = regex.firstMatch(result.data);
+
+    if (match != null) {
+      firstName = match.group(1) ?? '';
+      surname = match.group(2) ?? '';
+      country = match.group(3) ?? '';
+      email = match.group(4) ?? '';
+    } else {
+      throw const FormatException('Invalid scan result format');
+    }
+
+    return ScanUserBody(firstName, surname, country, email);
+  }
+
   void listener({bool redirect = false}) {
     fdw?.onScanResult.listen((ScanResult result) async {
       if (isLoading) return;

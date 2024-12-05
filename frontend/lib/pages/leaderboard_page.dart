@@ -33,7 +33,9 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
       Provider.of<DataWedgeState>(context, listen: false).clear();
       Provider.of<RestState>(context, listen: false).clear();
       Provider.of<WebSocketState>(context, listen: false).clear();
-      Provider.of<GameState>(context, listen: false).clear();
+      Provider.of<GameState>(context, listen: false)
+        ..clear()
+        ..sendProperties();
 
       context.read<DataWedgeState>().initScanner(redirect: true);
     });

@@ -55,7 +55,7 @@ class _LeaderboardState extends State<Leaderboard> {
       await _scrollController.animateTo(
         down ? _scrollController.position.maxScrollExtent : 0,
         duration: context.read<RestState>().lapLeaderboard != null
-            ? Duration(seconds: context.read<RestState>().lapLeaderboard!.length * 2)
+            ? Duration(seconds: context.read<RestState>().lapLeaderboard!.length - 8)
             : Duration.zero,
         curve: Curves.linear,
       );

@@ -84,12 +84,11 @@ class GameState with ChangeNotifier {
   String get rfidReaderUrl => _rfidReaderUrl;
   set rfidReaderUrl(String value) {
     _rfidReaderUrl = value;
-    http
-        .post(
-          Uri.parse('$restUrl/setRfidUrl'),
-          body: jsonEncode({'ip': value}),
-        )
-        .timeout(const Duration(seconds: 2));
+    http.post(
+      Uri.parse('$restUrl/setRfidUrl'),
+      body: jsonEncode({'ip': value}),
+      headers: {'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 2));
   }
 
   RaceMode raceMode;
@@ -229,5 +228,13 @@ class GameState with ChangeNotifier {
     racers.clear();
 
     notifyListeners();
+  }
+
+  void sendProperties() {
+    http.post(
+      Uri.parse('$restUrl/setRfidUrl'),
+      body: jsonEncode({'ip': rfidReaderUrl}),
+      headers: {'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 2));
   }
 }

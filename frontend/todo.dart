@@ -3,7 +3,9 @@
 // TODO: Parse correct data from the QR code
 // TODO: Change background image
 // TODO: Optimize RFID Reader
-// TODO: Write a better README.md
+// TODO: Write a better README.md\
+// TODO: Scanner is not activated when leaderbaord page is re-visited. Only on init.
+// TODO: Scanner content Regex?
 
 /// Enhancements
 // Add a "How to play" page

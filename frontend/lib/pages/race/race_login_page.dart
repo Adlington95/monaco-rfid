@@ -51,7 +51,7 @@ class _RaceLoginPageState extends State<RaceLoginPage> {
                     IdCard(
                       onTap: state.isEmulator
                           ? () {
-                              context.read<RestState>().postUser(ScanUserBody('Luke Walton', 'Luke Walton'));
+                              context.read<RestState>().postUser(ScanUserBody('Luke ', ' Walton', 'uk', 'email'));
                             }
                           : null,
                       data: state.racers.isNotEmpty ? state.racers[0] : null,
@@ -60,7 +60,9 @@ class _RaceLoginPageState extends State<RaceLoginPage> {
                     IdCard(
                       onTap: state.isEmulator
                           ? () {
-                              context.read<RestState>().postUser(ScanUserBody('Marcilton', 'Marcilton'));
+                              context
+                                  .read<RestState>()
+                                  .postUser(ScanUserBody('Marcilton', 'Marcilton', 'ingerland', 'email'));
                             }
                           : null,
                       data: state.racers.length > 1 ? state.racers[1] : null,
