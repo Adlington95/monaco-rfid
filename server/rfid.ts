@@ -1,5 +1,5 @@
 import { RfidResponse, User } from "./models";
-import { debounceTime, wss, setToggling, setToken, token, toggling } from "./server";
+import { wss, setToggling, setToken, token, toggling } from "./server";
 import fetch from "node-fetch";
 import websocket from "ws";
 
@@ -115,7 +115,7 @@ export const rfidQualifyingLap = (timestamp: string, previousTimeStamp: string, 
 
   const lapTime = newTime - oldTime;
 
-  if (lapTime > debounceTime) {
+  if (lapTime > 0) {
     lapTimes.push(lapTime);
     console.log(lapTimes);
   } else {
@@ -132,14 +132,9 @@ export const rfidRaceLap = (timestamp: string, previousTimeStamp: string, lapTim
 
   const lapTime = newTime - oldTime;
 
-  if (lapTime > debounceTime) {
+  if (lapTime > 0) {
     console.log("Lap time: " + lapTime);
     lapTimes.push(lapTime);
-    // wss.clients.forEach((client) => {
-    //   if (client.readyState === websocket.OPEN) {
-    //     client.send(JSON.stringify({ lapTimes: lapTimes }));
-    //   }
-    // });
   } else {
     console.log("Lap time too quick");
   }
@@ -227,27 +222,4 @@ export const addToRFIDTimes = (json: RfidResponse, rfidTimes: Map<string, string
   const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
   userRfidTimes.push(json.timestamp);
   rfidTimes.set(json.data.idHex, userRfidTimes);
-};
-
-export const rfidReaderSetup = async (rfidAddress: string) => {
-  try {
-    if (token === undefined || token === null) {
-      setToken(await rfidGetToken(rfidAddress));
-    }
-
-    await fetch(`https://${rfidAddress}/cloud/mode`, {
-      method: "PUT",
-      body: JSON.stringify({
-        type: "SIMPLE",
-        transmitPower: "20",
-        reportFilter: {
-          duration: "3",
-          type: "RADIO_WIDE",
-        },
-      }),
-    });
-  } catch (e) {
-    console.log("Unable to setup RFID reader");
-    console.error(e);
-  }
 };

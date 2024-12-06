@@ -7,7 +7,6 @@ import {
   rfidCompareToPrevious,
   rfidQualifyingLap,
   rfidRaceLap,
-  rfidReaderSetup,
   rfidSaveData,
   rfidScannedCar,
   rfidStart,
@@ -20,14 +19,8 @@ import { mockLapWS } from "./mocks";
 
 const port = 3000;
 
-// Time to debounce the RFID reader in milliseconds
-export const debounceTime = 2500;
-
-const defaultRFIDAddress = process.env.RFID_ADDRESS;
-
-const getRfidAddress = (): string => rfidAddress ?? defaultRFIDAddress ?? "";
-
-let rfidAddress: string | undefined;
+let minLapTime = 1;
+let rfidAddress: string = process.env.RFID_ADDRESS ?? "";
 
 const app = express();
 app.use(express.json());
@@ -58,8 +51,6 @@ let lastData: Map<string, string> = new Map();
 let status = Status.UNKNOWN;
 
 let raceStart = false;
-
-let defaultGameMode: typeof Status.QUALIFYING | typeof Status.RACE = Status.QUALIFYING;
 
 // Create  WebSocket server
 export const wss = new websocket.Server({ port: 8080 }).on("connection", (ws) => {
@@ -106,8 +97,6 @@ app.get("/removeTableFromDb", async (req, res: Response) => {
     res.sendStatus(500);
   }
 });
-
-// CREATE TABLE
 app.get("/setup", async (_, res: Response) => {
   try {
     await pool.query(
@@ -124,7 +113,7 @@ app.get("/setup", async (_, res: Response) => {
 // Start RFID Reader
 app.get("/start", async (_, res: Response) => {
   try {
-    await rfidStart(getRfidAddress());
+    await rfidStart(rfidAddress);
     res.status(200);
   } catch (e) {
     console.error(e);
@@ -135,7 +124,7 @@ app.get("/start", async (_, res: Response) => {
 // Stop RFID Reader
 app.get("/stop", async (_, res: Response) => {
   try {
-    rfidStop(getRfidAddress());
+    rfidStop(rfidAddress);
     res.status(200);
   } catch (e) {
     console.error(e);
@@ -153,16 +142,16 @@ app.get("/raceReady", async (_, res: Response) => {
   }
 });
 
-// Get status of thedefaultGameMode server
 app.get("/status", async (_, res: Response) => {
   console.log("Status");
-  // try {
-  //   rfidStart(getRfidAddress());
-  //   if (status === Status.QUALIFYING || status === Status.RACE) return;
-  //   status = defaultGameMode;
-  // } catch (e) {
-  //   status = Status.ERROR;
-  // }
+  try {
+    await rfidStart(rfidAddress);
+    if (status === Status.ERROR || status === Status.UNKNOWN) {
+      status = Status.QUALIFYING;
+    }
+  } catch (e) {
+    status = Status.ERROR;
+  }
   res.status(200).send({ status: status });
 });
 
@@ -235,29 +224,6 @@ app.post("/rfid", async (req, _) => {
           } else {
             console.log("Wrong car scanned");
           }
-
-          // if (!carIds.includes(json.data.idHex)) {
-          //   // qualifyingCarId = rfidScannedCar(json);
-
-          // } else if (carIds[0] === json.data.idHex) {
-          //   const userRfidTimes = rfidTimes.get(json.data.idHex);
-          //   const lastRFIDTime = userRfidTimes ? userRfidTimes[userRfidTimes.length - 1] : undefined;
-          //   if (lastRFIDTime) {
-          //     console.log("Last RFID time: " + lastRFIDTime);
-          //     lapTimes.set(
-          //       json.data.idHex,
-          //       rfidQualifyingLap(json.timestamp, lastRFIDTime, lapTimes.get(json.data.idHex) ?? [])
-          //     );
-          //     wss.clients.forEach((client) => {
-          //       if (client.readyState === websocket.OPEN) {
-          //         client.send(JSON.stringify(Object.fromEntries(lapTimes)));
-          //       }
-          //     });
-          //   } else {
-          //     console.log("No previous RFID time");
-          //     rfidTimes.set(json.data.idHex, [json.timestamp]);
-          //   }
-          // }
         } else {
           // Race
 
@@ -312,12 +278,12 @@ app.post("/rfid", async (req, _) => {
 });
 
 app.post("/resetRFID", async (req, res) => {
-  rfidToggle(getRfidAddress());
+  rfidToggle(rfidAddress);
   res.sendStatus(200);
 });
 
 app.post("/reset", async (req, res) => {
-  rfidToggle(getRfidAddress());
+  rfidToggle(rfidAddress);
   reset();
   res.sendStatus(200);
 });
@@ -409,7 +375,7 @@ app.post("/scanUser", async (req: Request, res: Response) => {
     console.error(e);
     res.sendStatus(500);
   }
-  rfidToggle(getRfidAddress());
+  rfidToggle(rfidAddress);
 });
 
 // Post new status
@@ -470,22 +436,6 @@ app.post("/setRfidUrl", async (req, res) => {
   res.sendStatus(200);
 });
 
-app.post("/setDefaultGameMode", async (req, res) => {
-  const { gameMode } = req.body;
-  console.log("Setting default game mode to " + gameMode);
-  defaultGameMode = gameMode;
-  res.sendStatus(200);
-});
-
-app.post("/rfidReaderSetup", async (req, res) => {
-  try {
-    rfidReaderSetup(getRfidAddress());
-    res.sendStatus(200);
-  } catch (e) {
-    console.error(e);
-    res.sendStatus(500);
-  }
-});
 // Start Rest Server
 app.listen(port, () => console.log(`Server has started on port: ${port}`));
 
@@ -498,7 +448,6 @@ const reset = () => {
   raceStart = false;
   carIds = [];
   isRaceReady = false;
-  // status = defaultGameMode;
 };
 
 // Set whether the RFID reader is toggling
