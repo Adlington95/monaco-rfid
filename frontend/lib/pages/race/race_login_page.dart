@@ -62,7 +62,7 @@ class _RaceLoginPageState extends State<RaceLoginPage> {
                           ? () {
                               context
                                   .read<RestState>()
-                                  .postUser(ScanUserBody('Marcilton', 'Marcilton', 'ingerland', 'email'));
+                                  .postUser(ScanUserBody('Marcilton', 'Marcilton', 'ingerland', 'email2'));
                             }
                           : null,
                       data: state.racers.length > 1 ? state.racers[1] : null,

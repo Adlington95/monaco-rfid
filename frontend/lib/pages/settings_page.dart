@@ -1,5 +1,5 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/main.dart';
 import 'package:frontend/pages/leaderboard_page.dart';
 import 'package:frontend/pages/qualifying/practice_coutdown_page.dart';
 import 'package:frontend/pages/qualifying/practice_instructions_page.dart';
@@ -13,262 +13,356 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key, this.settings});
   static const String name = '/settings';
 
+  final GameSettings? settings;
+
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
+      child: _SettingsPageBody(settings: settings ?? context.read<GameState>().settings),
+    );
+  }
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageBody extends StatefulWidget {
+  const _SettingsPageBody({required this.settings});
+
+  final GameSettings settings;
+  @override
+  State<_SettingsPageBody> createState() => _SettingsPageBodyState();
+}
+
+class _SettingsPageBodyState extends State<_SettingsPageBody> {
   final _formKey = GlobalKey<FormState>();
+  late GameSettings settings;
+
+  @override
+  void initState() {
+    super.initState();
+    settings = widget.settings;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<GameState>(
-      builder: (context, state, child) => Column(
-        children: [
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
+      builder: (context, state, _) {
+        return Builder(
+          builder: (context) {
+            return Column(
+              children: [
+                Expanded(
+                  child: Form(
+                    key: _formKey,
+                    child: Row(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            'Game Play Settings',
-                            style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                         Expanded(
-                          child: ListView(
+                          child: Column(
                             children: [
-                              SettingRow(
-                                onSaved: (value) => value != null
-                                    ? state.circuitLength = double.tryParse(value) ?? state.circuitLength
-                                    : null,
-                                initialValue: state.circuitLength.toString(),
-                                title: 'Track length',
-                                icon: Icons.timeline,
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                onSaved: (value) => value != null
-                                    ? state.practiceLaps = int.tryParse(value) ?? state.practiceLaps
-                                    : null,
-                                initialValue: state.practiceLaps.toString(),
-                                title: 'Practice laps',
-                                icon: Icons.time_to_leave,
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                icon: Icons.timelapse,
-                                title: 'Qualifying laps',
-                                onSaved: (value) => value != null
-                                    ? state.qualifyingLaps = int.tryParse(value) ?? state.qualifyingLaps
-                                    : null,
-                                initialValue: state.qualifyingLaps.toString(),
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                icon: Icons.car_crash,
-                                title: 'Race laps',
-                                onSaved: (value) =>
-                                    value != null ? state.raceLaps = int.tryParse(value) ?? state.raceLaps : null,
-                                initialValue: state.raceLaps.toString(),
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                icon: Icons.lightbulb,
-                                title: 'Race light amount',
-                                onSaved: (value) =>
-                                    value != null ? state.raceLights = int.tryParse(value) ?? state.raceLights : null,
-                                initialValue: state.raceLights.toString(),
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                icon: Icons.lightbulb,
-                                title: 'Scanned thing name',
-                                onSaved: (value) => value != null ? state.scannedThingName = value : null,
-                                initialValue: state.scannedThingName,
-                              ),
-                            ].gap(20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            'Technical Settings',
-                            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              // const ListTile(
-                              //   leading: Icon(ZetaIcons.upload),
-                              //   title: Text(
-                              //     style: TextStyle(color: Colors.white),
-                              //     'Load Config from JSON',
-                              //   ),
-                              //   // onTap: state.applyFromJson,
-                              //   enabled: false,
-                              // ),
-                              // //TODO: Getting an error from file picker package
-                              // const ListTile(
-                              //   leading: Icon(ZetaIcons.download),
-                              //   title: Text(
-                              //     'Save config to JSON',
-                              //     style: TextStyle(color: Colors.white),
-                              //   ),
-                              //   // onTap: state.saveToJson,
-                              //   enabled: false,
-                              // ),
-                              SettingRow(
-                                icon: ZetaIcons.uhf_rfid,
-                                initialValue: state.rfidReaderUrl,
-                                onSaved: (newValue) => newValue != null ? state.rfidReaderUrl = newValue : null,
-                                title: 'RFID Reader IP address',
-                              ),
-                              SettingRow(
-                                icon: Icons.https,
-                                title: 'Server IP address',
-                                onSaved: (value) => value != null ? state.serverUrl = value : null,
-                                initialValue: state.serverUrl,
-                              ),
-                              SettingRow(
-                                icon: Icons.api,
-                                title: 'Rest port',
-                                onSaved: (value) => value != null ? state.restPort = value : null,
-                                initialValue: state.restPort,
-                                numeric: true,
-                              ),
-                              SettingRow(
-                                initialValue: state.websocketPort,
-                                onSaved: (value) => value != null ? state.websocketPort = value : null,
-                                title: 'WebSocket port',
-                                icon: Icons.web_asset,
-                              ),
-
-                              ZetaSelectInput(
-                                label: 'Default Race mode',
-                                items: RaceMode.values
-                                    .map((e) => ZetaDropdownItem(label: e.name, value: e.toString()))
-                                    .toList(),
-                                onFieldSubmitted: (value) => value != null
-                                    ? state.raceMode =
-                                        (value == 'RaceMode.QUALIFYING' ? RaceMode.QUALIFYING : RaceMode.RACE)
-                                    : null,
-                              ),
-
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
-                                width: 200,
-                                child: Row(
-                                  children: [
-                                    ZetaGroupButton.dropdown(
-                                      label: 'Go to page',
-                                      rounded: true,
-                                      icon: Icons.find_in_page_rounded,
-                                      items: [
-                                        ZetaDropdownItem(label: 'Leaderboard Page', value: 'lp'),
-                                        ZetaDropdownItem(label: 'Scan Id Page', value: 'si'),
-                                        ZetaDropdownItem(label: 'Practice Instructions Page', value: 'pi'),
-                                        ZetaDropdownItem(label: 'Car Start Page', value: 'cs'),
-                                        ZetaDropdownItem(label: 'Practice Countdown Page', value: 'pc'),
-                                        ZetaDropdownItem(label: 'Qualifying Page', value: 'q'),
-                                        ZetaDropdownItem(label: 'Finish Page', value: 'f'),
-                                      ],
-                                      onChange: (item) {
-                                        switch (item.value) {
-                                          case 'lp':
-                                            context.go(LeaderBoardsPage.name);
-                                            break;
-                                          case 'si':
-                                            context.go(QualifyingLoginPage.name);
-                                            break;
-                                          case 'pi':
-                                            context.go(PracticeInstructionsPage.name);
-                                            break;
-                                          case 'cs':
-                                            context.go(QualifyingStartPage.name);
-                                          case 'pc':
-                                            context.go(PracticeCountdownPage.name);
-                                            break;
-                                          case 'q':
-                                            context.go(QualifyingPage.name);
-                                            break;
-                                          case 'f':
-                                            context.go(QualifyingFinishPage.name);
-                                            break;
-                                          default:
-                                            break;
-                                        }
-                                      },
-                                    ),
-                                  ],
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(
+                                  'Game Play Settings',
+                                  style: TextStyle(
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                            ].gap(20),
+                              Expanded(
+                                child: ListView(
+                                  children: [
+                                    SettingRow(
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(circuitLength: double.tryParse(value));
+                                        }
+                                      },
+                                      initialValue: settings.circuitLength.toString(),
+                                      title: 'Track length',
+                                      icon: Icons.timeline,
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(practiceLaps: int.tryParse(value));
+                                        }
+                                      },
+                                      initialValue: settings.practiceLaps.toString(),
+                                      title: 'Practice laps',
+                                      icon: Icons.time_to_leave,
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.timelapse,
+                                      title: 'Qualifying laps',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(qualifyingLaps: int.tryParse(value));
+                                        }
+                                      },
+                                      initialValue: settings.qualifyingLaps.toString(),
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.car_crash,
+                                      title: 'Race laps',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(raceLaps: int.tryParse(value));
+                                        }
+                                      },
+                                      initialValue: settings.raceLaps.toString(),
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.lightbulb,
+                                      title: 'Race light amount',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(raceLights: int.tryParse(value));
+                                        }
+                                      },
+                                      initialValue: settings.raceLights.toString(),
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.lightbulb,
+                                      title: 'Scanned thing name',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(scannedThingName: value);
+                                        }
+                                      },
+                                      initialValue: settings.scannedThingName,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.lightbulb,
+                                      title: 'Event name',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(eventName: value);
+                                        }
+                                      },
+                                      initialValue: settings.eventName,
+                                    ),
+                                  ].gap(20),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(
+                                  'Technical Settings',
+                                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView(
+                                  children: [
+                                    SettingRow(
+                                      icon: ZetaIcons.uhf_rfid,
+                                      initialValue: settings.rfidReaderUrl,
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(rfidReaderUrl: value);
+                                        }
+                                      },
+                                      title: 'RFID Reader IP address',
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.https,
+                                      title: 'Server IP address',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(serverUrl: value);
+                                        }
+                                      },
+                                      initialValue: settings.serverUrl,
+                                    ),
+                                    SettingRow(
+                                      icon: Icons.api,
+                                      title: 'Rest port',
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(restPort: value);
+                                        }
+                                      },
+                                      initialValue: settings.restPort,
+                                      numeric: true,
+                                    ),
+                                    SettingRow(
+                                      initialValue: settings.websocketPort,
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(websocketPort: value);
+                                        }
+                                      },
+                                      title: 'WebSocket port',
+                                      icon: Icons.web_asset,
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      width: 200,
+                                      child: Row(
+                                        children: [
+                                          ZetaGroupButton.dropdown(
+                                            label: 'Go to page',
+                                            rounded: true,
+                                            icon: Icons.find_in_page_rounded,
+                                            items: [
+                                              ZetaDropdownItem(label: 'Leaderboard Page', value: 'lp'),
+                                              ZetaDropdownItem(label: 'Scan Id Page', value: 'si'),
+                                              ZetaDropdownItem(label: 'Practice Instructions Page', value: 'pi'),
+                                              ZetaDropdownItem(label: 'Car Start Page', value: 'cs'),
+                                              ZetaDropdownItem(label: 'Practice Countdown Page', value: 'pc'),
+                                              ZetaDropdownItem(label: 'Qualifying Page', value: 'q'),
+                                              ZetaDropdownItem(label: 'Finish Page', value: 'f'),
+                                            ],
+                                            onChange: (item) {
+                                              switch (item.value) {
+                                                case 'lp':
+                                                  context.go(LeaderBoardsPage.name);
+                                                  break;
+                                                case 'si':
+                                                  context.go(QualifyingLoginPage.name);
+                                                  break;
+                                                case 'pi':
+                                                  context.go(PracticeInstructionsPage.name);
+                                                  break;
+                                                case 'cs':
+                                                  context.go(QualifyingStartPage.name);
+                                                case 'pc':
+                                                  context.go(PracticeCountdownPage.name);
+                                                  break;
+                                                case 'q':
+                                                  context.go(QualifyingPage.name);
+                                                  break;
+                                                case 'f':
+                                                  context.go(QualifyingFinishPage.name);
+                                                  break;
+                                                default:
+                                                  break;
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ].gap(20),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(
+                                  'Tools',
+                                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ),
+                              ZetaButton(
+                                label: 'RFID Reset',
+                                onPressed: context.watch<RestState>().rfidResetting
+                                    ? null
+                                    : () async {
+                                        await context.read<RestState>().resetRFID();
+                                      },
+                              ),
+                              ZetaButton(
+                                label: 'Save settings to JSON',
+                                onPressed: () async {
+                                  _formKey.currentState?.save();
+                                  state.settings = settings;
+                                  await state.writeJson(settings);
+                                },
+                              ),
+                              ZetaButton(
+                                label: 'Load settings from JSON',
+                                onPressed: () async {
+                                  final newSettings = await GameSettings.fromJson();
+                                  if (newSettings != null) {
+                                    if (context.mounted) {
+                                      context.pushReplacement(SettingsPage.name, extra: newSettings);
+                                    }
+                                  }
+                                },
+                              ),
+                              ZetaButton(
+                                label: 'Set background image',
+                                onPressed: () {
+                                  FilePicker.platform.pickFiles(
+                                    type: FileType.custom,
+                                    allowedExtensions: ['jpg', 'jpeg', 'png'],
+                                  ).then((value) {
+                                    if (value != null) {
+                                      setState(
+                                        () => settings = settings.copyWith(backgroundImage: value.files.single.path),
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                              ZetaButton(
+                                label: 'Clear background image',
+                                onPressed: () => setState(() => settings = settings.copyWith(backgroundImage: '')),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Expanded(child: Nothing()),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ZetaButton(
-                  label: 'RFID Reset',
-                  onPressed: () async {
-                    await context.read<RestState>().resetRFID();
-                    if (mounted && context.mounted) context.pop();
-                  },
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ZetaButton(
-                      label: 'Cancel',
-                      onPressed: () => context.pop(),
-                    ),
-                    ZetaButton(
-                      label: 'Save',
-                      onPressed: () async {
-                        _formKey.currentState?.save();
-                        await state.saveToSharedPreferences();
-                        key = UniqueKey();
-                        if (context.mounted) context.pop();
-                      },
-                    ),
-                  ].gap(40),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (settings != state.settings) ...[
+                        const Text(
+                          'Unsaved changes',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        const SizedBox(width: 20),
+                      ],
+                      ZetaButton(
+                        label: 'Cancel',
+                        onPressed: () async {
+                          if (context.mounted) context.pushReplacement(LeaderBoardsPage.name);
+                        },
+                      ),
+                      ZetaButton(
+                        label: 'Save',
+                        onPressed: () async {
+                          _formKey.currentState?.save();
+                          state.settings = settings;
+                          await state.settings.toSavedPreferences();
+                          if (context.mounted) context.pushReplacement(LeaderBoardsPage.name);
+                        },
+                      ),
+                    ].gap(40),
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

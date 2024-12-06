@@ -27,30 +27,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:zeta_flutter/zeta_flutter.dart';
 
-Key key = UniqueKey();
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  final GameState state;
-  if (Platform.isAndroid) {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    state = await GameState.loadFromPreferences(isEmulator: !deviceInfo.isPhysicalDevice);
-  } else {
-    state = await GameState.loadFromPreferences(isEmulator: true);
-  }
+class DefaultBackground extends StatelessWidget {
+  const DefaultBackground({super.key});
 
-  runApp(MyApp(state: state, key: key));
-}
-
-CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Widget child) {
-  return CustomTransitionPage<void>(
-    key: state.pageKey,
-    transitionDuration: const Duration(milliseconds: 250),
-    transitionsBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-      return FadeTransition(opacity: CurveTween(curve: Curves.easeInOut).animate(animation), child: child);
-    },
-    child: Stack(
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
       children: [
         Positioned(
           top: 0,
@@ -67,12 +49,44 @@ CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Wi
             height: 1460,
           ),
         ),
+      ],
+    );
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  final settings = await GameSettings.fromSavedPreferences();
+  final GameState state;
+  if (Platform.isAndroid) {
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    state = GameState(isEmulator: deviceInfo.isPhysicalDevice == false, settings: settings);
+  } else {
+    state = GameState(isEmulator: false, settings: settings);
+  }
+
+  runApp(MyApp(state: state));
+}
+
+CustomTransitionPage<void> wrapper(BuildContext context, GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      return FadeTransition(opacity: CurveTween(curve: Curves.easeInOut).animate(animation), child: child);
+    },
+    child: Stack(
+      children: [
         Positioned(
           left: 0,
           right: 0,
           top: 0,
           bottom: 0,
-          child: Image.asset('assets/bg.png'),
+          child: context.watch<GameState>().settings.backgroundImage == ''
+              ? const DefaultBackground()
+              : Image.file(File(context.watch<GameState>().settings.backgroundImage)),
         ),
         Positioned(
           left: 20,
@@ -151,7 +165,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: SettingsPage.name,
-      pageBuilder: (context, state) => wrapper(context, state, const SettingsPage()),
+      pageBuilder: (context, state) => wrapper(context, state, SettingsPage(settings: state.extra as GameSettings?)),
     ),
     GoRoute(
       path: RaceLoginPage.name,

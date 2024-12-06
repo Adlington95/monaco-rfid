@@ -1,11 +1,19 @@
 ### Set up the database (only run once per device)
 GET http://localhost:13000/setup
+
+
+### Set up the database (only run once per device)
+GET http://localhost:13000/setup1
+
+
 ### Start RFID
 GET http://localhost:13000/start
+
 ### Stop RFID
 GET http://localhost:13000/stop
+
 ### Get all rows from the database
-GET http://192.168.1.12:13000
+GET http://localhost:13000
 
 ### POST fastest lap time
 POST http://localhost:13000/lap

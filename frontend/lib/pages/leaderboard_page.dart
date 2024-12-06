@@ -117,7 +117,7 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
                     highlightColor: Colors.grey,
                     period: const Duration(milliseconds: 2500),
                     child: Text(
-                      'To start a new game, scan your ${context.watch<GameState>().scannedThingName} below or tap the screen',
+                      'To start a new game, scan your ${context.watch<GameState>().settings.scannedThingName} below or tap the screen',
                       style: const TextStyle(color: Colors.white, fontSize: 24),
                     ).paddingTop(40),
                   ),
@@ -195,7 +195,7 @@ class GameTitle extends StatelessWidget {
             children: [
               SvgPicture.asset('assets/zebra-word.svg', height: 60),
               Text(
-                Provider.of<GameState>(context).eventName,
+                Provider.of<GameState>(context).settings.eventName,
                 style: const TextStyle(
                   fontSize: 42,
                   color: Colors.white,

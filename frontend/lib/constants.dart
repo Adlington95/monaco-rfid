@@ -38,3 +38,4 @@ const raceLightsKey = 'raceLights';
 const scannedThingNameKey = 'scannedThingName';
 const rfidReaderUrlKey = 'rfidReaderUrl';
 const raceModeKey = 'raceMode';
+const backgroundImageKey = 'backgroundImage';

@@ -22,6 +22,15 @@ class RestState with ChangeNotifier {
   static const fakeCarId1 = '1234567890';
   static const fakeCarId2 = '0987654321';
 
+  bool _rfidResetting = false;
+
+  bool get rfidResetting => _rfidResetting;
+
+  set rfidResetting(bool value) {
+    _rfidResetting = value;
+    notifyListeners();
+  }
+
   final GameState gameState;
   List<User>? lapLeaderboard;
   List<User>? overallLeaderboard;
@@ -39,7 +48,7 @@ class RestState with ChangeNotifier {
 
   Future<void> postLap(int fastestLap, int overallTime, String carId) async {
     await http.post(
-      Uri.parse('${gameState.restUrl}/lap'),
+      Uri.parse('${gameState.settings.restUrl}/lap'),
       body: jsonEncode({
         'lap_time': fastestLap,
         'overall_time': overallTime,
@@ -66,7 +75,7 @@ class RestState with ChangeNotifier {
   }
 
   Future<List<User>> getLapLeaderboard() {
-    return http.get(Uri.parse('${gameState.restUrl}/getLeaderboard')).then((response) {
+    return http.get(Uri.parse('${gameState.settings.restUrl}/getLeaderboard')).then((response) {
       if (response.statusCode == 200) {
         final list = jsonDecode(response.body) as List<dynamic>;
         final users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
@@ -79,7 +88,7 @@ class RestState with ChangeNotifier {
   }
 
   Future<List<User>> getOverallLeaderboard() {
-    return http.get(Uri.parse('${gameState.restUrl}/getOverallLeaderboard')).then((response) {
+    return http.get(Uri.parse('${gameState.settings.restUrl}/getOverallLeaderboard')).then((response) {
       if (response.statusCode == 200) {
         final list = jsonDecode(response.body) as List<dynamic>;
         var users = list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
@@ -135,8 +144,9 @@ class RestState with ChangeNotifier {
 
   Future<Status> getStatus({bool retry = false}) async {
     try {
-      debugPrint('Getting status:  ${gameState.restUrl}');
-      final response = await http.get(Uri.parse('${gameState.restUrl}/status')).timeout(const Duration(seconds: 2));
+      debugPrint('Getting status:  ${gameState.settings.restUrl}');
+      final response =
+          await http.get(Uri.parse('${gameState.settings.restUrl}/status')).timeout(const Duration(seconds: 2));
       if (response.statusCode == 200) {
         unawaited(fetchDriverStandings());
 
@@ -158,7 +168,7 @@ class RestState with ChangeNotifier {
     debugPrint('Resetting status');
     try {
       final response = await http.post(
-        Uri.parse('${gameState.restUrl}/status'),
+        Uri.parse('${gameState.settings.restUrl}/status'),
         body: jsonEncode({'status': status.index}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -173,7 +183,7 @@ class RestState with ChangeNotifier {
   Future<void> postUser(ScanUserBody body) async {
     try {
       final res = await http.post(
-        Uri.parse('${gameState.restUrl}/scanUser'),
+        Uri.parse('${gameState.settings.restUrl}/scanUser'),
         body: jsonEncode(body.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
@@ -251,7 +261,7 @@ class RestState with ChangeNotifier {
 
   Future<void> startRace() async {
     final res = await http.post(
-      Uri.parse('${gameState.restUrl}/startRace'),
+      Uri.parse('${gameState.settings.restUrl}/startRace'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -265,35 +275,53 @@ class RestState with ChangeNotifier {
   }
 
   Future<void> resetRFID() async {
-    await http.post(
-      Uri.parse('${gameState.restUrl}/resetRFID'),
-      headers: {'Content-Type': 'application/json'},
-    );
+    rfidResetting = true;
+    try {
+      final res = await http.post(
+        Uri.parse('${gameState.settings.restUrl}/resetRFID'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (res.statusCode != 200) {
+        debugPrint(res.body);
+        unawaited(
+          Fluttertoast.showToast(msg: 'Unable to reset RFID. Please try again', toastLength: Toast.LENGTH_SHORT),
+        );
+        throw Exception('Failed to reset RFID');
+      } else {
+        unawaited(
+          Fluttertoast.showToast(msg: 'RFID Reset', toastLength: Toast.LENGTH_SHORT),
+        );
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      rfidResetting = false;
+    }
   }
 
   Future<void> reset() async {
     await http.post(
-      Uri.parse('${gameState.restUrl}/reset'),
+      Uri.parse('${gameState.settings.restUrl}/reset'),
       headers: {'Content-Type': 'application/json'},
     );
   }
 
   Future<void> removeUser(String id) async {
     await http.post(
-      Uri.parse('${gameState.restUrl}/removeEntry'),
+      Uri.parse('${gameState.settings.restUrl}/removeEntry'),
       body: jsonEncode({'id': id}),
       headers: {'Content-Type': 'application/json'},
     );
     await fetchDriverStandings();
   }
 
-  Future<void> raceReady() async => http.get(Uri.parse('${gameState.restUrl}/raceReady'));
+  Future<void> raceReady() async => http.get(Uri.parse('${gameState.settings.restUrl}/raceReady'));
 
   void fakeRFID(String fakeCarId, [DateTime? time]) {
     final timeString = ((time ?? DateTime.now()).toIso8601String().split('.')..removeLast()).join('.');
 
     http.post(
-      Uri.parse('${gameState.restUrl}/rfid'),
+      Uri.parse('${gameState.settings.restUrl}/rfid'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode([
         {

@@ -20,7 +20,7 @@ class RaceCountdownPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const GameTitle(isExpanded: false),
-        Lights(lightAmount: context.read<GameState>().raceLights),
+        Lights(lightAmount: context.read<GameState>().settings.raceLights),
         const SizedBox(height: 100),
         const SizedBox(
           width: 600,
@@ -91,9 +91,11 @@ class _LightsState extends State<Lights> {
     }
     final delay2 = random.nextInt(1500) + 1000;
     await Future<void>.delayed(Duration(milliseconds: delay2));
+    unawaited(player.play(AssetSource('lights_out.m4a')));
     setState(() {
       lightState.fillRange(0, lightState.length, LightColor.green);
     });
+
     if (mounted) await context.read<RestState>().startRace();
     await Future<void>.delayed(const Duration(seconds: 3));
     if (mounted) context.go(RacePage.name);

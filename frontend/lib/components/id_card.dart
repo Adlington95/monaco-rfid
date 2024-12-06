@@ -15,8 +15,6 @@ class IdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Animate this transition
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

@@ -55,7 +55,7 @@ class _QualifyingLoginPageState extends State<QualifyingLoginPage> {
           : IdCard(
               title: gameState.loggedInUser != null
                   ? 'Welcome'
-                  : 'Scan your ${context.read<GameState>().scannedThingName} below',
+                  : 'Scan your ${context.read<GameState>().settings.scannedThingName} below',
               onTap: gameState.loggedInUser != null
                   ? () => context.go(QualifyingStartPage.name)
                   : Provider.of<GameState>(context).isEmulator

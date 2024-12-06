@@ -35,8 +35,8 @@ class LapCounter extends StatelessWidget {
                         child: Column(
                           children: List.generate(
                             index != null
-                                ? state.restState.gameState.raceLaps
-                                : state.restState.gameState.qualifyingLaps,
+                                ? state.restState.gameState.settings.raceLaps
+                                : state.restState.gameState.settings.qualifyingLaps,
                             (lap) => LapRowItem(lap: lap + 1, index: index),
                           ).gap(12),
                         ),

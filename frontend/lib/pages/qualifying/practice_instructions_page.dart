@@ -33,7 +33,7 @@ class PracticeInstructionsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              'You get ${context.read<GameState>().practiceLaps} practice laps',
+              'You get ${context.read<GameState>().settings.practiceLaps} practice laps',
               style: textStyle,
             ),
             Text(
@@ -41,7 +41,7 @@ class PracticeInstructionsPage extends StatelessWidget {
               style: textStyle.copyWith(fontWeight: FontWeight.w400),
               textAlign: TextAlign.center,
             ),
-            Text('${context.read<GameState>().qualifyingLaps} qualifying laps', style: textStyle),
+            Text('${context.read<GameState>().settings.qualifyingLaps} qualifying laps', style: textStyle),
           ],
         ),
       ),
