@@ -19,6 +19,7 @@ const defaultEventName = '2025 Monaco Grand Prix';
 const defaultRaceLights = 4;
 const defaultScannedThingName = 'badge';
 const defaultRaceMode = 'QUALIFYING';
+const defaultMinLapTime = 3; // In seconds
 
 /// How long to show the finish screen
 const defaultFinishPageDuration = 60000; // In milliseconds
@@ -39,3 +40,4 @@ const scannedThingNameKey = 'scannedThingName';
 const rfidReaderUrlKey = 'rfidReaderUrl';
 const raceModeKey = 'raceMode';
 const backgroundImageKey = 'backgroundImage';
+const minLapTimeKey = 'minLapTime';

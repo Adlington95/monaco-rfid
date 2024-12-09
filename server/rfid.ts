@@ -1,4 +1,4 @@
-import { RfidResponse, User } from "./models";
+import { RfidResponse, Status, User } from "./models";
 import { wss, setToggling, setToken, token, toggling } from "./server";
 import fetch from "node-fetch";
 import websocket from "ws";
@@ -222,4 +222,107 @@ export const addToRFIDTimes = (json: RfidResponse, rfidTimes: Map<string, string
   const userRfidTimes = rfidTimes.get(json.data.idHex) ?? [];
   userRfidTimes.push(json.timestamp);
   rfidTimes.set(json.data.idHex, userRfidTimes);
+};
+
+const rfidRaceMode = (minLapTime: number) => {
+  return {
+    type: "CUSTOM",
+    antennaStopCondition: {
+      type: "DURATION",
+      value: 100,
+    },
+    antennas: [1],
+    query: {
+      tagpopulation: 10,
+      sel: "NOT_SL",
+      session: "S1",
+      target: "A",
+    },
+    modeSpecificSettings: {
+      interval: {
+        unit: "seconds",
+        value: 0,
+      },
+    },
+    selects: [
+      {
+        target: "S1",
+        action: "INVB_NOTHING",
+        membank: "TID",
+        pointer: 6,
+        length: 24,
+        mask: "800600",
+      },
+    ],
+    transmitPower: [10],
+    radioStartConditions: {},
+    radioStopConditions: {},
+    reportFilter: {
+      duration: minLapTime,
+      type: "PER_ANTENNA",
+    },
+  };
+};
+
+const rfidQualifyingMode = (minLapTime: number) => {
+  return {
+    type: "SIMPLE",
+    antennaStopCondition: {
+      type: "DURATION",
+      value: 100,
+    },
+    antennas: [1],
+    query: {
+      tagpopulation: 10,
+      sel: "NOT_SL",
+      session: "S1",
+      target: "A",
+    },
+
+    selects: [
+      {
+        target: "S1",
+        action: "INVB_NOTHING",
+        membank: "TID",
+        pointer: 6,
+        length: 24,
+        mask: "800600",
+      },
+    ],
+    transmitPower: [10],
+    radioStartConditions: {},
+    radioStopConditions: {},
+    reportFilter: {
+      duration: minLapTime,
+      type: "PER_ANTENNA",
+    },
+  };
+};
+
+export const setupRfidParams = async (rfidAddress: string, status: Status, minLapTime: number): Promise<void> => {
+  if (status == Status.RACE || status == Status.QUALIFYING) {
+    if (token === undefined || token === null) {
+      setToken(await rfidGetToken(rfidAddress));
+    }
+    try {
+      const startResponse = await fetch(`https://${rfidAddress}/cloud/mode`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify(status == Status.RACE ? rfidRaceMode(minLapTime) : rfidQualifyingMode(minLapTime)),
+      });
+
+      if (startResponse.ok) {
+        console.log("RFID Mode set");
+        return;
+      } else if (startResponse.status === 500) {
+        setToken(null);
+        return setupRfidParams(rfidAddress, status, minLapTime);
+      } else {
+        console.error("RFID Mode error");
+        throw startResponse.statusText;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 };

@@ -5,6 +5,7 @@ import {
   addToRFIDTimes,
   rfidCheckValidity,
   rfidCompareToPrevious,
+  rfidGetToken,
   rfidQualifyingLap,
   rfidRaceLap,
   rfidSaveData,
@@ -12,6 +13,7 @@ import {
   rfidStart,
   rfidStop,
   rfidToggle,
+  setupRfidParams,
 } from "./rfid";
 import { pool } from "./db";
 import { Status, User } from "./models";
@@ -97,6 +99,7 @@ app.get("/removeTableFromDb", async (req, res: Response) => {
     res.sendStatus(500);
   }
 });
+
 app.get("/setup", async (_, res: Response) => {
   try {
     await pool.query(
@@ -145,7 +148,9 @@ app.get("/raceReady", async (_, res: Response) => {
 app.get("/status", async (_, res: Response) => {
   console.log("Status");
   try {
-    await rfidStart(rfidAddress);
+    if (token === undefined || token === null) {
+      await rfidStart(rfidAddress);
+    }
     if (status === Status.ERROR || status === Status.UNKNOWN) {
       status = Status.QUALIFYING;
     }
@@ -192,7 +197,7 @@ app.post("/rfid", async (req, _) => {
     // Parse the JSON data, only return new data
     const jsonList = rfidCompareToPrevious(lastData, req.body);
     if (jsonList) {
-      // rfidToggle(getRfidAddress());
+      rfidToggle(rfidAddress);
       jsonList.forEach((json) => {
         if (status !== Status.RACE) {
           // Qualifying
@@ -381,11 +386,17 @@ app.post("/scanUser", async (req: Request, res: Response) => {
 // Post new status
 app.post("/status", async (req: Request, res: Response) => {
   console.log("posting new status " + req.body.status);
-  let newStatus = req.body.status;
-  status = newStatus;
-  console.log("Status updated to " + newStatus);
-  reset();
-  res.status(200).send({ message: "Status updated" });
+  try {
+    let newStatus = req.body.status;
+    status = newStatus;
+    console.log("Status updated to " + newStatus);
+    reset();
+    await setupRfidParams(rfidAddress, status, minLapTime);
+    res.status(200).send({ message: "Status updated" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ message: `Error updating status: ${e}` });
+  }
 });
 
 app.post("/startRace", async (req: Request, res: Response) => {
@@ -433,7 +444,23 @@ app.post("/setRfidUrl", async (req, res) => {
   const { ip } = req.body;
   console.log("Setting rfid ip to " + ip);
   rfidAddress = ip;
+  token = await rfidGetToken(rfidAddress);
   res.sendStatus(200);
+});
+
+app.post("/setMinLapTime", async (req, res) => {
+  console.log("posting new status " + req.body.status);
+  try {
+    const { time } = req.body;
+    console.log("Setting min lap time to " + time);
+    minLapTime = time;
+    reset();
+    await setupRfidParams(rfidAddress, status, minLapTime);
+    res.status(200).send({ message: "Min lap time updated" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ message: `Error updating: ${e}` });
+  }
 });
 
 // Start Rest Server
@@ -441,7 +468,7 @@ app.listen(port, () => console.log(`Server has started on port: ${port}`));
 
 // Reset qualifying data
 const reset = () => {
-  console.log("resetting qualifying local data");
+  console.log("resetting local data");
   users = [];
   rfidTimes = new Map();
   lapTimes = new Map();

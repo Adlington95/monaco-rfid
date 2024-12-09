@@ -211,6 +211,17 @@ class _SettingsPageBodyState extends State<_SettingsPageBody> {
                                       title: 'WebSocket port',
                                       icon: Icons.web_asset,
                                     ),
+                                    SettingRow(
+                                      initialValue: settings.minLapTime.toString(),
+                                      onSaved: (value) {
+                                        if (value != null) {
+                                          settings = settings.copyWith(minLapTime: int.tryParse(value));
+                                        }
+                                      },
+                                      numeric: true,
+                                      title: 'Minimum lap time (in seconds)',
+                                      icon: Icons.timer,
+                                    ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 20),
                                       width: 200,
@@ -266,62 +277,64 @@ class _SettingsPageBodyState extends State<_SettingsPageBody> {
                           ),
                         ),
                         Expanded(
-                          child: Column(
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Text(
-                                  'Tools',
-                                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  child: Text(
+                                    'Tools',
+                                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
                                 ),
-                              ),
-                              ZetaButton(
-                                label: 'RFID Reset',
-                                onPressed: context.watch<RestState>().rfidResetting
-                                    ? null
-                                    : () async {
-                                        await context.read<RestState>().resetRFID();
-                                      },
-                              ),
-                              ZetaButton(
-                                label: 'Save settings to JSON',
-                                onPressed: () async {
-                                  _formKey.currentState?.save();
-                                  state.settings = settings;
-                                  await state.writeJson(settings);
-                                },
-                              ),
-                              ZetaButton(
-                                label: 'Load settings from JSON',
-                                onPressed: () async {
-                                  final newSettings = await GameSettings.fromJson();
-                                  if (newSettings != null) {
-                                    if (context.mounted) {
-                                      context.pushReplacement(SettingsPage.name, extra: newSettings);
+                                ZetaButton(
+                                  label: 'RFID Reset',
+                                  onPressed: context.watch<RestState>().rfidResetting
+                                      ? null
+                                      : () async {
+                                          await context.read<RestState>().resetRFID();
+                                        },
+                                ),
+                                ZetaButton(
+                                  label: 'Save settings to JSON',
+                                  onPressed: () async {
+                                    _formKey.currentState?.save();
+                                    state.settings = settings;
+                                    await state.writeJson(settings);
+                                  },
+                                ),
+                                ZetaButton(
+                                  label: 'Load settings from JSON',
+                                  onPressed: () async {
+                                    final newSettings = await GameSettings.fromJson();
+                                    if (newSettings != null) {
+                                      if (context.mounted) {
+                                        context.pushReplacement(SettingsPage.name, extra: newSettings);
+                                      }
                                     }
-                                  }
-                                },
-                              ),
-                              ZetaButton(
-                                label: 'Set background image',
-                                onPressed: () {
-                                  FilePicker.platform.pickFiles(
-                                    type: FileType.custom,
-                                    allowedExtensions: ['jpg', 'jpeg', 'png'],
-                                  ).then((value) {
-                                    if (value != null) {
-                                      setState(
-                                        () => settings = settings.copyWith(backgroundImage: value.files.single.path),
-                                      );
-                                    }
-                                  });
-                                },
-                              ),
-                              ZetaButton(
-                                label: 'Clear background image',
-                                onPressed: () => setState(() => settings = settings.copyWith(backgroundImage: '')),
-                              ),
-                            ],
+                                  },
+                                ),
+                                ZetaButton(
+                                  label: 'Set background image',
+                                  onPressed: () {
+                                    FilePicker.platform.pickFiles(
+                                      type: FileType.custom,
+                                      allowedExtensions: ['jpg', 'jpeg', 'png'],
+                                    ).then((value) {
+                                      if (value != null) {
+                                        setState(
+                                          () => settings = settings.copyWith(backgroundImage: value.files.single.path),
+                                        );
+                                      }
+                                    });
+                                  },
+                                ),
+                                ZetaButton(
+                                  label: 'Clear background image',
+                                  onPressed: () => setState(() => settings = settings.copyWith(backgroundImage: '')),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

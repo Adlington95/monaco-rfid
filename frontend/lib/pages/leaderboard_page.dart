@@ -43,90 +43,96 @@ class _LeaderBoardsPageState extends State<LeaderBoardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: GestureDetector(
-            onLongPress: () {
-              Provider.of<DataWedgeState>(context, listen: false).clear();
-              context.push(SettingsPage.name);
-            },
-            child: Icon(
-              ZetaIcons.settings,
-              color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
-              size: 60,
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () => context
-              .push(context.read<RestState>().status == Status.RACE ? RaceLoginPage.name : QualifyingLoginPage.name),
-          child: PopScope(
-            canPop: false,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Expanded(child: GameTitle()),
-                      Row(
-                        children: [
-                          const Text('Qualifying'),
-                          ZetaSwitch(
-                            value: context.watch<RestState>().status == Status.RACE,
-                            onChanged: (x) {
-                              if (x != null) {
-                                context.read<RestState>().resetStatus(status: x ? Status.RACE : Status.QUALIFYING);
-                                context.read<DataWedgeState>().initScanner(
-                                      redirect: true,
-                                    );
-                              }
-                            },
-                          ),
-                          const Text('Race'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: Box(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 5,
-                            child: context.watch<RestState>().overallLeaderboard == null
-                                ? const Center(child: CircularProgressIndicator())
-                                : const Leaderboard(),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: context.watch<RestState>().lapLeaderboard == null
-                                ? const Center(child: CircularProgressIndicator())
-                                : const Leaderboard(lapType: LapType.lap),
-                          ),
-                        ].gap(40),
-                      ),
-                    ),
-                  ),
-                  Shimmer.fromColors(
-                    baseColor: Colors.white,
-                    highlightColor: Colors.grey,
-                    period: const Duration(milliseconds: 2500),
-                    child: Text(
-                      'To start a new game, scan your ${context.watch<GameState>().settings.scannedThingName} below or tap the screen',
-                      style: const TextStyle(color: Colors.white, fontSize: 24),
-                    ).paddingTop(40),
-                  ),
-                ],
+    return Consumer<RestState>(
+      builder: (context, state, _) {
+        return Stack(
+          children: [
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: GestureDetector(
+                onLongPress: () {
+                  Provider.of<DataWedgeState>(context, listen: false).clear();
+                  context.push(SettingsPage.name);
+                },
+                child: Icon(
+                  ZetaIcons.settings,
+                  color: Zeta.of(context).colors.textInverse.withOpacity(0.2),
+                  size: 60,
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+            GestureDetector(
+              onTap: state.status == Status.RACE || state.status == Status.QUALIFYING
+                  ? () => context.push(state.status == Status.RACE ? RaceLoginPage.name : QualifyingLoginPage.name)
+                  : null,
+              child: PopScope(
+                canPop: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(child: GameTitle()),
+                          Row(
+                            children: [
+                              const Text('Qualifying'),
+                              ZetaSwitch(
+                                value: state.status == Status.RACE,
+                                onChanged: (x) {
+                                  if (x != null) {
+                                    state.resetStatus(status: x ? Status.RACE : Status.QUALIFYING);
+                                    context.read<DataWedgeState>().initScanner(redirect: true);
+                                  }
+                                },
+                              ),
+                              const Text('Race'),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Box(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: state.overallLeaderboard == null
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : const Leaderboard(),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: state.lapLeaderboard == null
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : const Leaderboard(lapType: LapType.lap),
+                              ),
+                            ].gap(40),
+                          ),
+                        ),
+                      ),
+                      if (state.status == Status.UNKNOWN)
+                        const Nothing()
+                      else
+                        Shimmer.fromColors(
+                          baseColor: Colors.white,
+                          highlightColor: Colors.grey,
+                          period: const Duration(milliseconds: 2500),
+                          child: Text(
+                            'To start a new game, scan your ${context.watch<GameState>().settings.scannedThingName} below or tap the screen',
+                            style: const TextStyle(color: Colors.white, fontSize: 24),
+                          ).paddingTop(40),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -136,7 +142,8 @@ class Box extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: Durations.short4,
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
       decoration: ShapeDecoration(
         gradient: LinearGradient(

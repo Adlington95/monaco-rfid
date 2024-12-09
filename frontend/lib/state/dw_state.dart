@@ -82,9 +82,9 @@ class DataWedgeState with ChangeNotifier {
 
       try {
         await restState.postUser(body);
-        if (redirect && restState.status != Status.RACE) {
+        if (redirect && restState.status == Status.QUALIFYING) {
           router.go(QualifyingLoginPage.name);
-        } else {
+        } else if (restState.status == Status.RACE) {
           router.go(RaceLoginPage.name);
           if (gameState.racers.length < 2) {
             unawaited(initScanner());

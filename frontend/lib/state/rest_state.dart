@@ -149,17 +149,18 @@ class RestState with ChangeNotifier {
           await http.get(Uri.parse('${gameState.settings.restUrl}/status')).timeout(const Duration(seconds: 2));
       if (response.statusCode == 200) {
         unawaited(fetchDriverStandings());
-
+        if (status == Status.UNKNOWN) {
+          gameState.sendProperties();
+        }
         status = Status.values[((await json.decode(response.body))['status'] as int)];
       }
     } catch (e) {
       debugPrint(e.toString());
       status = Status.UNKNOWN;
     }
-    if (retry && status == Status.UNKNOWN) {
-      await Future<void>.delayed(const Duration(seconds: 2));
-      unawaited(getStatus(retry: true));
-    }
+    await Future<void>.delayed(const Duration(seconds: 2));
+    unawaited(getStatus(retry: true));
+
     debugPrint('Status: $status');
     return status;
   }

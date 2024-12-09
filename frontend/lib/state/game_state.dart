@@ -63,6 +63,11 @@ class GameState with ChangeNotifier {
       body: jsonEncode({'ip': settings.rfidReaderUrl}),
       headers: {'Content-Type': 'application/json'},
     ).timeout(const Duration(seconds: 2));
+    http.post(
+      Uri.parse('${settings.restUrl}/setMinLapTime'),
+      body: jsonEncode({'time': settings.minLapTime}),
+      headers: {'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 2));
   }
 
   Future<void> writeJson(GameSettings settings) async {
@@ -105,6 +110,7 @@ class GameSettings extends Equatable {
     required this.rfidReaderUrl,
     required this.raceMode,
     required this.backgroundImage,
+    required this.minLapTime,
   });
 
   GameSettings.fromObj(Map<String, dynamic> json)
@@ -125,6 +131,7 @@ class GameSettings extends Equatable {
           raceMode: json[raceModeKey] as String? ?? defaultRaceMode,
           backgroundImage:
               ((json[backgroundImageKey] as String?).imageExists) ? (json[backgroundImageKey] as String) : '',
+          minLapTime: json[minLapTimeKey] as int? ?? defaultMinLapTime,
         );
 
   final String serverUrl;
@@ -142,6 +149,7 @@ class GameSettings extends Equatable {
   final String rfidReaderUrl;
   final String raceMode; // TODO: Integrate this
   final String backgroundImage;
+  final int minLapTime;
 
   Uri get restUrl => Uri.parse('http://$serverUrl:$restPort');
   Uri get wsUrl => Uri.parse('ws://$serverUrl:$websocketPort');
@@ -196,6 +204,7 @@ class GameSettings extends Equatable {
         rfidReaderUrlKey: rfidReaderUrl,
         raceModeKey: raceMode,
         backgroundImageKey: backgroundImage,
+        minLapTimeKey: minLapTime,
       };
 
   @override
@@ -217,6 +226,7 @@ class GameSettings extends Equatable {
     String? rfidReaderUrl,
     String? raceMode,
     String? backgroundImage,
+    int? minLapTime,
   }) {
     return GameSettings(
       serverUrl: serverUrl ?? this.serverUrl,
@@ -234,6 +244,7 @@ class GameSettings extends Equatable {
       rfidReaderUrl: rfidReaderUrl ?? this.rfidReaderUrl,
       raceMode: raceMode ?? this.raceMode,
       backgroundImage: backgroundImage ?? this.backgroundImage,
+      minLapTime: minLapTime ?? this.minLapTime,
     );
   }
 }
